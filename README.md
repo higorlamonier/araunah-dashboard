@@ -20,7 +20,9 @@ npm run dev
 
 ## Windsor.ai
 
-Nunca exponha `WINDSOR_API_KEY` no frontend. Use apenas em ambiente server-side:
+Nunca exponha `WINDSOR_API_KEY` no frontend. Use apenas em ambiente server-side.
+
+Meta Ads:
 
 ```bash
 WINDSOR_API_KEY=*** python scripts/fetch_windsor.py \
@@ -28,6 +30,16 @@ WINDSOR_API_KEY=*** python scripts/fetch_windsor.py \
   --fields date,campaign,campaign_id,account_id,account_name,source,spend,impressions,clicks,ctr,cpc,cpm \
   --date-preset last_30d \
   --out data/raw/facebook.json
+```
+
+Instagram Insights:
+
+```bash
+WINDSOR_API_KEY=*** python scripts/fetch_windsor.py \
+  --connector instagram \
+  --fields date,account_id,account_name,source,impressions,reach,profile_views,followers_count,website_clicks \
+  --date-preset last_30d \
+  --out data/raw/instagram.json
 ```
 
 ## Próxima fase

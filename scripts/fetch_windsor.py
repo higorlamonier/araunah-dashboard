@@ -20,7 +20,7 @@ BASE_URL = "https://connectors.windsor.ai"
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--connector", required=True, choices=["facebook", "google_ads", "googleanalytics4", "all"])
+    parser.add_argument("--connector", required=True, choices=["facebook", "instagram", "google_ads", "googleanalytics4", "all"])
     parser.add_argument("--fields", required=True)
     parser.add_argument("--date-preset", default="last_30d")
     parser.add_argument("--out", required=True)
