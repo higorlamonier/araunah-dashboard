@@ -36,6 +36,7 @@ export function groupBySource(rows: DailyMetric[]) {
     },
     {
       'Meta Ads': { spend: 0, revenue: 0, conversions: 0, clicks: 0, impressions: 0 },
+      'Instagram Insights': { spend: 0, revenue: 0, conversions: 0, clicks: 0, impressions: 0 },
       'Google Ads': { spend: 0, revenue: 0, conversions: 0, clicks: 0, impressions: 0 },
       GA4: { spend: 0, revenue: 0, conversions: 0, clicks: 0, impressions: 0 },
     },

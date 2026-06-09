@@ -1,13 +1,22 @@
+import { useState } from 'react'
 import './App.css'
 import { dashboardData } from './data/dashboardData'
 import { decimal, integer, money, safeDiv } from './lib/kpis'
+import type { DashboardPeriodData, PeriodKey } from './types'
 
 const BR_TIMEZONE = 'America/Sao_Paulo'
+const PERIOD_OPTIONS: Array<{ key: PeriodKey; label: string }> = [
+  { key: '7d', label: '7 dias' },
+  { key: '15d', label: '15 dias' },
+  { key: '30d', label: '30 dias' },
+]
 
 function App() {
   const snapshot = dashboardData
-  const facebook = snapshot.facebookAds
-  const instagram = snapshot.instagramInsights
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('7d')
+  const current = snapshot.periods?.[selectedPeriod] ?? periodFromLegacy(snapshot)
+  const facebook = current.facebookAds
+  const instagram = current.instagramInsights
   const paidDaily = facebook?.daily ?? []
   const organicDaily = instagram?.daily ?? []
   const maxLeads = Math.max(...paidDaily.map((day) => day.leads), 1)
@@ -19,6 +28,7 @@ function App() {
     .reduce<(typeof paidDaily)[number] | undefined>((best, day) => (!best || day.costPerLead < best.costPerLead ? day : best), undefined)
   const averageDailySpend = safeDiv(facebook?.totals.spend ?? 0, Math.max(paidDaily.length, 1))
   const leadRate = safeDiv(facebook?.totals.leads ?? 0, facebook?.totals.clicks ?? 0)
+  const tableRows = paidDaily.slice(-10).reverse()
 
   return (
     <main className="app-frame">
@@ -38,8 +48,8 @@ function App() {
           <a href="#dados">Dados</a>
         </nav>
         <div className="sidebar-note">
-          <span>Período</span>
-          <strong>{formatShortDate(snapshot.period.start)} — {formatShortDate(snapshot.period.end)}</strong>
+          <span>Período ativo</span>
+          <strong>{formatShortDate(current.period.start)} — {formatShortDate(current.period.end)}</strong>
         </div>
       </aside>
 
@@ -49,11 +59,43 @@ function App() {
             <p className="eyebrow">Dashboard</p>
             <h1>Performance de Marketing</h1>
           </div>
-          <div className="date-chip">
-            <span>{snapshot.period.label}</span>
-            <strong>São Paulo · {formatDateTime(snapshot.freshness.generatedAt)}</strong>
+          <div className="topbar-actions">
+            <div className="period-switch" aria-label="Selecionar período">
+              {PERIOD_OPTIONS.map((option) => (
+                <button
+                  className={selectedPeriod === option.key ? 'active' : ''}
+                  key={option.key}
+                  onClick={() => setSelectedPeriod(option.key)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <div className="date-chip">
+              <span>{current.period.label}</span>
+              <strong>São Paulo · {formatDateTime(snapshot.freshness.generatedAt)}</strong>
+            </div>
           </div>
         </header>
+
+        <section className="period-summary" aria-label="Resumo por período">
+          {PERIOD_OPTIONS.map((option) => {
+            const period = snapshot.periods?.[option.key]
+            return (
+              <button
+                className={selectedPeriod === option.key ? 'period-card active' : 'period-card'}
+                key={option.key}
+                onClick={() => setSelectedPeriod(option.key)}
+                type="button"
+              >
+                <span>{option.label}</span>
+                <strong>{integer.format(period?.facebookAds?.totals.leads ?? 0)} leads</strong>
+                <small>{money.format(period?.facebookAds?.totals.costPerLead ?? 0)} CPL</small>
+              </button>
+            )
+          })}
+        </section>
 
         <section id="resumo" className="metric-grid" aria-label="Resumo principal">
           <MetricCard title="Investimento" value={money.format(facebook?.totals.spend ?? 0)} helper={`${money.format(averageDailySpend)} por dia`} accent="purple" />
@@ -63,7 +105,7 @@ function App() {
 
         <section className="dashboard-grid">
           <article id="midia-paga" className="card card-large">
-            <CardHeader title="Mídia paga" subtitle="Facebook Ads" />
+            <CardHeader title="Mídia paga" subtitle={`Facebook Ads · ${current.period.label}`} />
             <div className="overview-number">
               <strong>{integer.format(facebook?.totals.leads ?? 0)}</strong>
               <span>leads gerados</span>
@@ -73,8 +115,8 @@ function App() {
                 <div className="stack-column" key={day.date}>
                   <span className="stack-value">{integer.format(day.leads)}</span>
                   <div className="stack-bars">
-                    <i className="bar-purple" style={{ height: `${Math.max(16, (day.leads / maxLeads) * 96)}px` }} />
-                    <i className="bar-blue" style={{ height: `${Math.max(10, (day.spend / maxSpend) * 74)}px` }} />
+                    <i className="bar-purple" style={{ height: `${Math.max(12, (day.leads / maxLeads) * 96)}px` }} />
+                    <i className="bar-blue" style={{ height: `${Math.max(8, (day.spend / maxSpend) * 74)}px` }} />
                   </div>
                   <small>{formatShortDate(day.date)}</small>
                 </div>
@@ -87,7 +129,7 @@ function App() {
           </article>
 
           <article id="instagram" className="card">
-            <CardHeader title="Instagram" subtitle="Orgânico" />
+            <CardHeader title="Instagram" subtitle={`Orgânico · ${current.period.label}`} />
             <div className="overview-number compact">
               <strong>{integer.format(instagram?.totals.accountsEngaged ?? 0)}</strong>
               <span>contas engajadas</span>
@@ -96,9 +138,9 @@ function App() {
               {organicDaily.map((day) => (
                 <div className="vertical-column" key={day.date}>
                   <div className="vertical-track">
-                    <i style={{ height: `${Math.max(8, (day.accountsEngaged / maxEngagement) * 150)}px` }} />
+                    <i style={{ height: `${Math.max(6, (day.accountsEngaged / maxEngagement) * 150)}px` }} />
                   </div>
-                  <small>{formatWeekday(day.date)}</small>
+                  <small>{selectedPeriod === '30d' ? formatDay(day.date) : formatWeekday(day.date)}</small>
                 </div>
               ))}
             </div>
@@ -115,7 +157,7 @@ function App() {
           </article>
 
           <article className="card card-table">
-            <CardHeader title="Dias de campanha" subtitle="Leads, gasto e CPL" />
+            <CardHeader title="Dias recentes" subtitle="Leads, gasto e CPL" />
             <div className="data-table">
               <div className="table-head">
                 <span>Data</span>
@@ -123,7 +165,7 @@ function App() {
                 <span>Investimento</span>
                 <span>CPL</span>
               </div>
-              {paidDaily.map((day) => (
+              {tableRows.map((day) => (
                 <div className="table-row" key={day.date}>
                   <span>{formatDate(day.date)}</span>
                   <strong>{integer.format(day.leads)}</strong>
@@ -137,18 +179,32 @@ function App() {
           <article id="dados" className="card data-card">
             <CardHeader title="Dados" subtitle="Status das fontes" />
             <div className="source-status">
-              {snapshot.freshness.sources.map((source) => (
-                <span className={source.status} key={source.source}>{source.source}: {translateStatus(source.status)}</span>
+              {(current.freshness?.sources ?? snapshot.freshness.sources).map((source) => (
+                <span className={source.status} key={`${source.source}-${source.status}`}>{source.source}: {translateStatus(source.status)}</span>
               ))}
-              {facebook && <span className="ok">Facebook Ads: separado</span>}
-              {instagram && <span className="ok">Instagram Insights: separado</span>}
               <span className="partial">Timezone: America/Sao_Paulo</span>
+              <span className="ok">Períodos: 7, 15 e 30 dias</span>
             </div>
           </article>
         </section>
       </section>
     </main>
   )
+}
+
+function periodFromLegacy(snapshot: typeof dashboardData): DashboardPeriodData {
+  return {
+    key: '7d',
+    days: 7,
+    period: snapshot.period,
+    facebookAds: snapshot.facebookAds,
+    instagramInsights: snapshot.instagramInsights,
+    totals: snapshot.totals,
+    socialTotals: snapshot.socialTotals,
+    daily: snapshot.daily,
+    insights: snapshot.insights,
+    freshness: { sources: snapshot.freshness.sources },
+  }
 }
 
 function MetricCard({ title, value, helper, accent }: { title: string; value: string; helper: string; accent: 'purple' | 'blue' | 'teal' }) {
@@ -191,6 +247,10 @@ function formatDate(date: string) {
 
 function formatShortDate(date: string) {
   return new Intl.DateTimeFormat('pt-BR', { timeZone: BR_TIMEZONE, day: '2-digit', month: '2-digit' }).format(new Date(`${date}T12:00:00Z`))
+}
+
+function formatDay(date: string) {
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: BR_TIMEZONE, day: '2-digit' }).format(new Date(`${date}T12:00:00Z`))
 }
 
 function formatWeekday(date: string) {

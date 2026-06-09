@@ -1,4 +1,4 @@
-export type SourceName = 'Meta Ads' | 'Google Ads' | 'GA4'
+export type SourceName = 'Meta Ads' | 'Instagram Insights' | 'Google Ads' | 'GA4'
 
 export interface DailyMetric {
   date: string
@@ -37,6 +37,21 @@ export interface InstagramInsightsDaily {
   accounts: number
 }
 
+export type PeriodKey = '7d' | '15d' | '30d'
+
+export interface DashboardPeriodData {
+  key: PeriodKey
+  days: number
+  period: { start: string; end: string; label: string }
+  facebookAds?: DashboardSnapshot['facebookAds']
+  instagramInsights?: DashboardSnapshot['instagramInsights']
+  totals: DashboardSnapshot['totals']
+  socialTotals?: DashboardSnapshot['socialTotals']
+  daily: DailyMetric[]
+  insights: Insight[]
+  freshness?: { sources: Array<{ source: SourceName | 'Instagram Insights'; status: 'ok' | 'missing' | 'partial'; lastDate?: string }> }
+}
+
 export interface DashboardSnapshot {
   client: { id: string; name: string; segment: string; siteUrl?: string }
   period: { start: string; end: string; label: string }
@@ -45,6 +60,7 @@ export interface DashboardSnapshot {
     dataTimezone: string
     sources: Array<{ source: SourceName; status: 'ok' | 'missing' | 'partial'; lastDate?: string }>
   }
+  periods?: Partial<Record<PeriodKey, DashboardPeriodData>>
   facebookAds?: {
     totals: {
       clicks: number

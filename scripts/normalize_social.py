@@ -4,9 +4,16 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-FACEBOOK_RAW = Path('data/raw/facebook_ads_last_7d.json')
-INSTAGRAM_RAW = Path('data/raw/instagram_insights_last_7d.json')
 OUT_PATH = Path('data/social/latest.json')
+PERIODS = {
+    '7d': {'label': 'Últimos 7 dias', 'days': 7},
+    '15d': {'label': 'Últimos 15 dias', 'days': 15},
+    '30d': {'label': 'Últimos 30 dias', 'days': 30},
+}
+
+
+def raw_path(source_prefix: str, period_key: str) -> Path:
+    return Path('data/raw') / f'{source_prefix}_last_{period_key}.json'
 
 
 def rows_from(path: Path):
@@ -125,37 +132,24 @@ def normalize_instagram(rows):
     }
 
 
-def main():
-    facebook_rows = rows_from(FACEBOOK_RAW)
-    instagram_rows = rows_from(INSTAGRAM_RAW)
+def build_period(period_key: str, config: dict):
+    facebook_rows = rows_from(raw_path('facebook_ads', period_key))
+    instagram_rows = rows_from(raw_path('instagram_insights', period_key))
     if not facebook_rows:
-        raise SystemExit('No Facebook Ads rows found')
+        raise SystemExit(f'No Facebook Ads rows found for {period_key}')
     if not instagram_rows:
-        raise SystemExit('No Instagram Insights rows found')
+        raise SystemExit(f'No Instagram Insights rows found for {period_key}')
 
     all_dates = sorted({*(r.get('date') for r in facebook_rows if r.get('date')), *(r.get('date') for r in instagram_rows if r.get('date'))})
     facebook = normalize_facebook(facebook_rows)
     instagram = normalize_instagram(instagram_rows)
-
-    snapshot = {
-        'client': {
-            'id': 'meta-facebook-instagram',
-            'name': 'Facebook Ads + Instagram Insights',
-            'segment': 'Social / Performance',
-        },
+    return {
+        'key': period_key,
+        'days': config['days'],
         'period': {
             'start': all_dates[0],
             'end': all_dates[-1],
-            'label': 'Últimos 7 dias',
-        },
-        'freshness': {
-            'generatedAt': datetime.now(timezone.utc).isoformat(),
-            'dataTimezone': 'UTC/Windsor',
-            'sources': [
-                {'source': 'Meta Ads', 'status': 'ok', 'lastDate': max(r.get('date') for r in facebook_rows if r.get('date'))},
-                {'source': 'GA4', 'status': 'missing'},
-                {'source': 'Google Ads', 'status': 'missing'},
-            ],
+            'label': config['label'],
         },
         'facebookAds': facebook,
         'instagramInsights': instagram,
@@ -194,24 +188,60 @@ def main():
             {
                 'severity': 'positive' if facebook['totals']['leads'] else 'neutral',
                 'title': 'Facebook Ads conectado',
-                'detail': f"{facebook['totals']['leads']} leads, {facebook['totals']['clicks']} cliques e R$ {facebook['totals']['spend']:.2f} investidos nos últimos 7 dias.",
+                'detail': f"{facebook['totals']['leads']} leads, {facebook['totals']['clicks']} cliques e R$ {facebook['totals']['spend']:.2f} investidos em {config['label'].lower()}.",
             },
             {
                 'severity': 'positive' if instagram['totals']['accountsEngaged'] else 'neutral',
                 'title': 'Instagram Insights conectado',
                 'detail': f"{instagram['totals']['accountsEngaged']} contas engajadas e {instagram['totals']['followersCount']} seguidores no snapshot mais recente.",
             },
+        ],
+        'freshness': {
+            'sources': [
+                {'source': 'Meta Ads', 'status': 'ok', 'lastDate': max(r.get('date') for r in facebook_rows if r.get('date'))},
+                {'source': 'Instagram Insights', 'status': 'ok', 'lastDate': max(r.get('date') for r in instagram_rows if r.get('date'))},
+                {'source': 'GA4', 'status': 'missing'},
+                {'source': 'Google Ads', 'status': 'missing'},
+            ],
+        },
+    }
+
+
+def main():
+    periods = {period_key: build_period(period_key, config) for period_key, config in PERIODS.items()}
+    default = periods['7d']
+    snapshot = {
+        'client': {
+            'id': 'meta-facebook-instagram',
+            'name': 'Facebook Ads + Instagram Insights',
+            'segment': 'Social / Performance',
+        },
+        'period': default['period'],
+        'freshness': {
+            'generatedAt': datetime.now(timezone.utc).isoformat(),
+            'dataTimezone': 'UTC/Windsor',
+            'sources': default['freshness']['sources'],
+        },
+        'periods': periods,
+        'facebookAds': default['facebookAds'],
+        'instagramInsights': default['instagramInsights'],
+        'totals': default['totals'],
+        'socialTotals': default['socialTotals'],
+        'daily': default['daily'],
+        'insights': [
+            *default['insights'],
             {
                 'severity': 'neutral',
-                'title': 'Dados separados por fonte',
-                'detail': 'O dashboard agora mantém Facebook Ads e Instagram Insights em blocos independentes para evitar mistura de métricas pagas e orgânicas.',
+                'title': 'Períodos disponíveis',
+                'detail': 'O dashboard agora consolida visões de 7, 15 e 30 dias mantendo Facebook Ads e Instagram Insights separados.',
             },
         ],
     }
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2))
-    print(f"Wrote {OUT_PATH}: facebook_rows={len(facebook_rows)} instagram_rows={len(instagram_rows)}")
+    counts = ', '.join(f"{key}: facebook_rows={periods[key]['facebookAds']['totals']['rows']} instagram_rows={periods[key]['instagramInsights']['totals']['rows']}" for key in PERIODS)
+    print(f"Wrote {OUT_PATH}: {counts}")
 
 
 if __name__ == '__main__':
