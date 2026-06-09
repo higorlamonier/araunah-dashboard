@@ -1,22 +1,22 @@
 {
   "client": {
-    "id": "social-meta-instagram",
-    "name": "Meta Ads + Instagram Insights",
+    "id": "meta-facebook-instagram",
+    "name": "Facebook Ads + Instagram Insights",
     "segment": "Social / Performance"
   },
   "period": {
-    "start": "2026-06-02",
-    "end": "2026-06-08",
+    "start": "2026-06-03",
+    "end": "2026-06-09",
     "label": "Últimos 7 dias"
   },
   "freshness": {
-    "generatedAt": "2026-06-09T13:56:04.640799+00:00",
+    "generatedAt": "2026-06-09T14:13:24.270142+00:00",
     "dataTimezone": "UTC/Windsor",
     "sources": [
       {
         "source": "Meta Ads",
         "status": "ok",
-        "lastDate": "2026-06-08"
+        "lastDate": "2026-06-09"
       },
       {
         "source": "GA4",
@@ -28,123 +28,263 @@
       }
     ]
   },
+  "facebookAds": {
+    "totals": {
+      "clicks": 1584,
+      "spend": 2618.43,
+      "leads": 52,
+      "costPerLead": 50.35,
+      "rows": 10,
+      "accounts": 1,
+      "campaigns": 3
+    },
+    "daily": [
+      {
+        "date": "2026-06-03",
+        "clicks": 191,
+        "spend": 281.19,
+        "leads": 3,
+        "costPerLead": 93.73,
+        "campaigns": 2,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-04",
+        "clicks": 246,
+        "spend": 459.96,
+        "leads": 8,
+        "costPerLead": 57.49,
+        "campaigns": 1,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-05",
+        "clicks": 279,
+        "spend": 453.27,
+        "leads": 8,
+        "costPerLead": 56.66,
+        "campaigns": 1,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-06",
+        "clicks": 248,
+        "spend": 446.11,
+        "leads": 10,
+        "costPerLead": 44.61,
+        "campaigns": 1,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-07",
+        "clicks": 227,
+        "spend": 433.44,
+        "leads": 4,
+        "costPerLead": 108.36,
+        "campaigns": 1,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-08",
+        "clicks": 302,
+        "spend": 455.41,
+        "leads": 15,
+        "costPerLead": 30.36,
+        "campaigns": 2,
+        "accounts": 1
+      },
+      {
+        "date": "2026-06-09",
+        "clicks": 91,
+        "spend": 89.05,
+        "leads": 4,
+        "costPerLead": 22.26,
+        "campaigns": 2,
+        "accounts": 1
+      }
+    ]
+  },
+  "instagramInsights": {
+    "totals": {
+      "followersCount": 0,
+      "followerCount1d": 0,
+      "accountsEngaged": 350,
+      "followsAndUnfollows": 126,
+      "follows": 557,
+      "audienceGenderAgeSize": 23565,
+      "rows": 54,
+      "accounts": 2
+    },
+    "daily": [
+      {
+        "date": "2026-06-03",
+        "accountsEngaged": 71,
+        "followsAndUnfollows": 21,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-04",
+        "accountsEngaged": 66,
+        "followsAndUnfollows": 28,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-05",
+        "accountsEngaged": 38,
+        "followsAndUnfollows": 27,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-06",
+        "accountsEngaged": 54,
+        "followsAndUnfollows": 22,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-07",
+        "accountsEngaged": 43,
+        "followsAndUnfollows": 28,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-08",
+        "accountsEngaged": 61,
+        "followsAndUnfollows": 0,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
+      {
+        "date": "2026-06-09",
+        "accountsEngaged": 17,
+        "followsAndUnfollows": 0,
+        "follows": 557,
+        "audienceGenderAgeSize": 23565,
+        "accounts": 2
+      }
+    ]
+  },
   "totals": {
-    "spend": 0,
-    "impressions": 348,
-    "clicks": 774,
-    "conversions": 61,
+    "spend": 2618.43,
+    "impressions": 350,
+    "clicks": 1584,
+    "conversions": 52,
     "revenue": 0,
-    "sessions": 348
+    "sessions": 350
   },
   "socialTotals": {
-    "leads": 61,
-    "instagramProfileVisits": 348,
-    "instagramMediaLikes": 774,
+    "leads": 52,
+    "instagramProfileVisits": 350,
+    "instagramMediaLikes": 557,
     "feedShares": 0,
-    "rows": 54,
-    "accounts": 1,
-    "campaigns": 4
+    "rows": 64,
+    "accounts": 2,
+    "campaigns": 3
   },
   "daily": [
-    {
-      "date": "2026-06-02",
-      "source": "Meta Ads",
-      "campaign": "3 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 69,
-      "clicks": 115,
-      "conversions": 13,
-      "revenue": 0,
-      "sessions": 69
-    },
     {
       "date": "2026-06-03",
       "source": "Meta Ads",
       "campaign": "2 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 33,
-      "clicks": 128,
+      "spend": 281.19,
+      "impressions": 0,
+      "clicks": 191,
       "conversions": 3,
       "revenue": 0,
-      "sessions": 33
+      "sessions": 0
     },
     {
       "date": "2026-06-04",
       "source": "Meta Ads",
       "campaign": "1 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 51,
-      "clicks": 109,
+      "spend": 459.96,
+      "impressions": 0,
+      "clicks": 246,
       "conversions": 8,
       "revenue": 0,
-      "sessions": 51
+      "sessions": 0
     },
     {
       "date": "2026-06-05",
       "source": "Meta Ads",
       "campaign": "1 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 58,
-      "clicks": 107,
+      "spend": 453.27,
+      "impressions": 0,
+      "clicks": 279,
       "conversions": 8,
       "revenue": 0,
-      "sessions": 58
+      "sessions": 0
     },
     {
       "date": "2026-06-06",
       "source": "Meta Ads",
       "campaign": "1 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 55,
-      "clicks": 97,
+      "spend": 446.11,
+      "impressions": 0,
+      "clicks": 248,
       "conversions": 10,
       "revenue": 0,
-      "sessions": 55
+      "sessions": 0
     },
     {
       "date": "2026-06-07",
       "source": "Meta Ads",
       "campaign": "1 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 45,
-      "clicks": 91,
+      "spend": 433.44,
+      "impressions": 0,
+      "clicks": 227,
       "conversions": 4,
       "revenue": 0,
-      "sessions": 45
+      "sessions": 0
     },
     {
       "date": "2026-06-08",
       "source": "Meta Ads",
       "campaign": "2 campanhas / 1 contas",
-      "spend": 0,
-      "impressions": 37,
-      "clicks": 127,
+      "spend": 455.41,
+      "impressions": 0,
+      "clicks": 302,
       "conversions": 15,
       "revenue": 0,
-      "sessions": 37
+      "sessions": 0
+    },
+    {
+      "date": "2026-06-09",
+      "source": "Meta Ads",
+      "campaign": "2 campanhas / 1 contas",
+      "spend": 89.05,
+      "impressions": 0,
+      "clicks": 91,
+      "conversions": 4,
+      "revenue": 0,
+      "sessions": 0
     }
   ],
   "insights": [
     {
       "severity": "positive",
-      "title": "Captação Meta conectada",
-      "detail": "O snapshot Windsor trouxe 61 leads em 54 linhas nos últimos 7 dias."
+      "title": "Facebook Ads conectado",
+      "detail": "52 leads, 1584 cliques e R$ 2618.43 investidos nos últimos 7 dias."
     },
     {
       "severity": "positive",
       "title": "Instagram Insights conectado",
-      "detail": "Foram registradas 348 visitas ao perfil e 774 curtidas em mídias no período."
+      "detail": "350 contas engajadas e 0 seguidores no snapshot mais recente."
     },
     {
       "severity": "neutral",
-      "title": "Próxima melhoria",
-      "detail": "Separar visualizações por conta/campanha e adicionar criativos com thumbnail quando validarmos o layout final."
+      "title": "Dados separados por fonte",
+      "detail": "O dashboard agora mantém Facebook Ads e Instagram Insights em blocos independentes para evitar mistura de métricas pagas e orgânicas."
     }
-  ],
-  "metadata": {
-    "rawSources": [
-      "facebook"
-    ],
-    "rowsWithMediaThumbnail": 46
-  }
+  ]
 }

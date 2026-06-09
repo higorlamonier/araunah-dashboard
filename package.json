@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "validate:data": "python3 scripts/validate_data.py data/social/latest.json",
-    "normalize:social": "python3 scripts/normalize_social.py"
+    "normalize:social": "python3 scripts/normalize_social.py",
+    "fetch:social": "python3 scripts/fetch_social_sources.py"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.1",

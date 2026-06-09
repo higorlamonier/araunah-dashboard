@@ -1,13 +1,15 @@
 import './App.css'
 import { dashboardData } from './data/dashboardData'
-import { computeKpis, decimal, groupBySource, integer, money, percent, safeDiv, trendPoints } from './lib/kpis'
+import { computeKpis, decimal, integer, money, percent, trendPoints } from './lib/kpis'
 
 function App() {
   const snapshot = dashboardData
   const kpis = computeKpis(snapshot)
-  const sources = groupBySource(snapshot.daily)
   const trend = trendPoints(snapshot.daily)
-  const maxRevenue = Math.max(...trend.map((day) => day.revenue), 1)
+  const facebook = snapshot.facebookAds
+  const instagram = snapshot.instagramInsights
+  const maxLeads = Math.max(...(facebook?.daily.map((day) => day.leads) ?? [0]), 1)
+  const maxEngagement = Math.max(...(instagram?.daily.map((day) => day.accountsEngaged) ?? [0]), 1)
 
   return (
     <main className="dashboard-shell">
@@ -24,44 +26,87 @@ function App() {
         </div>
       </section>
 
-      <section className="kpi-grid" aria-label="Indicadores principais">
-        {snapshot.socialTotals ? (
-          <>
-            <Kpi label="Leads" value={integer.format(snapshot.socialTotals.leads)} helper="Meta Ads" positive />
-            <Kpi label="Visitas ao perfil" value={integer.format(snapshot.socialTotals.instagramProfileVisits)} helper="Instagram Insights" positive />
-            <Kpi label="Curtidas em mídias" value={integer.format(snapshot.socialTotals.instagramMediaLikes)} helper="Conteúdo Instagram" />
-            <Kpi label="Posts no feed" value={integer.format(snapshot.socialTotals.feedShares)} helper="Mídias compartilhadas" />
-            <Kpi label="Campanhas" value={integer.format(snapshot.socialTotals.campaigns)} helper="Campanhas detectadas" />
-            <Kpi label="Contas" value={integer.format(snapshot.socialTotals.accounts)} helper={`${integer.format(snapshot.socialTotals.rows)} linhas Windsor`} />
-          </>
-        ) : (
-          <>
-            <Kpi label="Investimento" value={money.format(kpis.spend)} helper="Mídia paga" />
-            <Kpi label="Receita" value={money.format(kpis.revenue)} helper="GA4/e-commerce" positive />
-            <Kpi label="ROAS" value={`${decimal.format(kpis.roas)}x`} helper="Receita / investimento" positive={kpis.roas >= 3} />
-            <Kpi label="CAC/CPA" value={money.format(kpis.cpa)} helper="Custo por conversão" />
-            <Kpi label="CTR" value={percent.format(kpis.ctr)} helper="Cliques / impressões" />
-            <Kpi label="CPC" value={money.format(kpis.cpc)} helper="Custo médio por clique" />
-          </>
-        )}
-      </section>
+      {facebook && (
+        <section className="panel source-section facebook-section">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Facebook Ads</p>
+              <h2>Performance paga separada</h2>
+            </div>
+            <span className="badge">{integer.format(facebook.totals.rows)} linhas Windsor</span>
+          </div>
+          <div className="kpi-grid compact">
+            <Kpi label="Investimento" value={money.format(facebook.totals.spend)} helper="Spend" />
+            <Kpi label="Cliques" value={integer.format(facebook.totals.clicks)} helper="Clicks" positive />
+            <Kpi label="Leads" value={integer.format(facebook.totals.leads)} helper="Actions lead" positive />
+            <Kpi label="Custo por lead" value={money.format(facebook.totals.costPerLead)} helper="Spend / leads" />
+            <Kpi label="Campanhas" value={integer.format(facebook.totals.campaigns)} helper="Campanhas ativas" />
+            <Kpi label="Contas" value={integer.format(facebook.totals.accounts)} helper="Ad accounts" />
+          </div>
+          <DailyBars
+            title="Leads por dia"
+            days={facebook.daily.map((day) => ({ date: day.date, value: day.leads, helper: `${integer.format(day.clicks)} cliques • ${money.format(day.spend)}` }))}
+            max={maxLeads}
+          />
+        </section>
+      )}
+
+      {instagram && (
+        <section className="panel source-section instagram-section">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Instagram Insights</p>
+              <h2>Performance orgânica separada</h2>
+            </div>
+            <span className="badge">{integer.format(instagram.totals.rows)} linhas Windsor</span>
+          </div>
+          <div className="kpi-grid compact">
+            <Kpi label="Contas engajadas" value={integer.format(instagram.totals.accountsEngaged)} helper="accounts_engaged" positive />
+            <Kpi label="Follows" value={integer.format(instagram.totals.follows)} helper="follows_count" positive />
+            <Kpi label="Follows/unfollows" value={integer.format(instagram.totals.followsAndUnfollows)} helper="saldo informado" />
+            <Kpi label="Seguidores" value={integer.format(instagram.totals.followersCount)} helper="snapshot mais recente" />
+            <Kpi label="Seguidores 1d" value={integer.format(instagram.totals.followerCount1d)} helper="follower_count_1d" />
+            <Kpi label="Audiência" value={integer.format(instagram.totals.audienceGenderAgeSize)} helper="gender/age size" />
+          </div>
+          <DailyBars
+            title="Contas engajadas por dia"
+            days={instagram.daily.map((day) => ({ date: day.date, value: day.accountsEngaged, helper: `${integer.format(day.follows)} follows • ${integer.format(day.followsAndUnfollows)} follow/unfollow` }))}
+            max={maxEngagement}
+          />
+        </section>
+      )}
+
+      {!facebook && !instagram && (
+        <section className="kpi-grid" aria-label="Indicadores principais">
+          <Kpi label="Investimento" value={money.format(kpis.spend)} helper="Mídia paga" />
+          <Kpi label="Receita" value={money.format(kpis.revenue)} helper="GA4/e-commerce" positive />
+          <Kpi label="ROAS" value={`${decimal.format(kpis.roas)}x`} helper="Receita / investimento" positive={kpis.roas >= 3} />
+          <Kpi label="CAC/CPA" value={money.format(kpis.cpa)} helper="Custo por conversão" />
+          <Kpi label="CTR" value={percent.format(kpis.ctr)} helper="Cliques / impressões" />
+          <Kpi label="CPC" value={money.format(kpis.cpc)} helper="Custo médio por clique" />
+        </section>
+      )}
 
       <section className="content-grid">
         <article className="panel span-2">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Tendência</p>
-              <h2>Receita e investimento por dia</h2>
+              <p className="eyebrow">Tendência consolidada</p>
+              <h2>{facebook || instagram ? 'Leads Facebook Ads por dia' : 'Receita e investimento por dia'}</h2>
             </div>
             <span className="badge">{trend.length} dias</span>
           </div>
           <div className="bar-chart">
-            {trend.map((day) => (
-              <div className="bar-column" key={day.date} title={`${day.date}: ${money.format(day.revenue)}`}>
-                <div className="bar revenue" style={{ height: `${Math.max(8, (day.revenue / maxRevenue) * 100)}%` }} />
-                <small>{day.date.slice(5)}</small>
-              </div>
-            ))}
+            {(facebook?.daily ?? trend).map((day) => {
+              const value = 'leads' in day ? day.leads : day.revenue
+              const max = facebook ? maxLeads : Math.max(...trend.map((item) => item.revenue), 1)
+              return (
+                <div className="bar-column" key={day.date} title={`${day.date}: ${integer.format(value)}`}>
+                  <div className="bar revenue" style={{ height: `${Math.max(8, (value / max) * 100)}%` }} />
+                  <small>{day.date.slice(5)}</small>
+                </div>
+              )
+            })}
           </div>
         </article>
 
@@ -86,28 +131,6 @@ function App() {
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">Canais</p>
-            <h2>Performance por origem</h2>
-          </div>
-        </div>
-        <div className="source-grid">
-          {Object.entries(sources).map(([source, values]) => (
-            <div className="source-card" key={source}>
-              <strong>{source}</strong>
-              <dl>
-                <div><dt>Investimento</dt><dd>{money.format(values.spend)}</dd></div>
-                <div><dt>Receita</dt><dd>{money.format(values.revenue)}</dd></div>
-                <div><dt>Conversões</dt><dd>{integer.format(values.conversions)}</dd></div>
-                <div><dt>ROAS</dt><dd>{decimal.format(safeDiv(values.revenue, values.spend))}x</dd></div>
-              </dl>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="panel-heading">
-          <div>
             <p className="eyebrow">Qualidade dos dados</p>
             <h2>Status das fontes</h2>
           </div>
@@ -118,9 +141,31 @@ function App() {
               {source.source}: {source.status} {source.lastDate ? `• ${source.lastDate}` : ''}
             </span>
           ))}
+          {facebook && <span className="status-pill ok">Facebook Ads: separado</span>}
+          {instagram && <span className="status-pill ok">Instagram Insights: separado</span>}
         </div>
       </section>
     </main>
+  )
+}
+
+function DailyBars({ title, days, max }: { title: string; days: Array<{ date: string; value: number; helper: string }>; max: number }) {
+  return (
+    <div className="daily-card">
+      <strong>{title}</strong>
+      <div className="mini-bars">
+        {days.map((day) => (
+          <div className="mini-bar-row" key={day.date}>
+            <span>{day.date.slice(5)}</span>
+            <div className="mini-bar-track">
+              <div className="mini-bar-fill" style={{ width: `${Math.max(4, (day.value / max) * 100)}%` }} />
+            </div>
+            <b>{integer.format(day.value)}</b>
+            <small>{day.helper}</small>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 

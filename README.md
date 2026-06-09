@@ -20,32 +20,46 @@ npm run dev
 
 ## Windsor.ai
 
-Nunca exponha `WINDSOR_API_KEY` no frontend. Use apenas em ambiente server-side.
-
-Meta Ads:
+Nunca exponha `WINDSOR_API_KEY` no frontend. Use apenas em ambiente server-side. A chave padrão deve ficar em `~/.hermes/.env`:
 
 ```bash
-WINDSOR_API_KEY=*** python scripts/fetch_windsor.py \
-  --connector facebook \
-  --fields date,campaign,campaign_id,account_id,account_name,source,spend,impressions,clicks,ctr,cpc,cpm \
-  --date-preset last_30d \
-  --out data/raw/facebook.json
+WINDSOR_API_KEY=sua_chave_windsor
 ```
 
-Instagram Insights:
+Fluxo final Meta + Instagram separado:
 
 ```bash
-WINDSOR_API_KEY=*** python scripts/fetch_windsor.py \
-  --connector instagram \
-  --fields date,account_id,account_name,source,impressions,reach,profile_views,followers_count,website_clicks \
-  --date-preset last_30d \
-  --out data/raw/instagram.json
+npm run fetch:social
+npm run normalize:social
+npm run validate:data
+npm run build
+```
+
+O fetch gera arquivos brutos ignorados pelo Git:
+
+- `data/raw/facebook_ads_last_7d.json`
+- `data/raw/instagram_insights_last_7d.json`
+
+O normalizador gera o snapshot agregado e seguro para o frontend:
+
+- `data/social/latest.json`
+
+Campos usados no Facebook Ads:
+
+```text
+date,datasource,account_name,source,campaign,clicks,spend,actions_lead,cost_per_action_type_lead
+```
+
+Campos usados no Instagram Insights:
+
+```text
+date,account_name,source,followers_count,audience_gender_age_size,accounts_engaged,follows_and_unfollows,follows_count,follower_count_1d
 ```
 
 ## Próxima fase
 
-1. Conectar Windsor.ai e listar campos/contas disponíveis.
-2. Criar normalização de raw data para `data/<cliente>/latest.json`.
-3. Gerar insights executivos com Hermes/gpt-5.5.
-4. Versionar no GitHub e conectar Netlify.
-5. Criar automação recorrente via Hermes cron para atualizar snapshots e abrir PR.
+1. Criar repositório remoto no GitHub.
+2. Conectar deploy no Netlify.
+3. Ativar proteção de acesso ao dashboard.
+4. Criar automação recorrente via Hermes cron para atualizar Facebook Ads + Instagram Insights.
+5. Evoluir insights executivos com análise de variação, anomalias e recomendações.
