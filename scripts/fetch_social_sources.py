@@ -12,12 +12,12 @@ OUT_DIR = Path("data/raw")
 SOURCES = {
     "facebook": {
         "out": OUT_DIR / "facebook_ads_last_7d.json",
-        "date_preset": "last_7dT",
+        "date_preset": "last_7d",
         "fields": "date,datasource,account_name,source,campaign,clicks,spend,actions_lead,cost_per_action_type_lead",
     },
     "instagram": {
         "out": OUT_DIR / "instagram_insights_last_7d.json",
-        "date_preset": "last_7dT",
+        "date_preset": "last_7d",
         "fields": "date,account_name,source,followers_count,audience_gender_age_size,accounts_engaged,follows_and_unfollows,follows_count,follower_count_1d",
     },
 }

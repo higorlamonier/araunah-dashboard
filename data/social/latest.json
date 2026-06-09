@@ -5,18 +5,18 @@
     "segment": "Social / Performance"
   },
   "period": {
-    "start": "2026-06-03",
+    "start": "2026-06-02",
     "end": "2026-06-09",
     "label": "Últimos 7 dias"
   },
   "freshness": {
-    "generatedAt": "2026-06-09T14:13:24.270142+00:00",
+    "generatedAt": "2026-06-09T17:03:32.953508+00:00",
     "dataTimezone": "UTC/Windsor",
     "sources": [
       {
         "source": "Meta Ads",
         "status": "ok",
-        "lastDate": "2026-06-09"
+        "lastDate": "2026-06-08"
       },
       {
         "source": "GA4",
@@ -30,15 +30,24 @@
   },
   "facebookAds": {
     "totals": {
-      "clicks": 1584,
-      "spend": 2618.43,
-      "leads": 52,
-      "costPerLead": 50.35,
-      "rows": 10,
+      "clicks": 1821,
+      "spend": 3026.15,
+      "leads": 61,
+      "costPerLead": 49.61,
+      "rows": 11,
       "accounts": 1,
-      "campaigns": 3
+      "campaigns": 4
     },
     "daily": [
+      {
+        "date": "2026-06-02",
+        "clicks": 328,
+        "spend": 496.77,
+        "leads": 13,
+        "costPerLead": 38.21,
+        "campaigns": 3,
+        "accounts": 1
+      },
       {
         "date": "2026-06-03",
         "clicks": 191,
@@ -92,15 +101,6 @@
         "costPerLead": 30.36,
         "campaigns": 2,
         "accounts": 1
-      },
-      {
-        "date": "2026-06-09",
-        "clicks": 91,
-        "spend": 89.05,
-        "leads": 4,
-        "costPerLead": 22.26,
-        "campaigns": 2,
-        "accounts": 1
       }
     ]
   },
@@ -108,14 +108,22 @@
     "totals": {
       "followersCount": 0,
       "followerCount1d": 0,
-      "accountsEngaged": 350,
-      "followsAndUnfollows": 126,
-      "follows": 557,
+      "accountsEngaged": 395,
+      "followsAndUnfollows": 166,
+      "follows": 558,
       "audienceGenderAgeSize": 23565,
       "rows": 54,
       "accounts": 2
     },
     "daily": [
+      {
+        "date": "2026-06-02",
+        "accountsEngaged": 62,
+        "followsAndUnfollows": 40,
+        "follows": 0,
+        "audienceGenderAgeSize": 0,
+        "accounts": 2
+      },
       {
         "date": "2026-06-03",
         "accountsEngaged": 71,
@@ -166,32 +174,43 @@
       },
       {
         "date": "2026-06-09",
-        "accountsEngaged": 17,
+        "accountsEngaged": 0,
         "followsAndUnfollows": 0,
-        "follows": 557,
+        "follows": 558,
         "audienceGenderAgeSize": 23565,
         "accounts": 2
       }
     ]
   },
   "totals": {
-    "spend": 2618.43,
-    "impressions": 350,
-    "clicks": 1584,
-    "conversions": 52,
+    "spend": 3026.15,
+    "impressions": 395,
+    "clicks": 1821,
+    "conversions": 61,
     "revenue": 0,
-    "sessions": 350
+    "sessions": 395
   },
   "socialTotals": {
-    "leads": 52,
-    "instagramProfileVisits": 350,
-    "instagramMediaLikes": 557,
+    "leads": 61,
+    "instagramProfileVisits": 395,
+    "instagramMediaLikes": 558,
     "feedShares": 0,
-    "rows": 64,
+    "rows": 65,
     "accounts": 2,
-    "campaigns": 3
+    "campaigns": 4
   },
   "daily": [
+    {
+      "date": "2026-06-02",
+      "source": "Meta Ads",
+      "campaign": "3 campanhas / 1 contas",
+      "spend": 496.77,
+      "impressions": 0,
+      "clicks": 328,
+      "conversions": 13,
+      "revenue": 0,
+      "sessions": 0
+    },
     {
       "date": "2026-06-03",
       "source": "Meta Ads",
@@ -257,29 +276,18 @@
       "conversions": 15,
       "revenue": 0,
       "sessions": 0
-    },
-    {
-      "date": "2026-06-09",
-      "source": "Meta Ads",
-      "campaign": "2 campanhas / 1 contas",
-      "spend": 89.05,
-      "impressions": 0,
-      "clicks": 91,
-      "conversions": 4,
-      "revenue": 0,
-      "sessions": 0
     }
   ],
   "insights": [
     {
       "severity": "positive",
       "title": "Facebook Ads conectado",
-      "detail": "52 leads, 1584 cliques e R$ 2618.43 investidos nos últimos 7 dias."
+      "detail": "61 leads, 1821 cliques e R$ 3026.15 investidos nos últimos 7 dias."
     },
     {
       "severity": "positive",
       "title": "Instagram Insights conectado",
-      "detail": "350 contas engajadas e 0 seguidores no snapshot mais recente."
+      "detail": "395 contas engajadas e 0 seguidores no snapshot mais recente."
     },
     {
       "severity": "neutral",
