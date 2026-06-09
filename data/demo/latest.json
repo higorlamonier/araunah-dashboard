@@ -1,0 +1,36 @@
+{
+  "client": { "id": "demo", "name": "Cliente Demo", "segment": "E-commerce / Performance", "siteUrl": "https://example.com" },
+  "period": { "start": "2026-05-11", "end": "2026-06-09", "label": "Últimos 30 dias" },
+  "freshness": {
+    "generatedAt": "2026-06-09T12:00:00-03:00",
+    "dataTimezone": "America/Sao_Paulo",
+    "sources": [
+      { "source": "Meta Ads", "status": "ok", "lastDate": "2026-06-09" },
+      { "source": "Google Ads", "status": "ok", "lastDate": "2026-06-09" },
+      { "source": "GA4", "status": "partial", "lastDate": "2026-06-08" }
+    ]
+  },
+  "totals": { "spend": 42850.25, "impressions": 1842400, "clicks": 52340, "conversions": 1248, "revenue": 183420.9, "sessions": 81320 },
+  "daily": [
+    { "date": "2026-05-11", "source": "Meta Ads", "campaign": "Prospecting", "spend": 780, "impressions": 40100, "clicks": 1190, "conversions": 24, "revenue": 3150, "sessions": 0 },
+    { "date": "2026-05-11", "source": "Google Ads", "campaign": "Search Brand", "spend": 560, "impressions": 18200, "clicks": 930, "conversions": 31, "revenue": 5220, "sessions": 0 },
+    { "date": "2026-05-11", "source": "GA4", "campaign": "All Traffic", "spend": 0, "impressions": 0, "clicks": 0, "conversions": 42, "revenue": 6040, "sessions": 2450 },
+    { "date": "2026-05-18", "source": "Meta Ads", "campaign": "Remarketing", "spend": 890, "impressions": 45200, "clicks": 1320, "conversions": 37, "revenue": 4820, "sessions": 0 },
+    { "date": "2026-05-18", "source": "Google Ads", "campaign": "PMax", "spend": 790, "impressions": 27400, "clicks": 1010, "conversions": 45, "revenue": 7790, "sessions": 0 },
+    { "date": "2026-05-18", "source": "GA4", "campaign": "All Traffic", "spend": 0, "impressions": 0, "clicks": 0, "conversions": 58, "revenue": 8650, "sessions": 2870 },
+    { "date": "2026-05-25", "source": "Meta Ads", "campaign": "Prospecting", "spend": 1020, "impressions": 49800, "clicks": 1510, "conversions": 42, "revenue": 6320, "sessions": 0 },
+    { "date": "2026-05-25", "source": "Google Ads", "campaign": "Search Non Brand", "spend": 960, "impressions": 30200, "clicks": 1260, "conversions": 53, "revenue": 9010, "sessions": 0 },
+    { "date": "2026-05-25", "source": "GA4", "campaign": "All Traffic", "spend": 0, "impressions": 0, "clicks": 0, "conversions": 64, "revenue": 10320, "sessions": 3140 },
+    { "date": "2026-06-01", "source": "Meta Ads", "campaign": "Remarketing", "spend": 1180, "impressions": 51100, "clicks": 1640, "conversions": 51, "revenue": 7910, "sessions": 0 },
+    { "date": "2026-06-01", "source": "Google Ads", "campaign": "PMax", "spend": 1100, "impressions": 33800, "clicks": 1390, "conversions": 68, "revenue": 11880, "sessions": 0 },
+    { "date": "2026-06-01", "source": "GA4", "campaign": "All Traffic", "spend": 0, "impressions": 0, "clicks": 0, "conversions": 80, "revenue": 13750, "sessions": 3420 },
+    { "date": "2026-06-08", "source": "Meta Ads", "campaign": "Prospecting", "spend": 990, "impressions": 47200, "clicks": 1490, "conversions": 46, "revenue": 7010, "sessions": 0 },
+    { "date": "2026-06-08", "source": "Google Ads", "campaign": "Search Brand", "spend": 820, "impressions": 22900, "clicks": 1180, "conversions": 59, "revenue": 10160, "sessions": 0 },
+    { "date": "2026-06-08", "source": "GA4", "campaign": "All Traffic", "spend": 0, "impressions": 0, "clicks": 0, "conversions": 73, "revenue": 12590, "sessions": 3260 }
+  ],
+  "insights": [
+    { "severity": "positive", "title": "ROAS acima da meta inicial", "detail": "O consolidado está em 4,28x, bom ponto de partida para definir benchmarks por canal e campanha." },
+    { "severity": "warning", "title": "GA4 parcial no último dia", "detail": "A fonte de analytics está com defasagem de 1 dia; o dashboard mantém aviso de frescor antes de decisões executivas." },
+    { "severity": "neutral", "title": "Próxima ação recomendada", "detail": "Conectar Windsor.ai para substituir o snapshot demo por dados reais de Meta Ads, Google Ads e GA4." }
+  ]
+}
