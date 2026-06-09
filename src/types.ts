@@ -27,6 +27,15 @@ export interface DashboardSnapshot {
     sources: Array<{ source: SourceName; status: 'ok' | 'missing' | 'partial'; lastDate?: string }>
   }
   totals: { spend: number; impressions: number; clicks: number; conversions: number; revenue: number; sessions: number }
+  socialTotals?: {
+    leads: number
+    instagramProfileVisits: number
+    instagramMediaLikes: number
+    feedShares: number
+    rows: number
+    accounts: number
+    campaigns: number
+  }
   daily: DailyMetric[]
   insights: Insight[]
 }

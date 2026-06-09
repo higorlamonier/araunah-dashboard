@@ -25,12 +25,25 @@ function App() {
       </section>
 
       <section className="kpi-grid" aria-label="Indicadores principais">
-        <Kpi label="Investimento" value={money.format(kpis.spend)} helper="Mídia paga" />
-        <Kpi label="Receita" value={money.format(kpis.revenue)} helper="GA4/e-commerce" positive />
-        <Kpi label="ROAS" value={`${decimal.format(kpis.roas)}x`} helper="Receita / investimento" positive={kpis.roas >= 3} />
-        <Kpi label="CAC/CPA" value={money.format(kpis.cpa)} helper="Custo por conversão" />
-        <Kpi label="CTR" value={percent.format(kpis.ctr)} helper="Cliques / impressões" />
-        <Kpi label="CPC" value={money.format(kpis.cpc)} helper="Custo médio por clique" />
+        {snapshot.socialTotals ? (
+          <>
+            <Kpi label="Leads" value={integer.format(snapshot.socialTotals.leads)} helper="Meta Ads" positive />
+            <Kpi label="Visitas ao perfil" value={integer.format(snapshot.socialTotals.instagramProfileVisits)} helper="Instagram Insights" positive />
+            <Kpi label="Curtidas em mídias" value={integer.format(snapshot.socialTotals.instagramMediaLikes)} helper="Conteúdo Instagram" />
+            <Kpi label="Posts no feed" value={integer.format(snapshot.socialTotals.feedShares)} helper="Mídias compartilhadas" />
+            <Kpi label="Campanhas" value={integer.format(snapshot.socialTotals.campaigns)} helper="Campanhas detectadas" />
+            <Kpi label="Contas" value={integer.format(snapshot.socialTotals.accounts)} helper={`${integer.format(snapshot.socialTotals.rows)} linhas Windsor`} />
+          </>
+        ) : (
+          <>
+            <Kpi label="Investimento" value={money.format(kpis.spend)} helper="Mídia paga" />
+            <Kpi label="Receita" value={money.format(kpis.revenue)} helper="GA4/e-commerce" positive />
+            <Kpi label="ROAS" value={`${decimal.format(kpis.roas)}x`} helper="Receita / investimento" positive={kpis.roas >= 3} />
+            <Kpi label="CAC/CPA" value={money.format(kpis.cpa)} helper="Custo por conversão" />
+            <Kpi label="CTR" value={percent.format(kpis.ctr)} helper="Cliques / impressões" />
+            <Kpi label="CPC" value={money.format(kpis.cpc)} helper="Custo médio por clique" />
+          </>
+        )}
       </section>
 
       <section className="content-grid">

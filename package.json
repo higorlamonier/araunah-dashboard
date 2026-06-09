@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "validate:data": "python3 scripts/validate_data.py data/demo/latest.json"
+    "validate:data": "python3 scripts/validate_data.py data/social/latest.json",
+    "normalize:social": "python3 scripts/normalize_social.py"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.1",

@@ -1,0 +1,150 @@
+{
+  "client": {
+    "id": "social-meta-instagram",
+    "name": "Meta Ads + Instagram Insights",
+    "segment": "Social / Performance"
+  },
+  "period": {
+    "start": "2026-06-02",
+    "end": "2026-06-08",
+    "label": "Últimos 7 dias"
+  },
+  "freshness": {
+    "generatedAt": "2026-06-09T13:56:04.640799+00:00",
+    "dataTimezone": "UTC/Windsor",
+    "sources": [
+      {
+        "source": "Meta Ads",
+        "status": "ok",
+        "lastDate": "2026-06-08"
+      },
+      {
+        "source": "GA4",
+        "status": "missing"
+      },
+      {
+        "source": "Google Ads",
+        "status": "missing"
+      }
+    ]
+  },
+  "totals": {
+    "spend": 0,
+    "impressions": 348,
+    "clicks": 774,
+    "conversions": 61,
+    "revenue": 0,
+    "sessions": 348
+  },
+  "socialTotals": {
+    "leads": 61,
+    "instagramProfileVisits": 348,
+    "instagramMediaLikes": 774,
+    "feedShares": 0,
+    "rows": 54,
+    "accounts": 1,
+    "campaigns": 4
+  },
+  "daily": [
+    {
+      "date": "2026-06-02",
+      "source": "Meta Ads",
+      "campaign": "3 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 69,
+      "clicks": 115,
+      "conversions": 13,
+      "revenue": 0,
+      "sessions": 69
+    },
+    {
+      "date": "2026-06-03",
+      "source": "Meta Ads",
+      "campaign": "2 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 33,
+      "clicks": 128,
+      "conversions": 3,
+      "revenue": 0,
+      "sessions": 33
+    },
+    {
+      "date": "2026-06-04",
+      "source": "Meta Ads",
+      "campaign": "1 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 51,
+      "clicks": 109,
+      "conversions": 8,
+      "revenue": 0,
+      "sessions": 51
+    },
+    {
+      "date": "2026-06-05",
+      "source": "Meta Ads",
+      "campaign": "1 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 58,
+      "clicks": 107,
+      "conversions": 8,
+      "revenue": 0,
+      "sessions": 58
+    },
+    {
+      "date": "2026-06-06",
+      "source": "Meta Ads",
+      "campaign": "1 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 55,
+      "clicks": 97,
+      "conversions": 10,
+      "revenue": 0,
+      "sessions": 55
+    },
+    {
+      "date": "2026-06-07",
+      "source": "Meta Ads",
+      "campaign": "1 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 45,
+      "clicks": 91,
+      "conversions": 4,
+      "revenue": 0,
+      "sessions": 45
+    },
+    {
+      "date": "2026-06-08",
+      "source": "Meta Ads",
+      "campaign": "2 campanhas / 1 contas",
+      "spend": 0,
+      "impressions": 37,
+      "clicks": 127,
+      "conversions": 15,
+      "revenue": 0,
+      "sessions": 37
+    }
+  ],
+  "insights": [
+    {
+      "severity": "positive",
+      "title": "Captação Meta conectada",
+      "detail": "O snapshot Windsor trouxe 61 leads em 54 linhas nos últimos 7 dias."
+    },
+    {
+      "severity": "positive",
+      "title": "Instagram Insights conectado",
+      "detail": "Foram registradas 348 visitas ao perfil e 774 curtidas em mídias no período."
+    },
+    {
+      "severity": "neutral",
+      "title": "Próxima melhoria",
+      "detail": "Separar visualizações por conta/campanha e adicionar criativos com thumbnail quando validarmos o layout final."
+    }
+  ],
+  "metadata": {
+    "rawSources": [
+      "facebook"
+    ],
+    "rowsWithMediaThumbnail": 46
+  }
+}
