@@ -1,122 +1,188 @@
 import './App.css'
 import { dashboardData } from './data/dashboardData'
-import { computeKpis, decimal, integer, money, percent, trendPoints } from './lib/kpis'
+import { decimal, integer, money, safeDiv } from './lib/kpis'
+
+type ExecutiveInsight = {
+  tone: 'success' | 'warning' | 'info'
+  label: string
+  title: string
+  detail: string
+}
+
+const BR_TIMEZONE = 'America/Sao_Paulo'
 
 function App() {
   const snapshot = dashboardData
-  const kpis = computeKpis(snapshot)
-  const trend = trendPoints(snapshot.daily)
   const facebook = snapshot.facebookAds
   const instagram = snapshot.instagramInsights
-  const maxLeads = Math.max(...(facebook?.daily.map((day) => day.leads) ?? [0]), 1)
-  const maxEngagement = Math.max(...(instagram?.daily.map((day) => day.accountsEngaged) ?? [0]), 1)
+  const paidDaily = facebook?.daily ?? []
+  const organicDaily = instagram?.daily ?? []
+  const maxLeads = Math.max(...paidDaily.map((day) => day.leads), 1)
+  const maxEngagement = Math.max(...organicDaily.map((day) => day.accountsEngaged), 1)
+  const bestLeadDay = paidDaily.reduce<(typeof paidDaily)[number] | undefined>((best, day) => (!best || day.leads > best.leads ? day : best), undefined)
+  const bestCplDay = paidDaily
+    .filter((day) => day.leads > 0)
+    .reduce<(typeof paidDaily)[number] | undefined>((best, day) => (!best || day.costPerLead < best.costPerLead ? day : best), undefined)
+  const weakCplDay = paidDaily.reduce<(typeof paidDaily)[number] | undefined>((worst, day) => (!worst || day.costPerLead > worst.costPerLead ? day : worst), undefined)
+  const topEngagementDay = organicDaily.reduce<(typeof organicDaily)[number] | undefined>((best, day) => (!best || day.accountsEngaged > best.accountsEngaged ? day : best), undefined)
+  const averageDailySpend = safeDiv(facebook?.totals.spend ?? snapshot.totals.spend, Math.max(paidDaily.length, 1))
+  const leadRate = safeDiv(facebook?.totals.leads ?? 0, facebook?.totals.clicks ?? 0)
+  const engagementPerLead = safeDiv(instagram?.totals.accountsEngaged ?? 0, facebook?.totals.leads ?? 0)
+  const periodLabel = `${formatDate(snapshot.period.start)} — ${formatDate(snapshot.period.end)}`
+  const generatedAt = formatDateTime(snapshot.freshness.generatedAt)
+
+  const executiveInsights = [
+    facebook && {
+      tone: 'success' as const,
+      label: 'Oportunidade de escala',
+      title: `${integer.format(facebook.totals.leads)} leads captados com CPL médio de ${money.format(facebook.totals.costPerLead)}`,
+      detail: bestCplDay
+        ? `${formatDate(bestCplDay.date)} teve o melhor custo por lead (${money.format(bestCplDay.costPerLead)}). Use esse dia/campanha como referência para realocação de verba.`
+        : 'Acompanhe a evolução do CPL antes de aumentar orçamento.',
+    },
+    weakCplDay && {
+      tone: 'warning' as const,
+      label: 'Ponto de atenção',
+      title: `Maior CPL em ${formatDate(weakCplDay.date)}: ${money.format(weakCplDay.costPerLead)}`,
+      detail: 'Revise criativos, público e distribuição de orçamento nos dias com custo acima da média.',
+    },
+    instagram && {
+      tone: 'info' as const,
+      label: 'Orgânico alimentando demanda',
+      title: `${integer.format(instagram.totals.accountsEngaged)} contas engajadas no Instagram`,
+      detail: topEngagementDay
+        ? `${formatDate(topEngagementDay.date)} concentrou o maior engajamento (${integer.format(topEngagementDay.accountsEngaged)} contas). Transforme o tema em variações para mídia paga.`
+        : 'Mantenha o Instagram separado da mídia paga para preservar leitura correta.',
+    },
+  ].filter((insight): insight is ExecutiveInsight => Boolean(insight))
 
   return (
     <main className="dashboard-shell">
       <section className="hero-card">
-        <div>
-          <p className="eyebrow">Marketing Intelligence Dashboard</p>
-          <h1>{snapshot.client.name}</h1>
-          <p className="subtitle">{snapshot.client.segment} • {snapshot.period.label}</p>
+        <div className="hero-copy">
+          <p className="eyebrow">Marketing Intelligence · Araunah</p>
+          <h1>Dashboard de Performance</h1>
+          <p className="subtitle">Facebook Ads e Instagram Insights organizados por decisão: aquisição, conversão, engajamento e qualidade dos dados.</p>
+          <div className="hero-meta" aria-label="Configuração de período e timezone">
+            <span>{snapshot.period.label}</span>
+            <span>{periodLabel}</span>
+            <span>Fuso: São Paulo ({BR_TIMEZONE})</span>
+          </div>
         </div>
-        <div className="freshness-card">
-          <span>Atualizado em</span>
-          <strong>{new Date(snapshot.freshness.generatedAt).toLocaleString('pt-BR')}</strong>
-          <small>Timezone dos dados: {snapshot.freshness.dataTimezone}</small>
-        </div>
+        <aside className="freshness-card">
+          <span>Última atualização</span>
+          <strong>{generatedAt}</strong>
+          <small>Dados exibidos em horário de Brasília. Fonte original: {snapshot.freshness.dataTimezone}</small>
+        </aside>
       </section>
 
-      {facebook && (
-        <section className="panel source-section facebook-section">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Facebook Ads</p>
-              <h2>Performance paga separada</h2>
-            </div>
-            <span className="badge">{integer.format(facebook.totals.rows)} linhas Windsor</span>
-          </div>
-          <div className="kpi-grid compact">
-            <Kpi label="Investimento" value={money.format(facebook.totals.spend)} helper="Spend" />
-            <Kpi label="Cliques" value={integer.format(facebook.totals.clicks)} helper="Clicks" positive />
-            <Kpi label="Leads" value={integer.format(facebook.totals.leads)} helper="Actions lead" positive />
-            <Kpi label="Custo por lead" value={money.format(facebook.totals.costPerLead)} helper="Spend / leads" />
-            <Kpi label="Campanhas" value={integer.format(facebook.totals.campaigns)} helper="Campanhas ativas" />
-            <Kpi label="Contas" value={integer.format(facebook.totals.accounts)} helper="Ad accounts" />
-          </div>
-          <DailyBars
-            title="Leads por dia"
-            days={facebook.daily.map((day) => ({ date: day.date, value: day.leads, helper: `${integer.format(day.clicks)} cliques • ${money.format(day.spend)}` }))}
-            max={maxLeads}
-          />
-        </section>
-      )}
+      <section className="executive-grid" aria-label="Resumo executivo">
+        <Kpi label="Investimento" value={money.format(facebook?.totals.spend ?? snapshot.totals.spend)} helper={`${money.format(averageDailySpend)} / dia`} category="Mídia paga" tone="paid" />
+        <Kpi label="Leads" value={integer.format(facebook?.totals.leads ?? snapshot.totals.conversions)} helper={`${decimal.format(leadRate * 100)}% clique → lead`} category="Conversão" tone="success" />
+        <Kpi label="CPL médio" value={money.format(facebook?.totals.costPerLead ?? 0)} helper="Spend / leads" category="Eficiência" tone="warning" />
+        <Kpi label="Cliques" value={integer.format(facebook?.totals.clicks ?? snapshot.totals.clicks)} helper="Tráfego pago Meta" category="Aquisição" tone="neutral" />
+        <Kpi label="Engajamento IG" value={integer.format(instagram?.totals.accountsEngaged ?? 0)} helper={`${decimal.format(engagementPerLead)} engajamentos por lead`} category="Orgânico" tone="organic" />
+      </section>
 
-      {instagram && (
-        <section className="panel source-section instagram-section">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Instagram Insights</p>
-              <h2>Performance orgânica separada</h2>
-            </div>
-            <span className="badge">{integer.format(instagram.totals.rows)} linhas Windsor</span>
+      <section className="content-grid executive-section">
+        <article className="panel span-2">
+          <SectionHeading eyebrow="Análise geral" title="Leitura executiva e próximas ações" badge="prioridade" />
+          <div className="insight-list featured">
+            {executiveInsights.map((insight) => (
+              <div className={`insight ${insight.tone}`} key={insight.title}>
+                <span>{insight.label}</span>
+                <strong>{insight.title}</strong>
+                <p>{insight.detail}</p>
+              </div>
+            ))}
           </div>
-          <div className="kpi-grid compact">
-            <Kpi label="Contas engajadas" value={integer.format(instagram.totals.accountsEngaged)} helper="accounts_engaged" positive />
-            <Kpi label="Follows" value={integer.format(instagram.totals.follows)} helper="follows_count" positive />
-            <Kpi label="Follows/unfollows" value={integer.format(instagram.totals.followsAndUnfollows)} helper="saldo informado" />
-            <Kpi label="Seguidores" value={integer.format(instagram.totals.followersCount)} helper="snapshot mais recente" />
-            <Kpi label="Seguidores 1d" value={integer.format(instagram.totals.followerCount1d)} helper="follower_count_1d" />
-            <Kpi label="Audiência" value={integer.format(instagram.totals.audienceGenderAgeSize)} helper="gender/age size" />
-          </div>
-          <DailyBars
-            title="Contas engajadas por dia"
-            days={instagram.daily.map((day) => ({ date: day.date, value: day.accountsEngaged, helper: `${integer.format(day.follows)} follows • ${integer.format(day.followsAndUnfollows)} follow/unfollow` }))}
-            max={maxEngagement}
-          />
-        </section>
-      )}
+        </article>
+        <article className="panel decision-card">
+          <SectionHeading eyebrow="Diagnóstico" title="Resumo rápido" />
+          <ul className="decision-list">
+            <li><b>Escalar:</b> dias com CPL abaixo da média e bom volume de leads.</li>
+            <li><b>Otimizar:</b> dias com gasto alto e leads abaixo do esperado.</li>
+            <li><b>Conectar:</b> GA4/Google Ads para fechar ROAS, receita e jornada pós-lead.</li>
+          </ul>
+        </article>
+      </section>
 
-      {!facebook && !instagram && (
-        <section className="kpi-grid" aria-label="Indicadores principais">
-          <Kpi label="Investimento" value={money.format(kpis.spend)} helper="Mídia paga" />
-          <Kpi label="Receita" value={money.format(kpis.revenue)} helper="GA4/e-commerce" positive />
-          <Kpi label="ROAS" value={`${decimal.format(kpis.roas)}x`} helper="Receita / investimento" positive={kpis.roas >= 3} />
-          <Kpi label="CAC/CPA" value={money.format(kpis.cpa)} helper="Custo por conversão" />
-          <Kpi label="CTR" value={percent.format(kpis.ctr)} helper="Cliques / impressões" />
-          <Kpi label="CPC" value={money.format(kpis.cpc)} helper="Custo médio por clique" />
-        </section>
-      )}
+      <CategorySection
+        eyebrow="Categoria 1"
+        title="Aquisição e mídia paga"
+        description="Mostra quanto foi investido e como o tráfego pago gerou cliques e leads."
+      >
+        {facebook ? (
+          <>
+            <div className="kpi-grid compact">
+              <Kpi label="Investimento Meta" value={money.format(facebook.totals.spend)} helper="Facebook Ads" category="Spend" tone="paid" />
+              <Kpi label="Cliques" value={integer.format(facebook.totals.clicks)} helper="Entrada de tráfego" category="Aquisição" tone="neutral" />
+              <Kpi label="Campanhas" value={integer.format(facebook.totals.campaigns)} helper={`${integer.format(facebook.totals.accounts)} conta ativa`} category="Cobertura" tone="neutral" />
+              <Kpi label="Linhas Windsor" value={integer.format(facebook.totals.rows)} helper="Dados processados" category="Fonte" tone="neutral" />
+            </div>
+            <DailyBars
+              title="Leads por dia"
+              days={paidDaily.map((day) => ({ date: day.date, value: day.leads, helper: `${integer.format(day.clicks)} cliques • ${money.format(day.spend)} investidos • CPL ${money.format(day.costPerLead)}` }))}
+              max={maxLeads}
+              tone="paid"
+            />
+          </>
+        ) : <EmptyState text="Facebook Ads ainda não disponível no snapshot." />}
+      </CategorySection>
+
+      <CategorySection
+        eyebrow="Categoria 2"
+        title="Conversão e eficiência"
+        description="Isola o que realmente vira oportunidade comercial: leads, custo por lead e melhor/pior dia de eficiência."
+      >
+        {facebook ? (
+          <div className="efficiency-grid">
+            <Kpi label="Leads totais" value={integer.format(facebook.totals.leads)} helper="Actions lead" category="Conversão" tone="success" />
+            <Kpi label="CPL médio" value={money.format(facebook.totals.costPerLead)} helper="Quanto custa gerar 1 lead" category="Eficiência" tone="warning" />
+            <Kpi label="Melhor dia" value={bestLeadDay ? integer.format(bestLeadDay.leads) : '—'} helper={bestLeadDay ? `${formatDate(bestLeadDay.date)} • ${money.format(bestLeadDay.costPerLead)} CPL` : 'Sem dados'} category="Volume" tone="success" />
+            <Kpi label="Melhor CPL" value={bestCplDay ? money.format(bestCplDay.costPerLead) : '—'} helper={bestCplDay ? formatDate(bestCplDay.date) : 'Sem dados'} category="Benchmark" tone="success" />
+          </div>
+        ) : <EmptyState text="Sem dados de conversão de mídia paga." />}
+      </CategorySection>
+
+      <CategorySection
+        eyebrow="Categoria 3"
+        title="Instagram orgânico e demanda"
+        description="Mantém Instagram Insights separado para não misturar engajamento orgânico com performance paga."
+      >
+        {instagram ? (
+          <>
+            <div className="kpi-grid compact">
+              <Kpi label="Contas engajadas" value={integer.format(instagram.totals.accountsEngaged)} helper="accounts_engaged" category="Engajamento" tone="organic" />
+              <Kpi label="Follows" value={integer.format(instagram.totals.follows)} helper="follows_count" category="Crescimento" tone="organic" />
+              <Kpi label="Saldo follows/unfollows" value={integer.format(instagram.totals.followsAndUnfollows)} helper="saldo informado" category="Audiência" tone="neutral" />
+              <Kpi label="Base audiência" value={integer.format(instagram.totals.audienceGenderAgeSize)} helper="gender/age size" category="Perfil" tone="neutral" />
+            </div>
+            <DailyBars
+              title="Contas engajadas por dia"
+              days={organicDaily.map((day) => ({ date: day.date, value: day.accountsEngaged, helper: `${integer.format(day.follows)} follows • ${integer.format(day.followsAndUnfollows)} saldo follow/unfollow` }))}
+              max={maxEngagement}
+              tone="organic"
+            />
+          </>
+        ) : <EmptyState text="Instagram Insights ainda não disponível no snapshot." />}
+      </CategorySection>
 
       <section className="content-grid">
         <article className="panel span-2">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Tendência consolidada</p>
-              <h2>{facebook || instagram ? 'Leads Facebook Ads por dia' : 'Receita e investimento por dia'}</h2>
-            </div>
-            <span className="badge">{trend.length} dias</span>
-          </div>
+          <SectionHeading eyebrow="Categoria 4" title="Calendário de performance" badge={`${paidDaily.length || organicDaily.length} dias`} />
           <div className="bar-chart">
-            {(facebook?.daily ?? trend).map((day) => {
-              const value = 'leads' in day ? day.leads : day.revenue
-              const max = facebook ? maxLeads : Math.max(...trend.map((item) => item.revenue), 1)
-              return (
-                <div className="bar-column" key={day.date} title={`${day.date}: ${integer.format(value)}`}>
-                  <div className="bar revenue" style={{ height: `${Math.max(8, (value / max) * 100)}%` }} />
-                  <small>{day.date.slice(5)}</small>
-                </div>
-              )
-            })}
+            {paidDaily.map((day) => (
+              <div className="bar-column" key={day.date} title={`${formatDate(day.date)}: ${integer.format(day.leads)} leads`}>
+                <div className="bar revenue" style={{ height: `${Math.max(8, (day.leads / maxLeads) * 100)}%` }} />
+                <small>{formatShortDate(day.date)}</small>
+              </div>
+            ))}
           </div>
         </article>
 
         <article className="panel">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Alertas</p>
-              <h2>Leitura executiva</h2>
-            </div>
-          </div>
+          <SectionHeading eyebrow="Insights originais" title="Notas do snapshot" />
           <div className="insight-list">
             {snapshot.insights.map((insight) => (
               <div className={`insight ${insight.severity}`} key={insight.title}>
@@ -128,35 +194,58 @@ function App() {
         </article>
       </section>
 
-      <section className="panel">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">Qualidade dos dados</p>
-            <h2>Status das fontes</h2>
-          </div>
-        </div>
+      <section className="panel data-quality-panel">
+        <SectionHeading eyebrow="Categoria 5" title="Qualidade dos dados e fontes" badge="governança" />
         <div className="status-row">
           {snapshot.freshness.sources.map((source) => (
             <span className={`status-pill ${source.status}`} key={source.source}>
-              {source.source}: {source.status} {source.lastDate ? `• ${source.lastDate}` : ''}
+              {source.source}: {translateStatus(source.status)} {source.lastDate ? `• ${formatDate(source.lastDate)}` : ''}
             </span>
           ))}
           {facebook && <span className="status-pill ok">Facebook Ads: separado</span>}
           {instagram && <span className="status-pill ok">Instagram Insights: separado</span>}
+          <span className="status-pill partial">Timezone aplicado: São Paulo</span>
         </div>
       </section>
     </main>
   )
 }
 
-function DailyBars({ title, days, max }: { title: string; days: Array<{ date: string; value: number; helper: string }>; max: number }) {
+function SectionHeading({ eyebrow, title, badge }: { eyebrow: string; title: string; badge?: string }) {
   return (
-    <div className="daily-card">
+    <div className="panel-heading">
+      <div>
+        <p className="eyebrow">{eyebrow}</p>
+        <h2>{title}</h2>
+      </div>
+      {badge && <span className="badge">{badge}</span>}
+    </div>
+  )
+}
+
+function CategorySection({ eyebrow, title, description, children }: { eyebrow: string; title: string; description: string; children: React.ReactNode }) {
+  return (
+    <section className="panel category-section">
+      <div className="category-heading">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2>{title}</h2>
+        </div>
+        <p>{description}</p>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function DailyBars({ title, days, max, tone }: { title: string; days: Array<{ date: string; value: number; helper: string }>; max: number; tone: 'paid' | 'organic' }) {
+  return (
+    <div className={`daily-card ${tone}`}>
       <strong>{title}</strong>
       <div className="mini-bars">
         {days.map((day) => (
           <div className="mini-bar-row" key={day.date}>
-            <span>{day.date.slice(5)}</span>
+            <span>{formatShortDate(day.date)}</span>
             <div className="mini-bar-track">
               <div className="mini-bar-fill" style={{ width: `${Math.max(4, (day.value / max) * 100)}%` }} />
             </div>
@@ -169,14 +258,37 @@ function DailyBars({ title, days, max }: { title: string; days: Array<{ date: st
   )
 }
 
-function Kpi({ label, value, helper, positive = false }: { label: string; value: string; helper: string; positive?: boolean }) {
+function Kpi({ label, value, helper, category, tone = 'neutral' }: { label: string; value: string; helper: string; category: string; tone?: 'success' | 'warning' | 'paid' | 'organic' | 'neutral' }) {
   return (
-    <article className={`kpi-card ${positive ? 'positive' : ''}`}>
-      <span>{label}</span>
+    <article className={`kpi-card ${tone}`}>
+      <span>{category}</span>
       <strong>{value}</strong>
+      <em>{label}</em>
       <small>{helper}</small>
     </article>
   )
+}
+
+function EmptyState({ text }: { text: string }) {
+  return <div className="empty-state">{text}</div>
+}
+
+function formatDate(date: string) {
+  const normalized = date.includes('T') ? date : `${date}T12:00:00Z`
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: BR_TIMEZONE, day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(normalized))
+}
+
+function formatShortDate(date: string) {
+  const normalized = date.includes('T') ? date : `${date}T12:00:00Z`
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: BR_TIMEZONE, day: '2-digit', month: '2-digit' }).format(new Date(normalized))
+}
+
+function formatDateTime(date: string) {
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: BR_TIMEZONE, day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date))
+}
+
+function translateStatus(status: 'ok' | 'missing' | 'partial') {
+  return status === 'ok' ? 'ok' : status === 'missing' ? 'ausente' : 'parcial'
 }
 
 export default App
