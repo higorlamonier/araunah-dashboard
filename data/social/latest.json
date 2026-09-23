@@ -10,7 +10,7 @@
     "label": "Últimos 7 dias"
   },
   "freshness": {
-    "generatedAt": "2026-09-23T17:36:10.189Z",
+    "generatedAt": "2026-09-23T18:34:57.737Z",
     "dataTimezone": "America/Sao_Paulo",
     "sources": [
       {
@@ -47,7 +47,7 @@
       "facebookAds": {
         "totals": {
           "clicks": 3548,
-          "spend": 3172.28,
+          "spend": 3172.29,
           "leads": 64,
           "costPerLead": 49.57,
           "rows": 7,
@@ -112,7 +112,7 @@
           {
             "date": "2026-09-22",
             "clicks": 381,
-            "spend": 237.25,
+            "spend": 237.26,
             "leads": 4,
             "costPerLead": 59.31,
             "campaigns": 5,
@@ -191,8 +191,8 @@
         ]
       },
       "totals": {
-        "spend": 3172.28,
-        "impressions": 224746,
+        "spend": 3172.29,
+        "impressions": 224748,
         "clicks": 3548,
         "conversions": 64,
         "revenue": 0,
@@ -278,7 +278,7 @@
           "date": "2026-09-22",
           "source": "Meta Ads",
           "campaign": "5 campanhas ativas",
-          "spend": 237.25,
+          "spend": 237.26,
           "impressions": 9525,
           "clicks": 381,
           "conversions": 4,
@@ -290,7 +290,7 @@
         {
           "severity": "positive",
           "title": "Meta Graph API Direta Conectada",
-          "detail": "64 leads reais, 3548 cliques e R$ 3172.28 investidos em últimos 7 dias diretamente da Graph API v22.0."
+          "detail": "64 leads reais, 3548 cliques e R$ 3172.29 investidos em últimos 7 dias diretamente da Graph API v22.0."
         },
         {
           "severity": "positive",
@@ -334,7 +334,7 @@
       "facebookAds": {
         "totals": {
           "clicks": 7673,
-          "spend": 6626.57,
+          "spend": 6626.58,
           "leads": 152,
           "costPerLead": 43.6,
           "rows": 14,
@@ -462,7 +462,7 @@
           {
             "date": "2026-09-22",
             "clicks": 381,
-            "spend": 237.25,
+            "spend": 237.26,
             "leads": 4,
             "costPerLead": 59.31,
             "campaigns": 5,
@@ -597,8 +597,8 @@
         ]
       },
       "totals": {
-        "spend": 6626.57,
-        "impressions": 490767,
+        "spend": 6626.58,
+        "impressions": 490769,
         "clicks": 7673,
         "conversions": 152,
         "revenue": 0,
@@ -761,7 +761,7 @@
           "date": "2026-09-22",
           "source": "Meta Ads",
           "campaign": "5 campanhas ativas",
-          "spend": 237.25,
+          "spend": 237.26,
           "impressions": 9525,
           "clicks": 381,
           "conversions": 4,
@@ -773,7 +773,7 @@
         {
           "severity": "positive",
           "title": "Meta Graph API Direta Conectada",
-          "detail": "152 leads reais, 7673 cliques e R$ 6626.57 investidos em últimos 15 dias diretamente da Graph API v22.0."
+          "detail": "152 leads reais, 7673 cliques e R$ 6626.58 investidos em últimos 15 dias diretamente da Graph API v22.0."
         },
         {
           "severity": "positive",
@@ -1601,7 +1601,7 @@
   "facebookAds": {
     "totals": {
       "clicks": 3548,
-      "spend": 3172.28,
+      "spend": 3172.29,
       "leads": 64,
       "costPerLead": 49.57,
       "rows": 7,
@@ -1666,7 +1666,7 @@
       {
         "date": "2026-09-22",
         "clicks": 381,
-        "spend": 237.25,
+        "spend": 237.26,
         "leads": 4,
         "costPerLead": 59.31,
         "campaigns": 5,
@@ -1745,8 +1745,8 @@
     ]
   },
   "totals": {
-    "spend": 3172.28,
-    "impressions": 224746,
+    "spend": 3172.29,
+    "impressions": 224748,
     "clicks": 3548,
     "conversions": 64,
     "revenue": 0,
@@ -1832,7 +1832,7 @@
       "date": "2026-09-22",
       "source": "Meta Ads",
       "campaign": "5 campanhas ativas",
-      "spend": 237.25,
+      "spend": 237.26,
       "impressions": 9525,
       "clicks": 381,
       "conversions": 4,
@@ -1844,7 +1844,7 @@
     {
       "severity": "positive",
       "title": "Meta Graph API Direta Conectada",
-      "detail": "64 leads reais, 3548 cliques e R$ 3172.28 investidos em últimos 7 dias diretamente da Graph API v22.0."
+      "detail": "64 leads reais, 3548 cliques e R$ 3172.29 investidos em últimos 7 dias diretamente da Graph API v22.0."
     },
     {
       "severity": "positive",

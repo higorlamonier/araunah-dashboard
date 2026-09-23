@@ -45,12 +45,12 @@ const TABS: TabConfig[] = [
     id: 'instagram',
     label: 'Instagram',
     icon: '📸',
-    badge: '@araunah.agua',
+    badge: '3 Contas',
     badgeClass: 'pink',
     path: '/instagram',
     title: 'Tração & Engajamento Instagram',
     eyebrow: 'Instagram Graph API · Presença Multicanal',
-    subtitle: 'Acompanhamento dos perfis @araunah.agua, @araunah.florestas, @araunah.tech e publicações recentes.',
+    subtitle: 'Acompanhamento dos perfis @araunah.agro, @araunah.agua e @araunah.florestas.',
   },
   {
     id: 'google',
@@ -195,21 +195,21 @@ export default function App() {
     }
   }, [])
 
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (periodToFetch?: PeriodKey) => {
+    const targetPeriod = periodToFetch ?? selectedPeriod
     activeRequest.current?.abort()
     const controller = new AbortController()
     activeRequest.current = controller
     setIsRefreshing(true)
 
     try {
-      const nextSnapshot = await fetchDashboardData(selectedPeriod, controller.signal)
+      const nextSnapshot = await fetchDashboardData(targetPeriod, controller.signal)
+      const periodData = (nextSnapshot.periods?.[targetPeriod] ?? nextSnapshot) as unknown as DashboardPeriodData
       setSnapshot((currentSnapshot) => ({
         ...currentSnapshot,
-        ...nextSnapshot,
         periods: {
           ...currentSnapshot.periods,
-          [selectedPeriod]: nextSnapshot as unknown as DashboardPeriodData,
-          ...nextSnapshot.periods,
+          [targetPeriod]: periodData,
         },
       }))
 
@@ -222,7 +222,7 @@ export default function App() {
       } else {
         setStatusNotice({
           type: 'success',
-          message: 'Métricas sincronizadas em tempo real com a Meta Graph API v22.0.',
+          message: `Métricas (${targetPeriod}) sincronizadas em tempo real com a Meta Graph API v22.0.`,
           requestId: nextSnapshot.requestId,
         })
       }
@@ -240,6 +240,11 @@ export default function App() {
       }
     }
   }, [selectedPeriod])
+
+  const handleSelectPeriod = useCallback((key: PeriodKey) => {
+    setSelectedPeriod(key)
+    void refreshData(key)
+  }, [refreshData])
 
   const showPeriodSelector = activeTab === 'meta' || activeTab === 'instagram' || activeTab === 'google'
 
@@ -326,7 +331,7 @@ export default function App() {
                   <button
                     className={selectedPeriod === option.key ? 'active' : ''}
                     key={option.key}
-                    onClick={() => setSelectedPeriod(option.key)}
+                    onClick={() => handleSelectPeriod(option.key)}
                     type="button"
                     role="tab"
                     aria-selected={selectedPeriod === option.key}

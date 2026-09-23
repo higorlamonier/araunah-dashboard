@@ -259,29 +259,39 @@ async function fetchExecutions(start) {
     return leadsMemoryCache.data
   }
 
-  // 1. Busca rápida da lista de execuções
-  const listQuery = new URLSearchParams({ workflowId, limit: '40' })
-  const listResponse = await fetch(`${baseUrl}/api/v1/executions?${listQuery}`, {
-    headers: {
-      'X-N8N-API-KEY': apiKey,
-      Accept: 'application/json',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
-    },
-    signal: AbortSignal.timeout(10000),
-  })
+  // 1. Busca rápida de cabeçalhos de até 300 execuções com paginação
+  const allRows = []
+  let cursor = null
+  for (let page = 0; page < 3; page += 1) {
+    const query = new URLSearchParams({ workflowId, limit: '100' })
+    if (cursor) query.set('cursor', cursor)
+    const listRes = await fetch(`${baseUrl}/api/v1/executions?${query}`, {
+      headers: {
+        'X-N8N-API-KEY': apiKey,
+        Accept: 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+      },
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!listRes.ok) break
+    const payload = await listRes.json()
+    const rows = Array.isArray(payload.data) ? payload.data : []
+    allRows.push(...rows)
+    cursor = payload.nextCursor ?? payload.next_cursor ?? null
+    const oldest = rows.length > 0 ? new Date(rows[rows.length - 1].startedAt || 0) : null
+    if (!cursor || rows.length === 0 || (start && oldest && oldest < start)) break
+  }
 
-  if (!listResponse.ok) throw new Error(`Leitura da lista n8n indisponível (HTTP ${listResponse.status}).`)
-  const listPayload = await listResponse.json()
-  const rows = Array.isArray(listPayload.data) ? listPayload.data : []
-
-  // 2. Filtra execuções que ocorreram no período
-  const candidateRows = rows.filter((r) => {
+  // 2. Filtra candidatos no período: conversas reais com bot (duração > 1200ms) ou erros operacionais
+  const candidateRows = allRows.filter((r) => {
     const started = new Date(r.startedAt || r.createdAt || 0)
-    return !start || started >= start
+    if (start && started < start) return false
+    const dur = (new Date(r.stoppedAt || 0)).getTime() - (new Date(r.startedAt || 0)).getTime()
+    return dur > 1200 || r.status === 'error'
   })
 
-  // 3. Busca detalhes de até 20 execuções mais recentes em paralelo controlado
-  const detailPromises = candidateRows.slice(0, 20).map(async (row) => {
+  // 3. Busca detalhes com includeData apenas das execuções qualificadas (até 30)
+  const detailPromises = candidateRows.slice(0, 30).map(async (row) => {
     try {
       const res = await fetch(`${baseUrl}/api/v1/executions/${row.id}?includeData=true`, {
         headers: {

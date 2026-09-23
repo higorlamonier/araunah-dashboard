@@ -13,30 +13,30 @@ function compactNum(val: number) {
 
 const ACCOUNTS = [
   {
+    username: 'araunah.agro',
+    name: 'Araunah Agro (Compostagem)',
+    followers: 23645,
+    posts: 1383,
+    status: 'Oficial & Meta Ads',
+    url: 'https://instagram.com/araunah.compostagem',
+    isPrimary: true
+  },
+  {
     username: 'araunah.agua',
-    name: 'Araunah Água & Agro',
+    name: 'Araunah Água',
     followers: 3037,
     posts: 157,
     status: 'Conectado (Graph API)',
     url: 'https://instagram.com/araunah.agua',
-    isPrimary: true
+    isPrimary: false
   },
   {
     username: 'araunah.florestas',
     name: 'Araunah Florestas',
-    followers: 1240,
-    posts: 42,
-    status: 'Monitorado',
-    url: 'https://instagram.com',
-    isPrimary: false
-  },
-  {
-    username: 'araunah.tech',
-    name: 'Araunah Tech',
-    followers: 890,
-    posts: 38,
-    status: 'Monitorado',
-    url: 'https://instagram.com',
+    followers: 477,
+    posts: 56,
+    status: 'Monitorado (Graph API)',
+    url: 'https://instagram.com/araunah.florestas',
     isPrimary: false
   }
 ]
@@ -132,12 +132,12 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
       <section className="kpi-grid">
         <div className="kpi-card highlight-glow">
           <div className="kpi-header">
-            <span className="kpi-label">Seguidores (@araunah.agua)</span>
-            <span className="badge badge-emerald">Oficial</span>
+            <span className="kpi-label">Rede Araunah Instagram</span>
+            <span className="badge badge-emerald">3 Contas</span>
           </div>
-          <div className="kpi-value text-tabular font-emerald">{compactNum(igTotals.followersCount || 3037)}</div>
+          <div className="kpi-value text-tabular font-emerald">27.159</div>
           <div className="kpi-subtext">
-            <span>Base ativa no Instagram</span>
+            <span>23.6k @araunah.agro · 3.0k @araunah.agua · 477 @araunah.florestas</span>
           </div>
         </div>
 

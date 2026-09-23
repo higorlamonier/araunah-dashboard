@@ -1398,19 +1398,44 @@
   position: relative;
 }
 
-.bar-hover-val {
+.bar-hover-tooltip {
   position: absolute;
-  top: -20px;
-  font-size: 0.68rem;
-  color: var(--text-muted);
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-fast);
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: 10;
 }
 
-.split-bar-column:hover .bar-hover-val {
+.split-bar-column:hover .bar-hover-tooltip {
   opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.tooltip-spend {
+  color: var(--accent-meta);
+}
+
+.tooltip-sep {
+  color: var(--text-muted);
+}
+
+.tooltip-leads {
+  color: var(--accent-emerald);
 }
 
 .bar-fill {

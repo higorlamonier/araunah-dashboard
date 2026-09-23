@@ -216,56 +216,107 @@ export default function ChatbotMonitorPage({
         </header>
       )}
 
-      <section className="monitor-hero">
-        <div>
-          <p className="monitor-eyebrow">
-            <span className="live-pulse" style={{ background: 'var(--accent-whatsapp)' }} />
-            <span>Operação · n8n · WhatsApp Cloud API</span>
-          </p>
-          <h1>Monitoramento do Chatbot</h1>
-          <p>
-            Visão técnica em tempo real do workflow <strong>CHATBOT-ARAUNAH WHATSAPP</strong>, com rastreio de ponta a ponta:
-            recebimento de mensagem, triagem por IA, qualificação, persistência CRM e entrega via Graph.
-          </p>
-        </div>
-
-        <div className="monitor-periods" aria-label="Selecionar período">
-          <div className="monitor-periods-control" role="tablist">
-            {PERIODS.map((period) => (
-              <button
-                className={days === period ? 'active' : ''}
-                key={period}
-                onClick={() => setDays(period)}
-                type="button"
-                role="tab"
-              >
-                {period}d
-              </button>
-            ))}
+      {embedded && (
+        <div className="monitor-embedded-toolbar">
+          <div className="monitor-workflow-status">
+            <span className="service-dot ok" />
+            <span className="workflow-name">{currentData.workflow.name}</span>
+            <span className="workflow-badge">{currentData.workflow.active ? 'Workflow Ativo' : 'Em Verificação'}</span>
           </div>
 
-          <button
-            className="monitor-refresh-btn"
-            onClick={() => void load()}
-            disabled={loading}
-            type="button"
-          >
-            {loading ? (
-              <>
-                <span className="spinner-icon" />
-                <span>Consultando…</span>
-              </>
-            ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                </svg>
-                <span>Atualizar</span>
-              </>
-            )}
-          </button>
+          <div className="monitor-toolbar-actions">
+            <div className="monitor-periods-control" role="tablist" aria-label="Selecionar período">
+              {PERIODS.map((period) => (
+                <button
+                  className={days === period ? 'active' : ''}
+                  key={period}
+                  onClick={() => setDays(period)}
+                  type="button"
+                  role="tab"
+                  aria-selected={days === period}
+                >
+                  {period} dias
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="monitor-refresh-btn"
+              onClick={() => void load()}
+              disabled={loading}
+              type="button"
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-icon" />
+                  <span>Consultando…</span>
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  <span>Atualizar</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
-      </section>
+      )}
+
+      {!embedded && (
+        <section className="monitor-hero">
+          <div>
+            <p className="monitor-eyebrow">
+              <span className="live-pulse" style={{ background: 'var(--accent-whatsapp)' }} />
+              <span>Operação · n8n · WhatsApp Cloud API</span>
+            </p>
+            <h1>Monitoramento do Chatbot</h1>
+            <p>
+              Visão técnica em tempo real do workflow <strong>CHATBOT-ARAUNAH WHATSAPP</strong>, com rastreio de ponta a ponta:
+              recebimento de mensagem, triagem por IA, qualificação, persistência CRM e entrega via Graph.
+            </p>
+          </div>
+
+          <div className="monitor-periods" aria-label="Selecionar período">
+            <div className="monitor-periods-control" role="tablist">
+              {PERIODS.map((period) => (
+                <button
+                  className={days === period ? 'active' : ''}
+                  key={period}
+                  onClick={() => setDays(period)}
+                  type="button"
+                  role="tab"
+                  aria-selected={days === period}
+                >
+                  {period}d
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="monitor-refresh-btn"
+              onClick={() => void load()}
+              disabled={loading}
+              type="button"
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-icon" />
+                  <span>Consultando…</span>
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  <span>Atualizar</span>
+                </>
+              )}
+            </button>
+          </div>
+        </section>
+      )}
 
       {errorNotice && (
         <aside className="status-badge-bar warning">

@@ -111,13 +111,16 @@ export default function MetaAdsTab({ data, activePeriod, loading }: MetaAdsTabPr
             return (
               <div key={item.date} className={`split-bar-column ${isBest ? 'is-best-cpl' : ''}`}>
                 {isBest && <span className="best-cpl-badge">Melhor CPL</span>}
+                <div className="bar-hover-tooltip">
+                  <span className="tooltip-spend">{currency(item.spend)}</span>
+                  <span className="tooltip-sep">·</span>
+                  <span className="tooltip-leads">{item.leads} {item.leads === 1 ? 'lead' : 'leads'}</span>
+                </div>
                 <div className="bars-track">
                   <div className="bar-subcolumn">
-                    <span className="bar-hover-val">{currency(item.spend)}</span>
                     <div className="bar-fill bar-meta" style={{ height: `${Math.max(spendPercent, 6)}%` }} />
                   </div>
                   <div className="bar-subcolumn">
-                    <span className="bar-hover-val">{item.leads} leads</span>
                     <div className="bar-fill bar-emerald" style={{ height: `${Math.max(leadsPercent, item.leads > 0 ? 8 : 2)}%` }} />
                   </div>
                 </div>

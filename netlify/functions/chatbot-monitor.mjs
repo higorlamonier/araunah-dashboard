@@ -1,10 +1,13 @@
 const DEFAULT_WORKFLOW_ID = 'eXj1wyXmjshhMOtl'
 const WORKFLOW_NAME = 'CHATBOT-ARAUNAH WHATSAPP'
-const PAGE_SIZE = 40
-const MAX_PAGES = 4
+const PAGE_SIZE = 20
+const MAX_PAGES = 2
 const PERIODS = new Set([7, 15, 30])
 const BR_TIMEZONE = 'America/Sao_Paulo'
 const PRODUCTION_PHONE_NUMBER_ID = process.env.N8N_PRODUCTION_PHONE_NUMBER_ID ?? '1260236903829724'
+
+const memoryCache = new Map()
+const CACHE_TTL_MS = 60 * 1000
 
 function json(body, status = 200, requestId) {
   return Response.json(body, {
@@ -325,6 +328,13 @@ export default async function handler(request) {
   const url = new URL(request.url)
   const days = Number(url.searchParams.get('days') ?? 15)
   if (!Number.isInteger(days) || !PERIODS.has(days)) return json({ error: 'Período inválido.', requestId }, 400, requestId)
+
+  const cacheKey = `monitor_${days}`
+  const cached = memoryCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return json({ ...cached.data, isCached: true }, 200, requestId)
+  }
+
   const workflowId = process.env.N8N_CHATBOT_WORKFLOW_ID ?? DEFAULT_WORKFLOW_ID
   const now = new Date()
   const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000))
@@ -351,7 +361,11 @@ export default async function handler(request) {
   }
 
   const summary = buildMonitoringSummary(executions, workflow, days, now)
-  return json({ ...summary, isDegraded, degradationReason }, 200, requestId)
+  const result = { ...summary, isDegraded, degradationReason }
+  if (!isDegraded && executions.length > 0) {
+    memoryCache.set(cacheKey, { timestamp: Date.now(), data: result })
+  }
+  return json(result, 200, requestId)
 }
 
 export const __test__ = { buildMonitoringSummary, executionSignals, nodeItems, webhookSignals, graphMessageIds }
