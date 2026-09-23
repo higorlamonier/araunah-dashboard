@@ -86,6 +86,17 @@ export interface DashboardSnapshot {
       accounts: number
     }
     daily: InstagramInsightsDaily[]
+    recentMedia?: Array<{
+      id: string
+      type: string
+      caption: string
+      mediaUrl: string | null
+      thumbnailUrl: string | null
+      permalink: string
+      date: string
+      likes: number
+      comments: number
+    }>
   }
   totals: { spend: number; impressions: number; clicks: number; conversions: number; revenue: number; sessions: number }
   socialTotals?: {

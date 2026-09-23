@@ -215,6 +215,80 @@ export default function LeadsPage({
         </div>
       ) : null}
 
+      {/* Funil Operacional de Leads */}
+      <section className="leads-funnel-card">
+        <div className="funnel-header">
+          <div>
+            <span className="funnel-kicker">FLUXO DE CONVERSÃO EM TEMPO REAL</span>
+            <h3 className="funnel-title">Funil Operacional de Leads</h3>
+          </div>
+          <span className="funnel-period-badge">Período de {days} dias</span>
+        </div>
+
+        <div className="leads-funnel-stages">
+          <div className="funnel-step">
+            <div className="step-badge">01</div>
+            <div className="step-content">
+              <span className="step-label">Captação Inbound</span>
+              <strong className="step-value text-tabular">{data?.summary.uniqueLeads ?? data?.leads.length ?? 0}</strong>
+              <span className="step-subtext">WhatsApp Webhook & Meta Ads</span>
+            </div>
+            <div className="step-rate-tag">100% Entradas</div>
+            <div className="step-arrow" aria-hidden="true" />
+          </div>
+
+          <div className="funnel-step">
+            <div className="step-badge">02</div>
+            <div className="step-content">
+              <span className="step-label">Triagem IA</span>
+              <strong className="step-value font-cyan text-tabular">
+                {(data?.summary.inQualification ?? 0) + (data?.summary.created ?? 0) + (data?.summary.updated ?? 0)}
+              </strong>
+              <span className="step-subtext">Qualificação Agente Gemini</span>
+            </div>
+            <div className="step-rate-tag">
+              {(data?.summary.uniqueLeads ?? 0) > 0
+                ? ((((data?.summary.inQualification ?? 0) + (data?.summary.created ?? 0) + (data?.summary.updated ?? 0)) / (data?.summary.uniqueLeads || 1)) * 100).toFixed(1)
+                : '100'}% Triados
+            </div>
+            <div className="step-arrow" aria-hidden="true" />
+          </div>
+
+          <div className="funnel-step">
+            <div className="step-badge">03</div>
+            <div className="step-content">
+              <span className="step-label">Persistência CRM</span>
+              <strong className="step-value font-emerald text-tabular">
+                {(data?.summary.created ?? 0) + (data?.summary.updated ?? 0)}
+              </strong>
+              <span className="step-subtext">Supabase RPC Leads</span>
+            </div>
+            <div className="step-rate-tag">
+              {(data?.summary.uniqueLeads ?? 0) > 0
+                ? ((((data?.summary.created ?? 0) + (data?.summary.updated ?? 0)) / (data?.summary.uniqueLeads || 1)) * 100).toFixed(1)
+                : '—'}% Persistidos
+            </div>
+            <div className="step-arrow" aria-hidden="true" />
+          </div>
+
+          <div className="funnel-step">
+            <div className="step-badge">04</div>
+            <div className="step-content">
+              <span className="step-label">Handoff Consultor</span>
+              <strong className="step-value font-lime text-tabular">{data?.summary.transferConfirmed ?? 0}</strong>
+              <span className="step-subtext">Transferência Humana WhatsApp</span>
+            </div>
+            <div className="step-rate-tag">
+              {((data?.summary.created ?? 0) + (data?.summary.updated ?? 0)) > 0
+                ? (((data?.summary.transferConfirmed ?? 0) / ((data?.summary.created ?? 0) + (data?.summary.updated ?? 0))) * 100).toFixed(1)
+                : (data?.summary.uniqueLeads ?? 0) > 0
+                  ? (((data?.summary.transferConfirmed ?? 0) / (data?.summary.uniqueLeads || 1)) * 100).toFixed(1)
+                  : '—'}% Entregues
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="leads-kpi-grid">
         <div className="leads-kpi-card highlight-emerald">
           <span className="leads-kpi-title">Leads Únicos</span>

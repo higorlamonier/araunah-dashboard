@@ -39,6 +39,58 @@ export default function MetaAdsTab({ data, activePeriod, loading }: MetaAdsTabPr
 
   return (
     <div className="tab-pane animate-fade-in">
+      {/* Guia Didático de Métricas de Aquisição */}
+      <section className="meta-didactic-card">
+        <div className="meta-didactic-header">
+          <div className="meta-didactic-title-group">
+            <svg className="meta-didactic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            <h3 className="meta-didactic-title">Entenda as Métricas de Tráfego Pago (Meta Ads)</h3>
+          </div>
+          <span className="badge badge-meta">Conceitos Chave</span>
+        </div>
+        <div className="meta-didactic-grid">
+          <div className="meta-didactic-item">
+            <div className="meta-didactic-term">
+              <span>Investimento</span>
+              <span className="meta-didactic-formula">R$ Veiculado</span>
+            </div>
+            <p className="meta-didactic-desc">
+              Total financeiro investido na veiculação de anúncios ativos no Instagram e Facebook durante o período.
+            </p>
+          </div>
+          <div className="meta-didactic-item">
+            <div className="meta-didactic-term">
+              <span>Leads Gerados</span>
+              <span className="meta-didactic-formula">Inbounds CRM</span>
+            </div>
+            <p className="meta-didactic-desc">
+              Produtores rurais que preencheram cadastro ou iniciaram contato via WhatsApp direto rastreado.
+            </p>
+          </div>
+          <div className="meta-didactic-item">
+            <div className="meta-didactic-term">
+              <span>CPL (Custo/Lead)</span>
+              <span className="meta-didactic-formula">Gasto ÷ Leads</span>
+            </div>
+            <p className="meta-didactic-desc">
+              Custo médio para adquirir cada novo contato interessado. Quanto menor, maior a eficiência do criativo.
+            </p>
+          </div>
+          <div className="meta-didactic-item">
+            <div className="meta-didactic-term">
+              <span>Taxa Conversão</span>
+              <span className="meta-didactic-formula">Leads ÷ Cliques %</span>
+            </div>
+            <p className="meta-didactic-desc">
+              Percentual de visitantes qualificados que clicaram no anúncio e efetivamente converteram em oportunidade.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* KPI Cards */}
       <section className="kpi-grid">
         <div className="kpi-card highlight-glow">

@@ -133,6 +133,37 @@ export default async function handler(req) {
     }, token).catch(() => ({ data: [] }));
     const campaignsRaw = campRes.data || [];
 
+    // 4. Fetch live Instagram media (posts, reels, carousels)
+    const [mediaAgua, mediaAgro] = await Promise.all([
+      fetchFromGraph('/17841402100241381/media', {
+        fields: 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
+        limit: '6',
+      }, token).catch(() => ({ data: [] })),
+      fetchFromGraph('/17841433905590731/media', {
+        fields: 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
+        limit: '6',
+      }, token).catch(() => ({ data: [] })),
+    ]);
+
+    const rawMediaList = [...(mediaAgua.data || []), ...(mediaAgro.data || [])];
+    const fallbackMedia = getFallbackSnapshot()?.periods?.[periodParam]?.instagramInsights?.recentMedia || [];
+    const recentMedia = rawMediaList.length > 0
+      ? rawMediaList
+          .sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+          .slice(0, 8)
+          .map((m) => ({
+            id: m.id,
+            type: m.media_type,
+            caption: m.caption ? m.caption.slice(0, 160) : 'Publicação oficial Araunah',
+            mediaUrl: m.media_url || m.thumbnail_url || null,
+            thumbnailUrl: m.thumbnail_url || m.media_url || null,
+            permalink: m.permalink || 'https://www.instagram.com/araunah.agro',
+            date: m.timestamp ? m.timestamp.split('T')[0] : '2026-09-22',
+            likes: m.like_count ?? 0,
+            comments: m.comments_count ?? 0,
+          }))
+      : fallbackMedia;
+
     let totalSpend = 0;
     let totalClicks = 0;
     let totalImpressions = 0;
@@ -232,6 +263,7 @@ export default async function handler(req) {
           followers: igProfile.followers_count,
         },
         daily: igDaily,
+        recentMedia,
       },
       totals: {
         spend: Number(totalSpend.toFixed(2)),

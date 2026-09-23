@@ -53,6 +53,34 @@ async function run() {
   });
   console.log(`Instagram: @${igProfile.username} (${igProfile.followers_count} followers)`);
 
+  console.log('Fetching live Instagram media (posts and reels)...');
+  const [mediaAgua, mediaAgro] = await Promise.all([
+    fetchGraph('/17841402100241381/media', {
+      fields: 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
+      limit: '8'
+    }).catch(() => ({ data: [] })),
+    fetchGraph('/17841433905590731/media', {
+      fields: 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count',
+      limit: '8'
+    }).catch(() => ({ data: [] }))
+  ]);
+
+  const rawMediaList = [...(mediaAgua.data || []), ...(mediaAgro.data || [])];
+  const sortedMedia = rawMediaList
+    .sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+    .slice(0, 8)
+    .map(m => ({
+      id: m.id,
+      type: m.media_type,
+      caption: m.caption ? m.caption.slice(0, 160) : 'Publicação oficial Araunah',
+      mediaUrl: m.media_url || m.thumbnail_url || null,
+      thumbnailUrl: m.thumbnail_url || m.media_url || null,
+      permalink: m.permalink || 'https://www.instagram.com/araunah.agro',
+      date: m.timestamp ? m.timestamp.split('T')[0] : '2026-09-22',
+      likes: m.like_count ?? 0,
+      comments: m.comments_count ?? 0,
+    }));
+
   const periodsData = {};
 
   for (const [key, conf] of Object.entries(PERIOD_CONFIGS)) {
@@ -160,7 +188,8 @@ async function run() {
           rows: igDaily.length,
           accounts: 1
         },
-        daily: igDaily
+        daily: igDaily,
+        recentMedia: sortedMedia
       },
       totals: {
         spend: Number(totalSpend.toFixed(2)),

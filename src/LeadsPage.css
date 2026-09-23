@@ -554,3 +554,164 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ==========================================================================
+   Operational Leads Funnel (Conversion Pipeline)
+   ========================================================================== */
+
+.leads-funnel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--bg-surface, rgba(16, 22, 19, 0.72));
+  border: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 18px);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.funnel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.funnel-kicker {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-emerald, #10b981);
+}
+
+.funnel-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0fdf4);
+  margin: 3px 0 0 0;
+}
+
+.funnel-period-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary, #94a3b8);
+}
+
+.leads-funnel-stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  position: relative;
+}
+
+@media (max-width: 900px) {
+  .leads-funnel-stages {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.funnel-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--bg-surface-subtle, rgba(12, 17, 14, 0.9));
+  border: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.07));
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.funnel-step:hover {
+  background: rgba(20, 28, 24, 0.95);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+}
+
+.step-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #34d399;
+}
+
+.step-content {
+  margin: 12px 0 8px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.step-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary, #f0fdf4);
+  letter-spacing: -0.02em;
+  font-family: var(--font-mono, monospace);
+  margin: 2px 0;
+}
+
+.step-value.font-cyan {
+  color: #38bdf8;
+}
+
+.step-value.font-emerald {
+  color: #10b981;
+}
+
+.step-value.font-lime {
+  color: #a3e635;
+}
+
+.step-subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted, #5f7166);
+}
+
+.step-rate-tag {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary, #94a3b8);
+}
+
+@media (min-width: 901px) {
+  .step-arrow {
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: var(--bg-surface-subtle, #0c110e);
+    border-top: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.12));
+    border-right: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.12));
+    z-index: 2;
+  }
+}
+

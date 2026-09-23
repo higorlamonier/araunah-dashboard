@@ -330,6 +330,120 @@ export default function ChatbotMonitorPage({
         </aside>
       )}
 
+      {/* Diagrama de Arquitetura Conectada n8n */}
+      <section className="n8n-pipeline-diagram">
+        <div className="n8n-pipeline-header">
+          <div className="n8n-badge-group">
+            <span className="n8n-pulse-dot" />
+            <span className="n8n-badge-title">WORKFLOW n8n ATIVO: CHATBOT-ARAUNAH WHATSAPP</span>
+          </div>
+          <span className="n8n-version-tag">44 nós determinísticos · Graph v22.0</span>
+        </div>
+
+        <div className="n8n-pipeline-flow">
+          {/* Bloco 1: Webhook Inbound */}
+          <div className="n8n-node-block node-webhook">
+            <div className="node-badge-type">01 · TRIGGER</div>
+            <div className="node-main">
+              <div className="node-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              <div className="node-meta">
+                <h4 className="node-name">Webhook Inbound</h4>
+                <span className="node-tech">WhatsApp Cloud API</span>
+              </div>
+            </div>
+            <div className="node-params">
+              <div className="param-row"><span>Entradas:</span> <code>{integer(totals.inbound)} msgs</code></div>
+              <div className="param-row"><span>Formato:</span> <code>E.164 Telefone</code></div>
+            </div>
+          </div>
+
+          <div className="n8n-connector">
+            <span className="connector-line" />
+            <span className="connector-pulse" />
+          </div>
+
+          {/* Bloco 2: Gemini AI Engine */}
+          <div className="n8n-node-block node-ai">
+            <div className="node-badge-type">02 · AI AGENT</div>
+            <div className="node-main">
+              <div className="node-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
+                  <path d="M12 12L2.5 7.5" />
+                  <path d="M12 12v9" />
+                </svg>
+              </div>
+              <div className="node-meta">
+                <h4 className="node-name">Gemini AI Engine</h4>
+                <span className="node-tech">Triagem Agronômica</span>
+              </div>
+            </div>
+            <div className="node-params">
+              <div className="param-row"><span>Triados:</span> <code>{integer(totals.ai)} leads</code></div>
+              <div className="param-row"><span>Hard Gate:</span> <code>Dados Mínimos OK</code></div>
+            </div>
+          </div>
+
+          <div className="n8n-connector">
+            <span className="connector-line" />
+            <span className="connector-pulse" />
+          </div>
+
+          {/* Bloco 3: Supabase CRM */}
+          <div className="n8n-node-block node-crm">
+            <div className="node-badge-type">03 · PERSISTENCE</div>
+            <div className="node-main">
+              <div className="node-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </div>
+              <div className="node-meta">
+                <h4 className="node-name">Supabase CRM</h4>
+                <span className="node-tech">RPC Postgres Leads</span>
+              </div>
+            </div>
+            <div className="node-params">
+              <div className="param-row"><span>RPC:</span> <code>bot_n8n_lead_upsert</code></div>
+              <div className="param-row"><span>Gravados:</span> <code>{integer(totals.crmConfirmed)} leads</code></div>
+            </div>
+          </div>
+
+          <div className="n8n-connector">
+            <span className="connector-line" />
+            <span className="connector-pulse" />
+          </div>
+
+          {/* Bloco 4: Meta Graph API */}
+          <div className="n8n-node-block node-graph">
+            <div className="node-badge-type">04 · OUTBOUND</div>
+            <div className="node-main">
+              <div className="node-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 2L11 13" />
+                  <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+              </div>
+              <div className="node-meta">
+                <h4 className="node-name">Meta Graph API</h4>
+                <span className="node-tech">Alerta & Handover</span>
+              </div>
+            </div>
+            <div className="node-params">
+              <div className="param-row"><span>Template:</span> <code>araunah_alerta</code></div>
+              <div className="param-row"><span>Handoff:</span> <code>{integer(totals.transferAccepted)} repasses</code></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Grid de Saúde dos Serviços (Service Health) */}
       <section className="service-health-grid" aria-label="Status dos serviços conectados">
         <div className="service-card">

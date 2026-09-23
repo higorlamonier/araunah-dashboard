@@ -18,7 +18,7 @@ assert.ok(cssMatch, 'CSS bundle must be referenced in index.html');
 console.log('  ✓ JS Bundle:', jsMatch[1]);
 console.log('  ✓ CSS Bundle:', cssMatch[1]);
 
-// Verify CSS bundle contains new Leads CRM classes and Meta Ads tooltip classes
+// Verify CSS bundle contains new Leads CRM classes, Instagram visual cards, and Meta Ads didactic classes
 const cssRes = await fetch('https://meta.araunah.com' + cssMatch[1]);
 assert.equal(cssRes.status, 200, 'CSS bundle must return 200');
 const cssContent = await cssRes.text();
@@ -27,7 +27,12 @@ assert.ok(cssContent.includes('.leads-filters-bar'), 'CSS must contain .leads-fi
 assert.ok(cssContent.includes('.leads-table'), 'CSS must contain .leads-table');
 assert.ok(cssContent.includes('.bar-hover-tooltip'), 'CSS must contain .bar-hover-tooltip');
 assert.ok(cssContent.includes('.monitor-embedded-toolbar'), 'CSS must contain .monitor-embedded-toolbar');
-console.log('  ✓ CSS Bundle contains all new styles: .leads-kpi-grid, .leads-filters-bar, .leads-table, .bar-hover-tooltip, .monitor-embedded-toolbar.');
+assert.ok(cssContent.includes('.posts-visual-grid'), 'CSS must contain .posts-visual-grid');
+assert.ok(cssContent.includes('.ig-media-card'), 'CSS must contain .ig-media-card');
+assert.ok(cssContent.includes('.leads-funnel-card'), 'CSS must contain .leads-funnel-card');
+assert.ok(cssContent.includes('.n8n-pipeline-diagram'), 'CSS must contain .n8n-pipeline-diagram');
+assert.ok(cssContent.includes('.meta-didactic-card'), 'CSS must contain .meta-didactic-card');
+console.log('  ✓ CSS Bundle contains all new styles: .posts-visual-grid, .ig-media-card, .leads-funnel-card, .n8n-pipeline-diagram, .meta-didactic-card.');
 
 // Verify JS bundle contains the 3 Instagram accounts
 const jsRes = await fetch('https://meta.araunah.com' + jsMatch[1]);
@@ -92,4 +97,19 @@ assert.ok(d7.facebookAds?.daily?.length === 7, '7d daily count must be 7');
 assert.ok(d15.facebookAds?.daily?.length === 14, '15d daily count must be 14');
 assert.ok(d30.facebookAds?.daily?.length === 25, '30d daily count must be 25');
 
-console.log('\n=== ALL 4 VERIFICATION STAGES PASSED WITH 100% INTEGRITY ===');
+// 5. VERIFY INSTAGRAM RECENT MEDIA (FEED & REELS)
+console.log('\n5. Checking Instagram Recent Media & Images...');
+const mediaItems = d7.instagramInsights?.recentMedia;
+assert.ok(Array.isArray(mediaItems), 'recentMedia must be an array');
+assert.ok(mediaItems.length > 0, 'recentMedia must have at least 1 post');
+console.log(`  ✓ Found ${mediaItems.length} recent media items in 7d payload.`);
+const sample = mediaItems[0];
+assert.ok(sample.id, 'Media must have an id');
+assert.ok(sample.permalink?.includes('instagram.com'), 'Media must have a valid Instagram permalink');
+const hasImage = !!(sample.mediaUrl || sample.thumbnailUrl);
+assert.ok(hasImage, 'Media must have either mediaUrl or thumbnailUrl');
+console.log(`  ✓ Sample post ID: ${sample.id} (${sample.type}) - URL: ${sample.permalink}`);
+console.log(`  ✓ Media image preview source is valid.`);
+
+console.log('\n=== ALL 5 VERIFICATION STAGES PASSED WITH 100% INTEGRITY ===');
+
