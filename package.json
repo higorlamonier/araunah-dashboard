@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "test:chatbot": "node scripts/test-chatbot-monitor.mjs",
     "preview": "vite preview",
-    "validate:data": "python scripts/validate_data.py data/social/latest.json",
+    "validate:data": "node scripts/validate-data.mjs data/social/latest.json",
     "normalize:social": "python scripts/normalize_social.py",
     "fetch:social": "python scripts/fetch_social_sources.py"
   },
