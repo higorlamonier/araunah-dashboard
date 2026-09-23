@@ -11,8 +11,10 @@ node_modules
 dist
 # Raw connector exports may contain client/campaign data and must stay local
 data/raw
-dist-ssr
 *.local
+.env
+.env.*
+.env.local
 
 # Editor directories and files
 .vscode/*
