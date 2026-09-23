@@ -25,6 +25,32 @@
   status = 200
 
 [[redirects]]
+  from = "/google-api/*"
+  to = "/.netlify/functions/google-data"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/google"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/google/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/instagram"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/meta"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
   from = "/leads-api/*"
   to = "/.netlify/functions/n8n-leads"
   status = 200

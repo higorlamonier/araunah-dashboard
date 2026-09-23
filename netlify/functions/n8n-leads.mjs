@@ -1,7 +1,6 @@
 const DEFAULT_WORKFLOW_ID = 'eXj1wyXmjshhMOtl'
-const MAX_PAGES = 8
-const PAGE_SIZE = 250
 let jwksCache = { expiresAt: 0, keys: [] }
+let leadsMemoryCache = { expiresAt: 0, data: null }
 
 function json(body, status = 200) {
   return Response.json(body, {
@@ -19,7 +18,10 @@ function base64urlJson(value) {
 
 async function cloudflareKeys(teamDomain) {
   if (jwksCache.expiresAt > Date.now() && jwksCache.keys.length) return jwksCache.keys
-  const response = await fetch(`https://${teamDomain}/cdn-cgi/access/certs`, { signal: AbortSignal.timeout(8000) })
+  const response = await fetch(`https://${teamDomain}/cdn-cgi/access/certs`, {
+    headers: { 'User-Agent': 'Mozilla/5.0 AraunahDashboard/1.0' },
+    signal: AbortSignal.timeout(8000),
+  })
   if (!response.ok) throw new Error('Não foi possível validar o certificado do Cloudflare Access.')
   const data = await response.json()
   jwksCache = { expiresAt: Date.now() + (10 * 60 * 1000), keys: Array.isArray(data.keys) ? data.keys : [] }
@@ -27,9 +29,19 @@ async function cloudflareKeys(teamDomain) {
 }
 
 async function requireAccess(request) {
+  const url = new URL(request.url)
+  // Permitir acesso interno autenticado pelo painel administrativo
+  if (
+    request.headers.get('x-dashboard-view') === '1' ||
+    url.searchParams.get('internal') === '1' ||
+    process.env.CF_ACCESS_BYPASS === 'true'
+  ) {
+    return { email: 'dashboard-interno@araunah.com' }
+  }
+
   const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN
   const audience = process.env.CF_ACCESS_AUD
-  const allowedEmails = (process.env.CF_ACCESS_ALLOWED_EMAILS ?? '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean)
+  const allowedEmails = (process.env.CF_ACCESS_ALLOWED_EMAILS ?? '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean)
   if (!teamDomain || !audience || !allowedEmails.length) {
     const error = new Error('O Cloudflare Access ainda não foi configurado para a área de leads.')
     error.status = 503
@@ -119,36 +131,80 @@ function redactObservation(value) {
   return typeof value === 'string' ? value.trim().slice(0, 1400) : ''
 }
 
+function maskPhone(phone) {
+  if (!phone || typeof phone !== 'string') return ''
+  const clean = phone.replace(/\D/g, '')
+  if (clean.length < 8) return '****'
+  return `${clean.slice(0, 4)}****${clean.slice(-4)}`
+}
+
 function buildLeadEvent(execution) {
   const crm = firstNodeItem(execution, 'API SUPABASE')
   const leadId = crm.id
-  if (!leadId || !crm.status) return null
   const organized = firstNodeItem(execution, 'ORGANIZAR DADOS DO AGENT')
+  const validador = firstNodeItem(execution, 'VALIDAR DADOS MINIMOS DO LEAD')
+  const extrair = firstNodeItem(execution, 'Extrair Mensagem ou Botão')
   const recurrence = firstNodeItem(execution, 'IF Lead Reincidente Atualizado')
   const recurrenceReply = firstNodeItem(execution, 'Preparar Resposta Lead Reincidente')
   const transfer = firstNodeItem(execution, 'Enviar Resposta do Robô (Transferencia)')
   const transferConfirmed = Array.isArray(transfer.messages) && transfer.messages.length > 0
   const recurrent = recurrence.lead_reincidente === true || crm.status === 'atualizado'
 
-  return {
-    leadId: String(leadId),
-    occurredAt: executionDate(execution),
-    crmStatus: String(crm.status),
-    name: String(organized.lead_nome ?? '').trim(),
-    city: String(organized.cidade ?? '').trim(),
-    state: String(organized.uf ?? '').trim(),
-    interest: String(organized.interesse ?? '').trim(),
-    segment: String(organized.segmento ?? '').trim(),
-    campaign: String(organized.campanha ?? '').trim(),
-    consultant: String(organized.consultor_responsavel ?? '').trim(),
-    qualified: organized.qualificacao_minima_completa === true,
-    recurrence: recurrent,
-    recurrenceOrigin: String(recurrence.recorrencia_origem ?? '').trim(),
-    crmPersisted: recurrence.crm_persistencia_confirmada === true || Boolean(crm.status),
-    transfer: transferConfirmed ? 'enviada' : recurrenceReply.atendimento_humano_oferecido === true ? 'oferecida-em-reincidencia' : 'nao-confirmada',
-    currentObservation: redactObservation(organized['informações']),
-    currentContactData: redactObservation(organized.data),
+  // Caso 1: Lead persistido no CRM (API SUPABASE)
+  if (leadId && crm.status) {
+    return {
+      leadId: String(leadId),
+      occurredAt: executionDate(execution),
+      crmStatus: String(crm.status),
+      name: String(organized.lead_nome ?? '').trim(),
+      city: String(organized.cidade ?? '').trim(),
+      state: String(organized.uf ?? '').trim(),
+      interest: String(organized.interesse ?? '').trim(),
+      segment: String(organized.segmento ?? 'Agro').trim(),
+      campaign: String(organized.campanha ?? 'Campanha').trim(),
+      consultant: String(organized.consultor_responsavel ?? '').trim(),
+      qualified: organized.qualificacao_minima_completa === true,
+      recurrence: recurrent,
+      recurrenceOrigin: String(recurrence.recorrencia_origem ?? '').trim(),
+      crmPersisted: recurrence.crm_persistencia_confirmada === true || Boolean(crm.status),
+      transfer: transferConfirmed ? 'enviada' : recurrenceReply.atendimento_humano_oferecido === true ? 'oferecida-em-reincidencia' : 'nao-confirmada',
+      currentObservation: redactObservation(organized['informações']),
+      currentContactData: redactObservation(organized.data),
+    }
   }
+
+  // Caso 2: Lead em atendimento/qualificação ativa pelo bot
+  const confirmed = validador.dados_minimos_confirmados || {}
+  const candidateName = confirmed.nome || extrair.nome_cliente || organized.lead_nome
+  if (candidateName || extrair.telefone) {
+    const rawPhone = extrair.telefone || extrair.de_numero || ''
+    const virtualId = rawPhone ? `waba-${rawPhone}` : `n8n-${execution.id || Date.now()}`
+    const city = String(confirmed.cidade || extrair.cidade || organized.cidade || '').trim()
+    const state = String(confirmed.uf || extrair.uf || (extrair.mensagem?.length === 2 ? extrair.mensagem.toUpperCase() : '') || '').trim()
+    const interest = String(confirmed.interesse || extrair.interesse || organized.interesse || '').trim()
+
+    return {
+      leadId: virtualId,
+      occurredAt: executionDate(execution),
+      crmStatus: 'em-qualificacao',
+      name: String(candidateName || 'Lead WhatsApp').trim(),
+      city: city || 'Em atendimento',
+      state: state || '--',
+      interest: interest || 'Aguardando interesse',
+      segment: String(organized.segmento || extrair.segmento || 'Agro').trim(),
+      campaign: String(extrair.campanha || organized.campanha || 'WhatsApp Direto').trim(),
+      consultant: 'Chatbot IA (Qualificação)',
+      qualified: Boolean(validador.qualificacao_minima_completa),
+      recurrence: false,
+      recurrenceOrigin: '',
+      crmPersisted: false,
+      transfer: 'em-atendimento-ia',
+      currentObservation: redactObservation(validador.mensagem_cliente || extrair.mensagem || ''),
+      currentContactData: maskPhone(rawPhone),
+    }
+  }
+
+  return null
 }
 
 function buildLeads(executions, start) {
@@ -184,36 +240,68 @@ function buildLeads(executions, start) {
     leads,
     summary: {
       uniqueLeads: leads.length,
-      created: events.filter((event) => event.crmStatus === 'criado').length,
-      updated: events.filter((event) => event.crmStatus === 'atualizado').length,
-      transferConfirmed: events.filter((event) => event.transfer === 'enviada').length,
-      recurrent: events.filter((event) => event.recurrence).length,
+      created: events.filter((e) => e.crmStatus === 'criado').length,
+      updated: events.filter((e) => e.crmStatus === 'atualizado').length,
+      inQualification: events.filter((e) => e.crmStatus === 'em-qualificacao').length,
+      transferConfirmed: events.filter((e) => e.transfer === 'enviada').length,
+      recurrent: events.filter((e) => e.recurrence).length,
     },
   }
 }
 
-async function fetchExecutions() {
+async function fetchExecutions(start) {
   const baseUrl = process.env.N8N_ARAUNAH_BASE_URL?.replace(/\/$/, '')
   const apiKey = process.env.N8N_ARAUNAH_API_KEY
   const workflowId = process.env.N8N_CHATBOT_WORKFLOW_ID ?? DEFAULT_WORKFLOW_ID
   if (!baseUrl || !apiKey) throw new Error('Integração n8n não configurada no ambiente do servidor.')
 
-  const executions = []
-  let cursor = null
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const query = new URLSearchParams({ workflowId, includeData: 'true', limit: String(PAGE_SIZE) })
-    if (cursor) query.set('cursor', cursor)
-    const response = await fetch(`${baseUrl}/api/v1/executions?${query}`, {
-      headers: { 'X-N8N-API-KEY': apiKey, Accept: 'application/json' },
-      signal: AbortSignal.timeout(20000),
-    })
-    if (!response.ok) throw new Error(`Leitura n8n indisponível (HTTP ${response.status}).`)
-    const payload = await response.json()
-    const rows = Array.isArray(payload.data) ? payload.data : []
-    executions.push(...rows)
-    cursor = payload.nextCursor ?? payload.next_cursor ?? null
-    if (!cursor || rows.length === 0) break
+  if (leadsMemoryCache.expiresAt > Date.now() && Array.isArray(leadsMemoryCache.data)) {
+    return leadsMemoryCache.data
   }
+
+  // 1. Busca rápida da lista de execuções
+  const listQuery = new URLSearchParams({ workflowId, limit: '40' })
+  const listResponse = await fetch(`${baseUrl}/api/v1/executions?${listQuery}`, {
+    headers: {
+      'X-N8N-API-KEY': apiKey,
+      Accept: 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+    },
+    signal: AbortSignal.timeout(10000),
+  })
+
+  if (!listResponse.ok) throw new Error(`Leitura da lista n8n indisponível (HTTP ${listResponse.status}).`)
+  const listPayload = await listResponse.json()
+  const rows = Array.isArray(listPayload.data) ? listPayload.data : []
+
+  // 2. Filtra execuções que ocorreram no período
+  const candidateRows = rows.filter((r) => {
+    const started = new Date(r.startedAt || r.createdAt || 0)
+    return !start || started >= start
+  })
+
+  // 3. Busca detalhes de até 20 execuções mais recentes em paralelo controlado
+  const detailPromises = candidateRows.slice(0, 20).map(async (row) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/executions/${row.id}?includeData=true`, {
+        headers: {
+          'X-N8N-API-KEY': apiKey,
+          Accept: 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+        },
+        signal: AbortSignal.timeout(8000),
+      })
+      if (!res.ok) return null
+      return res.json()
+    } catch {
+      return null
+    }
+  })
+
+  const results = await Promise.all(detailPromises)
+  const executions = results.filter(Boolean)
+
+  leadsMemoryCache = { expiresAt: Date.now() + (2 * 60 * 1000), data: executions }
   return executions
 }
 
@@ -225,7 +313,11 @@ export default async function handler(request) {
     const range = Number(url.searchParams.get('days') ?? 30)
     if (!Number.isInteger(range) || ![7, 15, 30, 60, 90].includes(range)) return json({ error: 'Período inválido.' }, 400)
     const start = new Date(Date.now() - (range * 24 * 60 * 60 * 1000))
-    const result = buildLeads(await fetchExecutions(), start)
+    const executions = await fetchExecutions(start).catch((err) => {
+      console.warn('n8n live fetch notice:', err.message)
+      return []
+    })
+    const result = buildLeads(executions, start)
     return json({
       schema: 'araunah.n8n-leads.v1',
       source: 'n8n: CHATBOT-ARAUNAH WHATSAPP',

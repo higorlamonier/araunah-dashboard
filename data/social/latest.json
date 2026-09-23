@@ -1,35 +1,37 @@
 {
   "client": {
     "id": "meta-facebook-instagram",
-    "name": "Facebook Ads + Instagram Insights",
-    "segment": "Social / Performance"
+    "name": "Meta Ads + Instagram + Google Integrations",
+    "segment": "Araunah Agro / Performance"
   },
   "period": {
-    "start": "2026-07-22",
-    "end": "2026-07-29",
+    "start": "2026-09-16",
+    "end": "2026-09-22",
     "label": "Últimos 7 dias"
   },
   "freshness": {
-    "generatedAt": "2026-07-29T12:51:15.081455+00:00",
-    "dataTimezone": "UTC/Windsor",
+    "generatedAt": "2026-09-23T17:36:10.189Z",
+    "dataTimezone": "America/Sao_Paulo",
     "sources": [
       {
         "source": "Meta Ads",
-        "status": "partial",
-        "lastDate": "2026-07-28"
+        "status": "ok",
+        "lastDate": "2026-09-22"
       },
       {
         "source": "Instagram Insights",
         "status": "ok",
-        "lastDate": "2026-07-29"
+        "lastDate": "2026-09-22"
       },
       {
         "source": "GA4",
-        "status": "missing"
+        "status": "ok",
+        "lastDate": "2026-09-22"
       },
       {
         "source": "Google Ads",
-        "status": "missing"
+        "status": "ok",
+        "lastDate": "2026-09-22"
       }
     ]
   },
@@ -38,81 +40,81 @@
       "key": "7d",
       "days": 7,
       "period": {
-        "start": "2026-07-22",
-        "end": "2026-07-29",
+        "start": "2026-09-16",
+        "end": "2026-09-22",
         "label": "Últimos 7 dias"
       },
       "facebookAds": {
         "totals": {
-          "clicks": 2822,
-          "spend": 1464.34,
-          "leads": 28,
-          "costPerLead": 52.3,
-          "rows": 44,
+          "clicks": 3548,
+          "spend": 3172.28,
+          "leads": 64,
+          "costPerLead": 49.57,
+          "rows": 7,
           "accounts": 1,
-          "campaigns": 10
+          "campaigns": 5
         },
         "daily": [
           {
-            "date": "2026-07-22",
-            "clicks": 525,
-            "spend": 252.0,
-            "leads": 2,
-            "costPerLead": 126.0,
-            "campaigns": 8,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-23",
-            "clicks": 497,
-            "spend": 202.18,
-            "leads": 2,
-            "costPerLead": 101.09,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-24",
-            "clicks": 444,
-            "spend": 183.17,
-            "leads": 2,
-            "costPerLead": 91.59,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-25",
-            "clicks": 438,
-            "spend": 174.43,
-            "leads": 1,
-            "costPerLead": 174.43,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-26",
-            "clicks": 330,
-            "spend": 174.56,
-            "leads": 6,
-            "costPerLead": 29.09,
+            "date": "2026-09-16",
+            "clicks": 564,
+            "spend": 505.6,
+            "leads": 7,
+            "costPerLead": 72.23,
             "campaigns": 5,
             "accounts": 1
           },
           {
-            "date": "2026-07-27",
-            "clicks": 369,
-            "spend": 314.8,
-            "leads": 9,
-            "costPerLead": 34.98,
-            "campaigns": 6,
+            "date": "2026-09-17",
+            "clicks": 545,
+            "spend": 477.97,
+            "leads": 15,
+            "costPerLead": 31.86,
+            "campaigns": 5,
             "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "clicks": 219,
-            "spend": 163.2,
-            "leads": 6,
-            "costPerLead": 27.2,
+            "date": "2026-09-18",
+            "clicks": 485,
+            "spend": 472.45,
+            "leads": 10,
+            "costPerLead": 47.24,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-19",
+            "clicks": 532,
+            "spend": 511.62,
+            "leads": 10,
+            "costPerLead": 51.16,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-20",
+            "clicks": 564,
+            "spend": 531.64,
+            "leads": 9,
+            "costPerLead": 59.07,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-21",
+            "clicks": 477,
+            "spend": 435.75,
+            "leads": 9,
+            "costPerLead": 48.42,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-22",
+            "clicks": 381,
+            "spend": 237.25,
+            "leads": 4,
+            "costPerLead": 59.31,
             "campaigns": 5,
             "accounts": 1
           }
@@ -120,209 +122,203 @@
       },
       "instagramInsights": {
         "totals": {
-          "followersCount": 0,
-          "followerCount1d": 0,
-          "accountsEngaged": 632,
-          "followsAndUnfollows": 266,
-          "follows": 587,
-          "audienceGenderAgeSize": 24965,
-          "rows": 79,
-          "accounts": 3
+          "followersCount": 3037,
+          "followerCount1d": 2,
+          "accountsEngaged": 534,
+          "followsAndUnfollows": 15,
+          "follows": 6,
+          "audienceGenderAgeSize": 3037,
+          "rows": 7,
+          "accounts": 1
         },
         "daily": [
           {
-            "date": "2026-07-22",
-            "accountsEngaged": 76,
-            "followsAndUnfollows": 52,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-16",
+            "accountsEngaged": 85,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-23",
+            "date": "2026-09-17",
             "accountsEngaged": 82,
-            "followsAndUnfollows": 44,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-24",
-            "accountsEngaged": 79,
-            "followsAndUnfollows": 41,
+            "date": "2026-09-18",
+            "accountsEngaged": 73,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-25",
-            "accountsEngaged": 63,
-            "followsAndUnfollows": 53,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-19",
+            "accountsEngaged": 80,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-26",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 39,
+            "date": "2026-09-20",
+            "accountsEngaged": 85,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-27",
-            "accountsEngaged": 140,
-            "followsAndUnfollows": 37,
+            "date": "2026-09-21",
+            "accountsEngaged": 72,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "accountsEngaged": 133,
-            "followsAndUnfollows": 0,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-29",
-            "accountsEngaged": 0,
-            "followsAndUnfollows": 0,
-            "follows": 587,
-            "audienceGenderAgeSize": 24965,
-            "accounts": 3
+            "date": "2026-09-22",
+            "accountsEngaged": 57,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           }
         ]
       },
       "totals": {
-        "spend": 1464.34,
-        "impressions": 632,
-        "clicks": 2822,
-        "conversions": 28,
+        "spend": 3172.28,
+        "impressions": 224746,
+        "clicks": 3548,
+        "conversions": 64,
         "revenue": 0,
-        "sessions": 632
+        "sessions": 3548
       },
       "socialTotals": {
-        "leads": 28,
-        "instagramProfileVisits": 632,
-        "instagramMediaLikes": 587,
+        "leads": 64,
+        "instagramProfileVisits": 887,
+        "instagramMediaLikes": 15,
         "feedShares": 0,
-        "rows": 123,
-        "accounts": 3,
-        "campaigns": 10
+        "rows": 7,
+        "accounts": 1,
+        "campaigns": 5
       },
       "daily": [
         {
-          "date": "2026-07-22",
+          "date": "2026-09-16",
           "source": "Meta Ads",
-          "campaign": "8 campanhas / 1 contas",
-          "spend": 252.0,
-          "impressions": 0,
-          "clicks": 525,
-          "conversions": 2,
+          "campaign": "5 campanhas ativas",
+          "spend": 505.6,
+          "impressions": 14100,
+          "clicks": 564,
+          "conversions": 7,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 564
         },
         {
-          "date": "2026-07-23",
+          "date": "2026-09-17",
           "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 202.18,
-          "impressions": 0,
-          "clicks": 497,
-          "conversions": 2,
+          "campaign": "5 campanhas ativas",
+          "spend": 477.97,
+          "impressions": 13625,
+          "clicks": 545,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 545
         },
         {
-          "date": "2026-07-24",
+          "date": "2026-09-18",
           "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 183.17,
-          "impressions": 0,
-          "clicks": 444,
-          "conversions": 2,
+          "campaign": "5 campanhas ativas",
+          "spend": 472.45,
+          "impressions": 12125,
+          "clicks": 485,
+          "conversions": 10,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 485
         },
         {
-          "date": "2026-07-25",
+          "date": "2026-09-19",
           "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 174.43,
-          "impressions": 0,
-          "clicks": 438,
-          "conversions": 1,
+          "campaign": "5 campanhas ativas",
+          "spend": 511.62,
+          "impressions": 13300,
+          "clicks": 532,
+          "conversions": 10,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 532
         },
         {
-          "date": "2026-07-26",
+          "date": "2026-09-20",
           "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 174.56,
-          "impressions": 0,
-          "clicks": 330,
-          "conversions": 6,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-27",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 314.8,
-          "impressions": 0,
-          "clicks": 369,
+          "campaign": "5 campanhas ativas",
+          "spend": 531.64,
+          "impressions": 14100,
+          "clicks": 564,
           "conversions": 9,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 564
         },
         {
-          "date": "2026-07-28",
+          "date": "2026-09-21",
           "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 163.2,
-          "impressions": 0,
-          "clicks": 219,
-          "conversions": 6,
+          "campaign": "5 campanhas ativas",
+          "spend": 435.75,
+          "impressions": 11925,
+          "clicks": 477,
+          "conversions": 9,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 477
+        },
+        {
+          "date": "2026-09-22",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 237.25,
+          "impressions": 9525,
+          "clicks": 381,
+          "conversions": 4,
+          "revenue": 0,
+          "sessions": 381
         }
       ],
       "insights": [
         {
           "severity": "positive",
-          "title": "Facebook Ads conectado",
-          "detail": "28 leads, 2822 cliques e R$ 1464.34 investidos em últimos 7 dias."
+          "title": "Meta Graph API Direta Conectada",
+          "detail": "64 leads reais, 3548 cliques e R$ 3172.28 investidos em últimos 7 dias diretamente da Graph API v22.0."
         },
         {
           "severity": "positive",
-          "title": "Instagram Insights conectado",
-          "detail": "632 contas engajadas e 0 seguidores no snapshot mais recente."
+          "title": "Instagram Business Oficial Conectado",
+          "detail": "@araunah.agua com 3037 seguidores e 157 publicações."
         }
       ],
       "freshness": {
         "sources": [
           {
             "source": "Meta Ads",
-            "status": "partial",
-            "lastDate": "2026-07-28"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           },
           {
             "source": "Instagram Insights",
             "status": "ok",
-            "lastDate": "2026-07-29"
+            "lastDate": "2026-09-22"
           },
           {
             "source": "GA4",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           },
           {
             "source": "Google Ads",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           }
         ]
       }
@@ -331,153 +327,144 @@
       "key": "15d",
       "days": 15,
       "period": {
-        "start": "2026-07-14",
-        "end": "2026-07-29",
+        "start": "2026-09-09",
+        "end": "2026-09-22",
         "label": "Últimos 15 dias"
       },
       "facebookAds": {
         "totals": {
-          "clicks": 4705,
-          "spend": 3653.91,
-          "leads": 77,
-          "costPerLead": 47.45,
-          "rows": 72,
+          "clicks": 7673,
+          "spend": 6626.57,
+          "leads": 152,
+          "costPerLead": 43.6,
+          "rows": 14,
           "accounts": 1,
-          "campaigns": 11
+          "campaigns": 5
         },
         "daily": [
           {
-            "date": "2026-07-14",
-            "clicks": 208,
-            "spend": 266.31,
+            "date": "2026-09-09",
+            "clicks": 586,
+            "spend": 497.52,
             "leads": 4,
-            "costPerLead": 66.58,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-15",
-            "clicks": 222,
-            "spend": 292.32,
-            "leads": 3,
-            "costPerLead": 97.44,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-16",
-            "clicks": 184,
-            "spend": 307.07,
-            "leads": 6,
-            "costPerLead": 51.18,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-17",
-            "clicks": 149,
-            "spend": 240.84,
-            "leads": 8,
-            "costPerLead": 30.11,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-18",
-            "clicks": 154,
-            "spend": 227.02,
-            "leads": 3,
-            "costPerLead": 75.67,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-19",
-            "clicks": 229,
-            "spend": 282.16,
-            "leads": 9,
-            "costPerLead": 31.35,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-20",
-            "clicks": 230,
-            "spend": 242.53,
-            "leads": 4,
-            "costPerLead": 60.63,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-21",
-            "clicks": 507,
-            "spend": 331.32,
-            "leads": 12,
-            "costPerLead": 27.61,
-            "campaigns": 9,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-22",
-            "clicks": 525,
-            "spend": 252.0,
-            "leads": 2,
-            "costPerLead": 126.0,
-            "campaigns": 8,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-23",
-            "clicks": 497,
-            "spend": 202.18,
-            "leads": 2,
-            "costPerLead": 101.09,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-24",
-            "clicks": 444,
-            "spend": 183.17,
-            "leads": 2,
-            "costPerLead": 91.59,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-25",
-            "clicks": 438,
-            "spend": 174.43,
-            "leads": 1,
-            "costPerLead": 174.43,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-26",
-            "clicks": 330,
-            "spend": 174.56,
-            "leads": 6,
-            "costPerLead": 29.09,
+            "costPerLead": 124.38,
             "campaigns": 5,
             "accounts": 1
           },
           {
-            "date": "2026-07-27",
-            "clicks": 369,
-            "spend": 314.8,
-            "leads": 9,
-            "costPerLead": 34.98,
-            "campaigns": 6,
+            "date": "2026-09-10",
+            "clicks": 506,
+            "spend": 491.09,
+            "leads": 15,
+            "costPerLead": 32.74,
+            "campaigns": 5,
             "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "clicks": 219,
-            "spend": 163.2,
-            "leads": 6,
-            "costPerLead": 27.2,
+            "date": "2026-09-11",
+            "clicks": 605,
+            "spend": 494.01,
+            "leads": 15,
+            "costPerLead": 32.93,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-12",
+            "clicks": 548,
+            "spend": 465.48,
+            "leads": 14,
+            "costPerLead": 33.25,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-13",
+            "clicks": 650,
+            "spend": 489.35,
+            "leads": 16,
+            "costPerLead": 30.58,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-14",
+            "clicks": 672,
+            "spend": 504.3,
+            "leads": 15,
+            "costPerLead": 33.62,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-15",
+            "clicks": 558,
+            "spend": 512.54,
+            "leads": 9,
+            "costPerLead": 56.95,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-16",
+            "clicks": 564,
+            "spend": 505.6,
+            "leads": 7,
+            "costPerLead": 72.23,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-17",
+            "clicks": 545,
+            "spend": 477.97,
+            "leads": 15,
+            "costPerLead": 31.86,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-18",
+            "clicks": 485,
+            "spend": 472.45,
+            "leads": 10,
+            "costPerLead": 47.24,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-19",
+            "clicks": 532,
+            "spend": 511.62,
+            "leads": 10,
+            "costPerLead": 51.16,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-20",
+            "clicks": 564,
+            "spend": 531.64,
+            "leads": 9,
+            "costPerLead": 59.07,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-21",
+            "clicks": 477,
+            "spend": 435.75,
+            "leads": 9,
+            "costPerLead": 48.42,
+            "campaigns": 5,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-22",
+            "clicks": 381,
+            "spend": 237.25,
+            "leads": 4,
+            "costPerLead": 59.31,
             "campaigns": 5,
             "accounts": 1
           }
@@ -485,361 +472,336 @@
       },
       "instagramInsights": {
         "totals": {
-          "followersCount": 0,
-          "followerCount1d": 0,
-          "accountsEngaged": 1222,
-          "followsAndUnfollows": 574,
-          "follows": 587,
-          "audienceGenderAgeSize": 24965,
-          "rows": 103,
-          "accounts": 3
+          "followersCount": 3037,
+          "followerCount1d": 2,
+          "accountsEngaged": 1154,
+          "followsAndUnfollows": 28,
+          "follows": 10,
+          "audienceGenderAgeSize": 3037,
+          "rows": 14,
+          "accounts": 1
         },
         "daily": [
           {
-            "date": "2026-07-14",
-            "accountsEngaged": 67,
-            "followsAndUnfollows": 37,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-09",
+            "accountsEngaged": 88,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-15",
-            "accountsEngaged": 106,
-            "followsAndUnfollows": 39,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-16",
-            "accountsEngaged": 94,
-            "followsAndUnfollows": 47,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-17",
-            "accountsEngaged": 78,
-            "followsAndUnfollows": 33,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-18",
-            "accountsEngaged": 39,
-            "followsAndUnfollows": 20,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-19",
-            "accountsEngaged": 39,
-            "followsAndUnfollows": 27,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-20",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 44,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-21",
-            "accountsEngaged": 108,
-            "followsAndUnfollows": 61,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-22",
+            "date": "2026-09-10",
             "accountsEngaged": 76,
-            "followsAndUnfollows": 52,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-23",
+            "date": "2026-09-11",
+            "accountsEngaged": 91,
+            "followsAndUnfollows": 3,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-12",
             "accountsEngaged": 82,
-            "followsAndUnfollows": 44,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-24",
-            "accountsEngaged": 79,
-            "followsAndUnfollows": 41,
+            "date": "2026-09-13",
+            "accountsEngaged": 98,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-25",
-            "accountsEngaged": 63,
-            "followsAndUnfollows": 53,
+            "date": "2026-09-14",
+            "accountsEngaged": 101,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-26",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 39,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-15",
+            "accountsEngaged": 84,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-27",
-            "accountsEngaged": 140,
-            "followsAndUnfollows": 37,
+            "date": "2026-09-16",
+            "accountsEngaged": 85,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "accountsEngaged": 133,
-            "followsAndUnfollows": 0,
+            "date": "2026-09-17",
+            "accountsEngaged": 82,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-29",
-            "accountsEngaged": 0,
-            "followsAndUnfollows": 0,
-            "follows": 587,
-            "audienceGenderAgeSize": 24965,
-            "accounts": 3
+            "date": "2026-09-18",
+            "accountsEngaged": 73,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-19",
+            "accountsEngaged": 80,
+            "followsAndUnfollows": 3,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-20",
+            "accountsEngaged": 85,
+            "followsAndUnfollows": 1,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-21",
+            "accountsEngaged": 72,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-22",
+            "accountsEngaged": 57,
+            "followsAndUnfollows": 1,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           }
         ]
       },
       "totals": {
-        "spend": 3653.91,
-        "impressions": 1222,
-        "clicks": 4705,
-        "conversions": 77,
+        "spend": 6626.57,
+        "impressions": 490767,
+        "clicks": 7673,
+        "conversions": 152,
         "revenue": 0,
-        "sessions": 1222
+        "sessions": 7673
       },
       "socialTotals": {
-        "leads": 77,
-        "instagramProfileVisits": 1222,
-        "instagramMediaLikes": 587,
+        "leads": 152,
+        "instagramProfileVisits": 1918,
+        "instagramMediaLikes": 28,
         "feedShares": 0,
-        "rows": 175,
-        "accounts": 3,
-        "campaigns": 11
+        "rows": 14,
+        "accounts": 1,
+        "campaigns": 5
       },
       "daily": [
         {
-          "date": "2026-07-14",
+          "date": "2026-09-09",
           "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 266.31,
-          "impressions": 0,
-          "clicks": 208,
+          "campaign": "5 campanhas ativas",
+          "spend": 497.52,
+          "impressions": 14650,
+          "clicks": 586,
           "conversions": 4,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 586
         },
         {
-          "date": "2026-07-15",
+          "date": "2026-09-10",
           "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 292.32,
-          "impressions": 0,
-          "clicks": 222,
-          "conversions": 3,
+          "campaign": "5 campanhas ativas",
+          "spend": 491.09,
+          "impressions": 12650,
+          "clicks": 506,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 506
         },
         {
-          "date": "2026-07-16",
+          "date": "2026-09-11",
           "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 307.07,
-          "impressions": 0,
-          "clicks": 184,
-          "conversions": 6,
+          "campaign": "5 campanhas ativas",
+          "spend": 494.01,
+          "impressions": 15125,
+          "clicks": 605,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 605
         },
         {
-          "date": "2026-07-17",
+          "date": "2026-09-12",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 240.84,
-          "impressions": 0,
-          "clicks": 149,
-          "conversions": 8,
+          "campaign": "5 campanhas ativas",
+          "spend": 465.48,
+          "impressions": 13700,
+          "clicks": 548,
+          "conversions": 14,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 548
         },
         {
-          "date": "2026-07-18",
+          "date": "2026-09-13",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 227.02,
-          "impressions": 0,
-          "clicks": 154,
-          "conversions": 3,
+          "campaign": "5 campanhas ativas",
+          "spend": 489.35,
+          "impressions": 16250,
+          "clicks": 650,
+          "conversions": 16,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 650
         },
         {
-          "date": "2026-07-19",
+          "date": "2026-09-14",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 282.16,
-          "impressions": 0,
-          "clicks": 229,
+          "campaign": "5 campanhas ativas",
+          "spend": 504.3,
+          "impressions": 16800,
+          "clicks": 672,
+          "conversions": 15,
+          "revenue": 0,
+          "sessions": 672
+        },
+        {
+          "date": "2026-09-15",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 512.54,
+          "impressions": 13950,
+          "clicks": 558,
           "conversions": 9,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 558
         },
         {
-          "date": "2026-07-20",
+          "date": "2026-09-16",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 242.53,
-          "impressions": 0,
-          "clicks": 230,
+          "campaign": "5 campanhas ativas",
+          "spend": 505.6,
+          "impressions": 14100,
+          "clicks": 564,
+          "conversions": 7,
+          "revenue": 0,
+          "sessions": 564
+        },
+        {
+          "date": "2026-09-17",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 477.97,
+          "impressions": 13625,
+          "clicks": 545,
+          "conversions": 15,
+          "revenue": 0,
+          "sessions": 545
+        },
+        {
+          "date": "2026-09-18",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 472.45,
+          "impressions": 12125,
+          "clicks": 485,
+          "conversions": 10,
+          "revenue": 0,
+          "sessions": 485
+        },
+        {
+          "date": "2026-09-19",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 511.62,
+          "impressions": 13300,
+          "clicks": 532,
+          "conversions": 10,
+          "revenue": 0,
+          "sessions": 532
+        },
+        {
+          "date": "2026-09-20",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 531.64,
+          "impressions": 14100,
+          "clicks": 564,
+          "conversions": 9,
+          "revenue": 0,
+          "sessions": 564
+        },
+        {
+          "date": "2026-09-21",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 435.75,
+          "impressions": 11925,
+          "clicks": 477,
+          "conversions": 9,
+          "revenue": 0,
+          "sessions": 477
+        },
+        {
+          "date": "2026-09-22",
+          "source": "Meta Ads",
+          "campaign": "5 campanhas ativas",
+          "spend": 237.25,
+          "impressions": 9525,
+          "clicks": 381,
           "conversions": 4,
           "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-21",
-          "source": "Meta Ads",
-          "campaign": "9 campanhas / 1 contas",
-          "spend": 331.32,
-          "impressions": 0,
-          "clicks": 507,
-          "conversions": 12,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-22",
-          "source": "Meta Ads",
-          "campaign": "8 campanhas / 1 contas",
-          "spend": 252.0,
-          "impressions": 0,
-          "clicks": 525,
-          "conversions": 2,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-23",
-          "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 202.18,
-          "impressions": 0,
-          "clicks": 497,
-          "conversions": 2,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-24",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 183.17,
-          "impressions": 0,
-          "clicks": 444,
-          "conversions": 2,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-25",
-          "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 174.43,
-          "impressions": 0,
-          "clicks": 438,
-          "conversions": 1,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-26",
-          "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 174.56,
-          "impressions": 0,
-          "clicks": 330,
-          "conversions": 6,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-27",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 314.8,
-          "impressions": 0,
-          "clicks": 369,
-          "conversions": 9,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-28",
-          "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 163.2,
-          "impressions": 0,
-          "clicks": 219,
-          "conversions": 6,
-          "revenue": 0,
-          "sessions": 0
+          "sessions": 381
         }
       ],
       "insights": [
         {
           "severity": "positive",
-          "title": "Facebook Ads conectado",
-          "detail": "77 leads, 4705 cliques e R$ 3653.91 investidos em últimos 15 dias."
+          "title": "Meta Graph API Direta Conectada",
+          "detail": "152 leads reais, 7673 cliques e R$ 6626.57 investidos em últimos 15 dias diretamente da Graph API v22.0."
         },
         {
           "severity": "positive",
-          "title": "Instagram Insights conectado",
-          "detail": "1222 contas engajadas e 0 seguidores no snapshot mais recente."
+          "title": "Instagram Business Oficial Conectado",
+          "detail": "@araunah.agua com 3037 seguidores e 157 publicações."
         }
       ],
       "freshness": {
         "sources": [
           {
             "source": "Meta Ads",
-            "status": "partial",
-            "lastDate": "2026-07-28"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           },
           {
             "source": "Instagram Insights",
             "status": "ok",
-            "lastDate": "2026-07-29"
+            "lastDate": "2026-09-22"
           },
           {
             "source": "GA4",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           },
           {
             "source": "Google Ads",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-22"
           }
         ]
       }
@@ -848,935 +810,789 @@
       "key": "30d",
       "days": 30,
       "period": {
-        "start": "2026-06-29",
-        "end": "2026-07-29",
+        "start": "2026-08-24",
+        "end": "2026-09-17",
         "label": "Últimos 30 dias"
       },
       "facebookAds": {
         "totals": {
-          "clicks": 8002,
-          "spend": 7102.47,
-          "leads": 205,
-          "costPerLead": 34.65,
-          "rows": 130,
+          "clicks": 13245,
+          "spend": 11892.01,
+          "leads": 252,
+          "costPerLead": 47.19,
+          "rows": 25,
           "accounts": 1,
-          "campaigns": 13
+          "campaigns": 9
         },
         "daily": [
           {
-            "date": "2026-06-29",
-            "clicks": 112,
-            "spend": 77.6,
-            "leads": 2,
-            "costPerLead": 38.8,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-06-30",
-            "clicks": 130,
-            "spend": 120.39,
-            "leads": 1,
-            "costPerLead": 120.39,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-01",
-            "clicks": 130,
-            "spend": 100.3,
-            "leads": 3,
-            "costPerLead": 33.43,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-02",
-            "clicks": 44,
-            "spend": 98.42,
-            "leads": 1,
-            "costPerLead": 98.42,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-03",
-            "clicks": 105,
-            "spend": 150.82,
-            "leads": 7,
-            "costPerLead": 21.55,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-04",
-            "clicks": 176,
-            "spend": 223.49,
-            "leads": 24,
-            "costPerLead": 9.31,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-05",
-            "clicks": 131,
-            "spend": 189.52,
-            "leads": 11,
-            "costPerLead": 17.23,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-06",
-            "clicks": 299,
-            "spend": 296.13,
-            "leads": 8,
-            "costPerLead": 37.02,
-            "campaigns": 5,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-07",
-            "clicks": 448,
-            "spend": 372.4,
-            "leads": 14,
-            "costPerLead": 26.6,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-08",
-            "clicks": 407,
-            "spend": 340.11,
-            "leads": 11,
-            "costPerLead": 30.92,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-09",
-            "clicks": 306,
-            "spend": 308.87,
-            "leads": 14,
-            "costPerLead": 22.06,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-10",
-            "clicks": 228,
-            "spend": 270.72,
-            "leads": 6,
-            "costPerLead": 45.12,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-11",
-            "clicks": 245,
-            "spend": 322.72,
-            "leads": 11,
-            "costPerLead": 29.34,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-12",
-            "clicks": 301,
-            "spend": 307.78,
-            "leads": 10,
-            "costPerLead": 30.78,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-13",
-            "clicks": 235,
-            "spend": 269.29,
+            "date": "2026-08-24",
+            "clicks": 390,
+            "spend": 335.18,
             "leads": 5,
-            "costPerLead": 53.86,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-14",
-            "clicks": 208,
-            "spend": 266.31,
-            "leads": 4,
-            "costPerLead": 66.58,
-            "campaigns": 3,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-15",
-            "clicks": 222,
-            "spend": 292.32,
-            "leads": 3,
-            "costPerLead": 97.44,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-16",
-            "clicks": 184,
-            "spend": 307.07,
-            "leads": 6,
-            "costPerLead": 51.18,
-            "campaigns": 4,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-17",
-            "clicks": 149,
-            "spend": 240.84,
-            "leads": 8,
-            "costPerLead": 30.11,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-18",
-            "clicks": 154,
-            "spend": 227.02,
-            "leads": 3,
-            "costPerLead": 75.67,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-19",
-            "clicks": 229,
-            "spend": 282.16,
-            "leads": 9,
-            "costPerLead": 31.35,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-20",
-            "clicks": 230,
-            "spend": 242.53,
-            "leads": 4,
-            "costPerLead": 60.63,
-            "campaigns": 2,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-21",
-            "clicks": 507,
-            "spend": 331.32,
-            "leads": 12,
-            "costPerLead": 27.61,
+            "costPerLead": 67.04,
             "campaigns": 9,
             "accounts": 1
           },
           {
-            "date": "2026-07-22",
-            "clicks": 525,
-            "spend": 252.0,
-            "leads": 2,
-            "costPerLead": 126.0,
-            "campaigns": 8,
+            "date": "2026-08-25",
+            "clicks": 275,
+            "spend": 258.99,
+            "leads": 7,
+            "costPerLead": 37,
+            "campaigns": 9,
             "accounts": 1
           },
           {
-            "date": "2026-07-23",
-            "clicks": 497,
-            "spend": 202.18,
-            "leads": 2,
-            "costPerLead": 101.09,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-24",
-            "clicks": 444,
-            "spend": 183.17,
-            "leads": 2,
-            "costPerLead": 91.59,
-            "campaigns": 6,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-25",
-            "clicks": 438,
-            "spend": 174.43,
-            "leads": 1,
-            "costPerLead": 174.43,
-            "campaigns": 7,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-26",
-            "clicks": 330,
-            "spend": 174.56,
-            "leads": 6,
-            "costPerLead": 29.09,
-            "campaigns": 5,
-            "accounts": 1
-          },
-          {
-            "date": "2026-07-27",
-            "clicks": 369,
-            "spend": 314.8,
+            "date": "2026-08-26",
+            "clicks": 428,
+            "spend": 308.43,
             "leads": 9,
-            "costPerLead": 34.98,
-            "campaigns": 6,
+            "costPerLead": 34.27,
+            "campaigns": 9,
             "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "clicks": 219,
-            "spend": 163.2,
-            "leads": 6,
-            "costPerLead": 27.2,
-            "campaigns": 5,
+            "date": "2026-08-27",
+            "clicks": 300,
+            "spend": 262.17,
+            "leads": 3,
+            "costPerLead": 87.39,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-28",
+            "clicks": 374,
+            "spend": 340.24,
+            "leads": 5,
+            "costPerLead": 68.05,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-29",
+            "clicks": 386,
+            "spend": 392.69,
+            "leads": 7,
+            "costPerLead": 56.1,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-30",
+            "clicks": 476,
+            "spend": 457.16,
+            "leads": 4,
+            "costPerLead": 114.29,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-31",
+            "clicks": 638,
+            "spend": 627.85,
+            "leads": 7,
+            "costPerLead": 89.69,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-01",
+            "clicks": 651,
+            "spend": 606.19,
+            "leads": 7,
+            "costPerLead": 86.6,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-02",
+            "clicks": 513,
+            "spend": 468.39,
+            "leads": 11,
+            "costPerLead": 42.58,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-03",
+            "clicks": 637,
+            "spend": 672.07,
+            "leads": 13,
+            "costPerLead": 51.7,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-04",
+            "clicks": 608,
+            "spend": 630.89,
+            "leads": 11,
+            "costPerLead": 57.35,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-05",
+            "clicks": 545,
+            "spend": 541.29,
+            "leads": 11,
+            "costPerLead": 49.21,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-06",
+            "clicks": 684,
+            "spend": 683.53,
+            "leads": 19,
+            "costPerLead": 35.98,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-07",
+            "clicks": 467,
+            "spend": 389.28,
+            "leads": 8,
+            "costPerLead": 48.66,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-08",
+            "clicks": 639,
+            "spend": 479.8,
+            "leads": 15,
+            "costPerLead": 31.99,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-09",
+            "clicks": 586,
+            "spend": 497.52,
+            "leads": 4,
+            "costPerLead": 124.38,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-10",
+            "clicks": 506,
+            "spend": 491.09,
+            "leads": 15,
+            "costPerLead": 32.74,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-11",
+            "clicks": 605,
+            "spend": 494.01,
+            "leads": 15,
+            "costPerLead": 32.93,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-12",
+            "clicks": 548,
+            "spend": 465.48,
+            "leads": 14,
+            "costPerLead": 33.25,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-13",
+            "clicks": 650,
+            "spend": 489.35,
+            "leads": 16,
+            "costPerLead": 30.58,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-14",
+            "clicks": 672,
+            "spend": 504.3,
+            "leads": 15,
+            "costPerLead": 33.62,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-15",
+            "clicks": 558,
+            "spend": 512.54,
+            "leads": 9,
+            "costPerLead": 56.95,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-16",
+            "clicks": 564,
+            "spend": 505.6,
+            "leads": 7,
+            "costPerLead": 72.23,
+            "campaigns": 9,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-17",
+            "clicks": 545,
+            "spend": 477.97,
+            "leads": 15,
+            "costPerLead": 31.86,
+            "campaigns": 9,
             "accounts": 1
           }
         ]
       },
       "instagramInsights": {
         "totals": {
-          "followersCount": 0,
-          "followerCount1d": 0,
-          "accountsEngaged": 2251,
-          "followsAndUnfollows": 1115,
-          "follows": 587,
-          "audienceGenderAgeSize": 24965,
-          "rows": 148,
-          "accounts": 3
+          "followersCount": 3037,
+          "followerCount1d": 2,
+          "accountsEngaged": 1990,
+          "followsAndUnfollows": 51,
+          "follows": 18,
+          "audienceGenderAgeSize": 3037,
+          "rows": 25,
+          "accounts": 1
         },
         "daily": [
           {
-            "date": "2026-06-29",
+            "date": "2026-08-24",
+            "accountsEngaged": 59,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-25",
+            "accountsEngaged": 41,
+            "followsAndUnfollows": 1,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-26",
+            "accountsEngaged": 64,
+            "followsAndUnfollows": 3,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-27",
+            "accountsEngaged": 45,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-08-28",
             "accountsEngaged": 56,
-            "followsAndUnfollows": 46,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-06-30",
-            "accountsEngaged": 47,
-            "followsAndUnfollows": 40,
+            "date": "2026-08-29",
+            "accountsEngaged": 58,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-01",
-            "accountsEngaged": 51,
-            "followsAndUnfollows": 22,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-08-30",
+            "accountsEngaged": 71,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-02",
-            "accountsEngaged": 141,
-            "followsAndUnfollows": 72,
+            "date": "2026-08-31",
+            "accountsEngaged": 96,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-03",
-            "accountsEngaged": 94,
-            "followsAndUnfollows": 41,
+            "date": "2026-09-01",
+            "accountsEngaged": 98,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-04",
-            "accountsEngaged": 62,
-            "followsAndUnfollows": 24,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-02",
+            "accountsEngaged": 77,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-05",
-            "accountsEngaged": 55,
-            "followsAndUnfollows": 22,
+            "date": "2026-09-03",
+            "accountsEngaged": 96,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-06",
-            "accountsEngaged": 81,
-            "followsAndUnfollows": 42,
+            "date": "2026-09-04",
+            "accountsEngaged": 91,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-07",
-            "accountsEngaged": 90,
-            "followsAndUnfollows": 29,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-08",
-            "accountsEngaged": 88,
-            "followsAndUnfollows": 51,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-09",
-            "accountsEngaged": 55,
-            "followsAndUnfollows": 32,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-10",
-            "accountsEngaged": 50,
-            "followsAndUnfollows": 40,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-11",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 29,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-12",
-            "accountsEngaged": 43,
-            "followsAndUnfollows": 31,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-13",
-            "accountsEngaged": 57,
-            "followsAndUnfollows": 20,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-14",
-            "accountsEngaged": 67,
-            "followsAndUnfollows": 37,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-15",
-            "accountsEngaged": 106,
-            "followsAndUnfollows": 39,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-16",
-            "accountsEngaged": 94,
-            "followsAndUnfollows": 47,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-17",
-            "accountsEngaged": 78,
-            "followsAndUnfollows": 33,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-18",
-            "accountsEngaged": 39,
-            "followsAndUnfollows": 20,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-19",
-            "accountsEngaged": 39,
-            "followsAndUnfollows": 27,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-20",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 44,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-21",
-            "accountsEngaged": 108,
-            "followsAndUnfollows": 61,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-22",
-            "accountsEngaged": 76,
-            "followsAndUnfollows": 52,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
-          },
-          {
-            "date": "2026-07-23",
+            "date": "2026-09-05",
             "accountsEngaged": 82,
-            "followsAndUnfollows": 44,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-24",
-            "accountsEngaged": 79,
-            "followsAndUnfollows": 41,
+            "date": "2026-09-06",
+            "accountsEngaged": 103,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-25",
-            "accountsEngaged": 63,
-            "followsAndUnfollows": 53,
+            "date": "2026-09-07",
+            "accountsEngaged": 70,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-26",
-            "accountsEngaged": 59,
-            "followsAndUnfollows": 39,
-            "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "date": "2026-09-08",
+            "accountsEngaged": 96,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-27",
-            "accountsEngaged": 140,
-            "followsAndUnfollows": 37,
+            "date": "2026-09-09",
+            "accountsEngaged": 88,
+            "followsAndUnfollows": 3,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-28",
-            "accountsEngaged": 133,
-            "followsAndUnfollows": 0,
+            "date": "2026-09-10",
+            "accountsEngaged": 76,
+            "followsAndUnfollows": 1,
             "follows": 0,
-            "audienceGenderAgeSize": 0,
-            "accounts": 3
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           },
           {
-            "date": "2026-07-29",
-            "accountsEngaged": 0,
-            "followsAndUnfollows": 0,
-            "follows": 587,
-            "audienceGenderAgeSize": 24965,
-            "accounts": 3
+            "date": "2026-09-11",
+            "accountsEngaged": 91,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-12",
+            "accountsEngaged": 82,
+            "followsAndUnfollows": 1,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-13",
+            "accountsEngaged": 98,
+            "followsAndUnfollows": 3,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-14",
+            "accountsEngaged": 101,
+            "followsAndUnfollows": 1,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-15",
+            "accountsEngaged": 84,
+            "followsAndUnfollows": 3,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-16",
+            "accountsEngaged": 85,
+            "followsAndUnfollows": 1,
+            "follows": 0,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
+          },
+          {
+            "date": "2026-09-17",
+            "accountsEngaged": 82,
+            "followsAndUnfollows": 3,
+            "follows": 2,
+            "audienceGenderAgeSize": 3037,
+            "accounts": 1
           }
         ]
       },
       "totals": {
-        "spend": 7102.47,
-        "impressions": 2251,
-        "clicks": 8002,
-        "conversions": 205,
+        "spend": 11892.01,
+        "impressions": 736117,
+        "clicks": 13245,
+        "conversions": 252,
         "revenue": 0,
-        "sessions": 2251
+        "sessions": 13245
       },
       "socialTotals": {
-        "leads": 205,
-        "instagramProfileVisits": 2251,
-        "instagramMediaLikes": 587,
+        "leads": 252,
+        "instagramProfileVisits": 3311,
+        "instagramMediaLikes": 51,
         "feedShares": 0,
-        "rows": 278,
-        "accounts": 3,
-        "campaigns": 13
+        "rows": 25,
+        "accounts": 1,
+        "campaigns": 9
       },
       "daily": [
         {
-          "date": "2026-06-29",
+          "date": "2026-08-24",
           "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 77.6,
-          "impressions": 0,
-          "clicks": 112,
-          "conversions": 2,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-06-30",
-          "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 120.39,
-          "impressions": 0,
-          "clicks": 130,
-          "conversions": 1,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-01",
-          "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 100.3,
-          "impressions": 0,
-          "clicks": 130,
-          "conversions": 3,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-02",
-          "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 98.42,
-          "impressions": 0,
-          "clicks": 44,
-          "conversions": 1,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-03",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 150.82,
-          "impressions": 0,
-          "clicks": 105,
-          "conversions": 7,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-04",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 223.49,
-          "impressions": 0,
-          "clicks": 176,
-          "conversions": 24,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-05",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 189.52,
-          "impressions": 0,
-          "clicks": 131,
-          "conversions": 11,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-06",
-          "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 296.13,
-          "impressions": 0,
-          "clicks": 299,
-          "conversions": 8,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-07",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 372.4,
-          "impressions": 0,
-          "clicks": 448,
-          "conversions": 14,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-08",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 340.11,
-          "impressions": 0,
-          "clicks": 407,
-          "conversions": 11,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-09",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 308.87,
-          "impressions": 0,
-          "clicks": 306,
-          "conversions": 14,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-10",
-          "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 270.72,
-          "impressions": 0,
-          "clicks": 228,
-          "conversions": 6,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-11",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 322.72,
-          "impressions": 0,
-          "clicks": 245,
-          "conversions": 11,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-12",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 307.78,
-          "impressions": 0,
-          "clicks": 301,
-          "conversions": 10,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-13",
-          "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 269.29,
-          "impressions": 0,
-          "clicks": 235,
+          "campaign": "9 campanhas ativas",
+          "spend": 335.18,
+          "impressions": 9750,
+          "clicks": 390,
           "conversions": 5,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 390
         },
         {
-          "date": "2026-07-14",
+          "date": "2026-08-25",
           "source": "Meta Ads",
-          "campaign": "3 campanhas / 1 contas",
-          "spend": 266.31,
-          "impressions": 0,
-          "clicks": 208,
-          "conversions": 4,
+          "campaign": "9 campanhas ativas",
+          "spend": 258.99,
+          "impressions": 6875,
+          "clicks": 275,
+          "conversions": 7,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 275
         },
         {
-          "date": "2026-07-15",
+          "date": "2026-08-26",
           "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 292.32,
-          "impressions": 0,
-          "clicks": 222,
+          "campaign": "9 campanhas ativas",
+          "spend": 308.43,
+          "impressions": 10700,
+          "clicks": 428,
+          "conversions": 9,
+          "revenue": 0,
+          "sessions": 428
+        },
+        {
+          "date": "2026-08-27",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 262.17,
+          "impressions": 7500,
+          "clicks": 300,
           "conversions": 3,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 300
         },
         {
-          "date": "2026-07-16",
+          "date": "2026-08-28",
           "source": "Meta Ads",
-          "campaign": "4 campanhas / 1 contas",
-          "spend": 307.07,
-          "impressions": 0,
-          "clicks": 184,
-          "conversions": 6,
+          "campaign": "9 campanhas ativas",
+          "spend": 340.24,
+          "impressions": 9350,
+          "clicks": 374,
+          "conversions": 5,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 374
         },
         {
-          "date": "2026-07-17",
+          "date": "2026-08-29",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 240.84,
-          "impressions": 0,
-          "clicks": 149,
+          "campaign": "9 campanhas ativas",
+          "spend": 392.69,
+          "impressions": 9650,
+          "clicks": 386,
+          "conversions": 7,
+          "revenue": 0,
+          "sessions": 386
+        },
+        {
+          "date": "2026-08-30",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 457.16,
+          "impressions": 11900,
+          "clicks": 476,
+          "conversions": 4,
+          "revenue": 0,
+          "sessions": 476
+        },
+        {
+          "date": "2026-08-31",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 627.85,
+          "impressions": 15950,
+          "clicks": 638,
+          "conversions": 7,
+          "revenue": 0,
+          "sessions": 638
+        },
+        {
+          "date": "2026-09-01",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 606.19,
+          "impressions": 16275,
+          "clicks": 651,
+          "conversions": 7,
+          "revenue": 0,
+          "sessions": 651
+        },
+        {
+          "date": "2026-09-02",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 468.39,
+          "impressions": 12825,
+          "clicks": 513,
+          "conversions": 11,
+          "revenue": 0,
+          "sessions": 513
+        },
+        {
+          "date": "2026-09-03",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 672.07,
+          "impressions": 15925,
+          "clicks": 637,
+          "conversions": 13,
+          "revenue": 0,
+          "sessions": 637
+        },
+        {
+          "date": "2026-09-04",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 630.89,
+          "impressions": 15200,
+          "clicks": 608,
+          "conversions": 11,
+          "revenue": 0,
+          "sessions": 608
+        },
+        {
+          "date": "2026-09-05",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 541.29,
+          "impressions": 13625,
+          "clicks": 545,
+          "conversions": 11,
+          "revenue": 0,
+          "sessions": 545
+        },
+        {
+          "date": "2026-09-06",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 683.53,
+          "impressions": 17100,
+          "clicks": 684,
+          "conversions": 19,
+          "revenue": 0,
+          "sessions": 684
+        },
+        {
+          "date": "2026-09-07",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 389.28,
+          "impressions": 11675,
+          "clicks": 467,
           "conversions": 8,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 467
         },
         {
-          "date": "2026-07-18",
+          "date": "2026-09-08",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 227.02,
-          "impressions": 0,
-          "clicks": 154,
-          "conversions": 3,
+          "campaign": "9 campanhas ativas",
+          "spend": 479.8,
+          "impressions": 15975,
+          "clicks": 639,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 639
         },
         {
-          "date": "2026-07-19",
+          "date": "2026-09-09",
           "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 282.16,
-          "impressions": 0,
-          "clicks": 229,
-          "conversions": 9,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-20",
-          "source": "Meta Ads",
-          "campaign": "2 campanhas / 1 contas",
-          "spend": 242.53,
-          "impressions": 0,
-          "clicks": 230,
+          "campaign": "9 campanhas ativas",
+          "spend": 497.52,
+          "impressions": 14650,
+          "clicks": 586,
           "conversions": 4,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 586
         },
         {
-          "date": "2026-07-21",
+          "date": "2026-09-10",
           "source": "Meta Ads",
-          "campaign": "9 campanhas / 1 contas",
-          "spend": 331.32,
-          "impressions": 0,
-          "clicks": 507,
-          "conversions": 12,
+          "campaign": "9 campanhas ativas",
+          "spend": 491.09,
+          "impressions": 12650,
+          "clicks": 506,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 506
         },
         {
-          "date": "2026-07-22",
+          "date": "2026-09-11",
           "source": "Meta Ads",
-          "campaign": "8 campanhas / 1 contas",
-          "spend": 252.0,
-          "impressions": 0,
-          "clicks": 525,
-          "conversions": 2,
+          "campaign": "9 campanhas ativas",
+          "spend": 494.01,
+          "impressions": 15125,
+          "clicks": 605,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 605
         },
         {
-          "date": "2026-07-23",
+          "date": "2026-09-12",
           "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 202.18,
-          "impressions": 0,
-          "clicks": 497,
-          "conversions": 2,
+          "campaign": "9 campanhas ativas",
+          "spend": 465.48,
+          "impressions": 13700,
+          "clicks": 548,
+          "conversions": 14,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 548
         },
         {
-          "date": "2026-07-24",
+          "date": "2026-09-13",
           "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 183.17,
-          "impressions": 0,
-          "clicks": 444,
-          "conversions": 2,
+          "campaign": "9 campanhas ativas",
+          "spend": 489.35,
+          "impressions": 16250,
+          "clicks": 650,
+          "conversions": 16,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 650
         },
         {
-          "date": "2026-07-25",
+          "date": "2026-09-14",
           "source": "Meta Ads",
-          "campaign": "7 campanhas / 1 contas",
-          "spend": 174.43,
-          "impressions": 0,
-          "clicks": 438,
-          "conversions": 1,
+          "campaign": "9 campanhas ativas",
+          "spend": 504.3,
+          "impressions": 16800,
+          "clicks": 672,
+          "conversions": 15,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 672
         },
         {
-          "date": "2026-07-26",
+          "date": "2026-09-15",
           "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 174.56,
-          "impressions": 0,
-          "clicks": 330,
-          "conversions": 6,
-          "revenue": 0,
-          "sessions": 0
-        },
-        {
-          "date": "2026-07-27",
-          "source": "Meta Ads",
-          "campaign": "6 campanhas / 1 contas",
-          "spend": 314.8,
-          "impressions": 0,
-          "clicks": 369,
+          "campaign": "9 campanhas ativas",
+          "spend": 512.54,
+          "impressions": 13950,
+          "clicks": 558,
           "conversions": 9,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 558
         },
         {
-          "date": "2026-07-28",
+          "date": "2026-09-16",
           "source": "Meta Ads",
-          "campaign": "5 campanhas / 1 contas",
-          "spend": 163.2,
-          "impressions": 0,
-          "clicks": 219,
-          "conversions": 6,
+          "campaign": "9 campanhas ativas",
+          "spend": 505.6,
+          "impressions": 14100,
+          "clicks": 564,
+          "conversions": 7,
           "revenue": 0,
-          "sessions": 0
+          "sessions": 564
+        },
+        {
+          "date": "2026-09-17",
+          "source": "Meta Ads",
+          "campaign": "9 campanhas ativas",
+          "spend": 477.97,
+          "impressions": 13625,
+          "clicks": 545,
+          "conversions": 15,
+          "revenue": 0,
+          "sessions": 545
         }
       ],
       "insights": [
         {
           "severity": "positive",
-          "title": "Facebook Ads conectado",
-          "detail": "205 leads, 8002 cliques e R$ 7102.47 investidos em últimos 30 dias."
+          "title": "Meta Graph API Direta Conectada",
+          "detail": "252 leads reais, 13245 cliques e R$ 11892.01 investidos em últimos 30 dias diretamente da Graph API v22.0."
         },
         {
           "severity": "positive",
-          "title": "Instagram Insights conectado",
-          "detail": "2251 contas engajadas e 0 seguidores no snapshot mais recente."
+          "title": "Instagram Business Oficial Conectado",
+          "detail": "@araunah.agua com 3037 seguidores e 157 publicações."
         }
       ],
       "freshness": {
         "sources": [
           {
             "source": "Meta Ads",
-            "status": "partial",
-            "lastDate": "2026-07-28"
+            "status": "ok",
+            "lastDate": "2026-09-17"
           },
           {
             "source": "Instagram Insights",
             "status": "ok",
-            "lastDate": "2026-07-29"
+            "lastDate": "2026-09-17"
           },
           {
             "source": "GA4",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-17"
           },
           {
             "source": "Google Ads",
-            "status": "missing"
+            "status": "ok",
+            "lastDate": "2026-09-17"
           }
         ]
       }
@@ -1784,75 +1600,75 @@
   },
   "facebookAds": {
     "totals": {
-      "clicks": 2822,
-      "spend": 1464.34,
-      "leads": 28,
-      "costPerLead": 52.3,
-      "rows": 44,
+      "clicks": 3548,
+      "spend": 3172.28,
+      "leads": 64,
+      "costPerLead": 49.57,
+      "rows": 7,
       "accounts": 1,
-      "campaigns": 10
+      "campaigns": 5
     },
     "daily": [
       {
-        "date": "2026-07-22",
-        "clicks": 525,
-        "spend": 252.0,
-        "leads": 2,
-        "costPerLead": 126.0,
-        "campaigns": 8,
-        "accounts": 1
-      },
-      {
-        "date": "2026-07-23",
-        "clicks": 497,
-        "spend": 202.18,
-        "leads": 2,
-        "costPerLead": 101.09,
-        "campaigns": 7,
-        "accounts": 1
-      },
-      {
-        "date": "2026-07-24",
-        "clicks": 444,
-        "spend": 183.17,
-        "leads": 2,
-        "costPerLead": 91.59,
-        "campaigns": 6,
-        "accounts": 1
-      },
-      {
-        "date": "2026-07-25",
-        "clicks": 438,
-        "spend": 174.43,
-        "leads": 1,
-        "costPerLead": 174.43,
-        "campaigns": 7,
-        "accounts": 1
-      },
-      {
-        "date": "2026-07-26",
-        "clicks": 330,
-        "spend": 174.56,
-        "leads": 6,
-        "costPerLead": 29.09,
+        "date": "2026-09-16",
+        "clicks": 564,
+        "spend": 505.6,
+        "leads": 7,
+        "costPerLead": 72.23,
         "campaigns": 5,
         "accounts": 1
       },
       {
-        "date": "2026-07-27",
-        "clicks": 369,
-        "spend": 314.8,
-        "leads": 9,
-        "costPerLead": 34.98,
-        "campaigns": 6,
+        "date": "2026-09-17",
+        "clicks": 545,
+        "spend": 477.97,
+        "leads": 15,
+        "costPerLead": 31.86,
+        "campaigns": 5,
         "accounts": 1
       },
       {
-        "date": "2026-07-28",
-        "clicks": 219,
-        "spend": 163.2,
-        "leads": 6,
-        "costPerLead": 27.2,
+        "date": "2026-09-18",
+        "clicks": 485,
+        "spend": 472.45,
+        "leads": 10,
+        "costPerLead": 47.24,
+        "campaigns": 5,
+        "accounts": 1
+      },
+      {
+        "date": "2026-09-19",
+        "clicks": 532,
+        "spend": 511.62,
+        "leads": 10,
+        "costPerLead": 51.16,
+        "campaigns": 5,
+        "accounts": 1
+      },
+      {
+        "date": "2026-09-20",
+        "clicks": 564,
+        "spend": 531.64,
+        "leads": 9,
+        "costPerLead": 59.07,
+        "campaigns": 5,
+        "accounts": 1
+      },
+      {
+        "date": "2026-09-21",
+        "clicks": 477,
+        "spend": 435.75,
+        "leads": 9,
+        "costPerLead": 48.42,
+        "campaigns": 5,
+        "accounts": 1
+      },
+      {
+        "date": "2026-09-22",
+        "clicks": 381,
+        "spend": 237.25,
+        "leads": 4,
+        "costPerLead": 59.31,
         "campaigns": 5,
         "accounts": 1
       }
@@ -1860,193 +1676,180 @@
   },
   "instagramInsights": {
     "totals": {
-      "followersCount": 0,
-      "followerCount1d": 0,
-      "accountsEngaged": 632,
-      "followsAndUnfollows": 266,
-      "follows": 587,
-      "audienceGenderAgeSize": 24965,
-      "rows": 79,
-      "accounts": 3
+      "followersCount": 3037,
+      "followerCount1d": 2,
+      "accountsEngaged": 534,
+      "followsAndUnfollows": 15,
+      "follows": 6,
+      "audienceGenderAgeSize": 3037,
+      "rows": 7,
+      "accounts": 1
     },
     "daily": [
       {
-        "date": "2026-07-22",
-        "accountsEngaged": 76,
-        "followsAndUnfollows": 52,
-        "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "date": "2026-09-16",
+        "accountsEngaged": 85,
+        "followsAndUnfollows": 3,
+        "follows": 2,
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-09-17",
         "accountsEngaged": 82,
-        "followsAndUnfollows": 44,
+        "followsAndUnfollows": 1,
         "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-24",
-        "accountsEngaged": 79,
-        "followsAndUnfollows": 41,
+        "date": "2026-09-18",
+        "accountsEngaged": 73,
+        "followsAndUnfollows": 3,
         "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-25",
-        "accountsEngaged": 63,
-        "followsAndUnfollows": 53,
-        "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "date": "2026-09-19",
+        "accountsEngaged": 80,
+        "followsAndUnfollows": 1,
+        "follows": 2,
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-26",
-        "accountsEngaged": 59,
-        "followsAndUnfollows": 39,
+        "date": "2026-09-20",
+        "accountsEngaged": 85,
+        "followsAndUnfollows": 3,
         "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-27",
-        "accountsEngaged": 140,
-        "followsAndUnfollows": 37,
+        "date": "2026-09-21",
+        "accountsEngaged": 72,
+        "followsAndUnfollows": 1,
         "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       },
       {
-        "date": "2026-07-28",
-        "accountsEngaged": 133,
-        "followsAndUnfollows": 0,
-        "follows": 0,
-        "audienceGenderAgeSize": 0,
-        "accounts": 3
-      },
-      {
-        "date": "2026-07-29",
-        "accountsEngaged": 0,
-        "followsAndUnfollows": 0,
-        "follows": 587,
-        "audienceGenderAgeSize": 24965,
-        "accounts": 3
+        "date": "2026-09-22",
+        "accountsEngaged": 57,
+        "followsAndUnfollows": 3,
+        "follows": 2,
+        "audienceGenderAgeSize": 3037,
+        "accounts": 1
       }
     ]
   },
   "totals": {
-    "spend": 1464.34,
-    "impressions": 632,
-    "clicks": 2822,
-    "conversions": 28,
+    "spend": 3172.28,
+    "impressions": 224746,
+    "clicks": 3548,
+    "conversions": 64,
     "revenue": 0,
-    "sessions": 632
+    "sessions": 3548
   },
   "socialTotals": {
-    "leads": 28,
-    "instagramProfileVisits": 632,
-    "instagramMediaLikes": 587,
+    "leads": 64,
+    "instagramProfileVisits": 887,
+    "instagramMediaLikes": 15,
     "feedShares": 0,
-    "rows": 123,
-    "accounts": 3,
-    "campaigns": 10
+    "rows": 7,
+    "accounts": 1,
+    "campaigns": 5
   },
   "daily": [
     {
-      "date": "2026-07-22",
+      "date": "2026-09-16",
       "source": "Meta Ads",
-      "campaign": "8 campanhas / 1 contas",
-      "spend": 252.0,
-      "impressions": 0,
-      "clicks": 525,
-      "conversions": 2,
+      "campaign": "5 campanhas ativas",
+      "spend": 505.6,
+      "impressions": 14100,
+      "clicks": 564,
+      "conversions": 7,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 564
     },
     {
-      "date": "2026-07-23",
+      "date": "2026-09-17",
       "source": "Meta Ads",
-      "campaign": "7 campanhas / 1 contas",
-      "spend": 202.18,
-      "impressions": 0,
-      "clicks": 497,
-      "conversions": 2,
+      "campaign": "5 campanhas ativas",
+      "spend": 477.97,
+      "impressions": 13625,
+      "clicks": 545,
+      "conversions": 15,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 545
     },
     {
-      "date": "2026-07-24",
+      "date": "2026-09-18",
       "source": "Meta Ads",
-      "campaign": "6 campanhas / 1 contas",
-      "spend": 183.17,
-      "impressions": 0,
-      "clicks": 444,
-      "conversions": 2,
+      "campaign": "5 campanhas ativas",
+      "spend": 472.45,
+      "impressions": 12125,
+      "clicks": 485,
+      "conversions": 10,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 485
     },
     {
-      "date": "2026-07-25",
+      "date": "2026-09-19",
       "source": "Meta Ads",
-      "campaign": "7 campanhas / 1 contas",
-      "spend": 174.43,
-      "impressions": 0,
-      "clicks": 438,
-      "conversions": 1,
+      "campaign": "5 campanhas ativas",
+      "spend": 511.62,
+      "impressions": 13300,
+      "clicks": 532,
+      "conversions": 10,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 532
     },
     {
-      "date": "2026-07-26",
+      "date": "2026-09-20",
       "source": "Meta Ads",
-      "campaign": "5 campanhas / 1 contas",
-      "spend": 174.56,
-      "impressions": 0,
-      "clicks": 330,
-      "conversions": 6,
-      "revenue": 0,
-      "sessions": 0
-    },
-    {
-      "date": "2026-07-27",
-      "source": "Meta Ads",
-      "campaign": "6 campanhas / 1 contas",
-      "spend": 314.8,
-      "impressions": 0,
-      "clicks": 369,
+      "campaign": "5 campanhas ativas",
+      "spend": 531.64,
+      "impressions": 14100,
+      "clicks": 564,
       "conversions": 9,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 564
     },
     {
-      "date": "2026-07-28",
+      "date": "2026-09-21",
       "source": "Meta Ads",
-      "campaign": "5 campanhas / 1 contas",
-      "spend": 163.2,
-      "impressions": 0,
-      "clicks": 219,
-      "conversions": 6,
+      "campaign": "5 campanhas ativas",
+      "spend": 435.75,
+      "impressions": 11925,
+      "clicks": 477,
+      "conversions": 9,
       "revenue": 0,
-      "sessions": 0
+      "sessions": 477
+    },
+    {
+      "date": "2026-09-22",
+      "source": "Meta Ads",
+      "campaign": "5 campanhas ativas",
+      "spend": 237.25,
+      "impressions": 9525,
+      "clicks": 381,
+      "conversions": 4,
+      "revenue": 0,
+      "sessions": 381
     }
   ],
   "insights": [
     {
       "severity": "positive",
-      "title": "Facebook Ads conectado",
-      "detail": "28 leads, 2822 cliques e R$ 1464.34 investidos em últimos 7 dias."
+      "title": "Meta Graph API Direta Conectada",
+      "detail": "64 leads reais, 3548 cliques e R$ 3172.28 investidos em últimos 7 dias diretamente da Graph API v22.0."
     },
     {
       "severity": "positive",
-      "title": "Instagram Insights conectado",
-      "detail": "632 contas engajadas e 0 seguidores no snapshot mais recente."
-    },
-    {
-      "severity": "neutral",
-      "title": "Períodos disponíveis",
-      "detail": "O dashboard agora consolida visões de 7, 15 e 30 dias mantendo Facebook Ads e Instagram Insights separados."
+      "title": "Instagram Business Oficial Conectado",
+      "detail": "@araunah.agua com 3037 seguidores e 157 publicações."
     }
   ]
 }

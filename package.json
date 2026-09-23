@@ -10,8 +10,8 @@
     "test:chatbot": "node scripts/test-chatbot-monitor.mjs",
     "preview": "vite preview",
     "validate:data": "node scripts/validate-data.mjs data/social/latest.json",
-    "normalize:social": "python scripts/normalize_social.py",
-    "fetch:social": "python scripts/fetch_social_sources.py"
+    "fetch:meta": "node scripts/fetch-meta-direct.mjs",
+    "fetch:social": "node scripts/fetch-meta-direct.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.1",

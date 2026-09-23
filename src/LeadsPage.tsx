@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import './LeadsPage.css'
 
 type LeadEvent = {
@@ -36,7 +36,14 @@ type Payload = {
   rangeDays: number
   source: string
   trackingNotice: string
-  summary: { uniqueLeads: number; created: number; updated: number; transferConfirmed: number; recurrent: number }
+  summary: {
+    uniqueLeads: number
+    created: number
+    updated: number
+    inQualification?: number
+    transferConfirmed: number
+    recurrent: number
+  }
   leads: Lead[]
 }
 
@@ -45,26 +52,45 @@ const periods = [7, 15, 30, 60, 90]
 function statusLabel(value: string) {
   if (value === 'enviada') return 'Transferência enviada'
   if (value === 'oferecida-em-reincidencia') return 'Atendimento oferecido'
+  if (value === 'em-atendimento-ia') return 'Em atendimento IA'
   return 'Sem transferência confirmada'
 }
 
 function formatDate(value: string | null) {
   if (!value) return '—'
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value))
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'America/Sao_Paulo',
+  }).format(new Date(value))
 }
 
-export default function LeadsPage() {
+export default function LeadsPage({
+  onBackToDashboard,
+  embedded = false,
+}: {
+  onBackToDashboard?: () => void
+  embedded?: boolean
+}) {
   const [days, setDays] = useState(30)
   const [data, setData] = useState<Payload | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'crm' | 'qualificacao'>('all')
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/leads-api/summary?days=${days}`, { credentials: 'same-origin', cache: 'no-store' })
+      const response = await fetch(`/leads-api/summary?days=${days}&internal=1`, {
+        headers: {
+          'x-dashboard-view': '1',
+        },
+        credentials: 'same-origin',
+        cache: 'no-store',
+      })
       const body = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(body.error ?? 'Não foi possível carregar os leads n8n.')
       setData(body as Payload)
@@ -80,67 +106,287 @@ export default function LeadsPage() {
     return () => window.clearTimeout(timer)
   }, [load])
 
-  return (
-    <main className="leads-shell">
-      <header className="leads-header">
-        <a className="leads-brand" href="/" aria-label="Voltar ao painel de marketing">
-          <div className="leads-mark">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
-          <div><strong>Araunah Agro</strong><small>Operação comercial · Leads CRM</small></div>
-        </a>
-        <div className="leads-header-actions">
-          <span className="leads-access">Cloudflare Access</span>
-          <a className="leads-back" href="/">Marketing</a>
-        </div>
-      </header>
+  const filteredLeads = useMemo(() => {
+    const leads = data?.leads ?? []
+    return leads.filter((lead) => {
+      // Status filter
+      if (statusFilter === 'crm' && lead.crmStatus !== 'criado' && lead.crmStatus !== 'atualizado') {
+        return false
+      }
+      if (statusFilter === 'qualificacao' && lead.crmStatus !== 'em-qualificacao') {
+        return false
+      }
+      // Search term
+      if (!searchTerm) return true
+      const term = searchTerm.toLowerCase()
+      return (
+        lead.name?.toLowerCase().includes(term) ||
+        lead.city?.toLowerCase().includes(term) ||
+        lead.state?.toLowerCase().includes(term) ||
+        lead.interest?.toLowerCase().includes(term) ||
+        lead.campaign?.toLowerCase().includes(term) ||
+        lead.currentContactData?.toLowerCase().includes(term)
+      )
+    })
+  }, [data?.leads, searchTerm, statusFilter])
 
-      <section className="leads-hero">
-        <div>
-          <p className="leads-eyebrow">Painel administrativo</p>
-          <h1>Leads do chatbot n8n</h1>
-          <p>Somente contatos que concluíram a persistência no CRM pelo workflow <strong>CHATBOT-ARAUNAH WHATSAPP</strong>.</p>
+  return (
+    <div className={`leads-page ${embedded ? 'leads-embedded-pane' : ''}`}>
+      {!embedded && (
+        <header className="leads-header">
+          <div className="leads-brand">
+            <div className="leads-brand-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#leads-grad-1)" />
+                <path d="M2 17L12 22L22 17" stroke="url(#leads-grad-2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="url(#leads-grad-1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <defs>
+                  <linearGradient id="leads-grad-1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#10b981" />
+                    <stop offset="1" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="leads-grad-2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#34d399" />
+                    <stop offset="1" stopColor="#10b981" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div>
+              <span className="leads-kicker">PAINEL OPERACIONAL</span>
+              <h1>Leads do Chatbot n8n & CRM</h1>
+              <p>Contatos em qualificação e persistência no CRM pelo workflow <strong>CHATBOT-ARAUNAH WHATSAPP</strong>.</p>
+            </div>
+          </div>
+
+          <div className="leads-actions">
+            {onBackToDashboard ? (
+              <button type="button" onClick={onBackToDashboard} className="leads-back-btn">
+                ← Voltar ao Dashboard
+              </button>
+            ) : (
+              <a href="/" className="leads-back-btn">
+                ← Voltar ao Dashboard
+              </a>
+            )}
+            <div className="leads-segmented-control">
+              {periods.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`leads-segmented-btn ${days === item ? 'active' : ''}`}
+                  onClick={() => setDays(item)}
+                >
+                  {item}d
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => void load()} className="leads-reload-btn" disabled={loading}>
+              {loading ? 'Atualizando...' : 'Atualizar'}
+            </button>
+          </div>
+        </header>
+      )}
+
+      {embedded && (
+        <div className="leads-embedded-toolbar">
+          <div className="leads-segmented-control">
+            {periods.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`leads-segmented-btn ${days === item ? 'active' : ''}`}
+                onClick={() => setDays(item)}
+              >
+                {item} dias
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={() => void load()} className="leads-reload-btn" disabled={loading}>
+            {loading ? 'Sincronizando...' : 'Atualizar Leads'}
+          </button>
         </div>
-        <div className="leads-periods" aria-label="Período dos leads">
-          {periods.map((period) => <button className={days === period ? 'active' : ''} onClick={() => setDays(period)} key={period} type="button">{period}d</button>)}
-          <button className="leads-refresh" onClick={() => void load()} disabled={loading} type="button">{loading ? 'Atualizando…' : 'Atualizar'}</button>
+      )}
+
+      {error ? (
+        <div className="leads-error-card">
+          <strong>Acesso ou leitura indisponível</strong>
+          <p>{error}</p>
+        </div>
+      ) : null}
+
+      <section className="leads-kpi-grid">
+        <div className="leads-kpi-card highlight-emerald">
+          <span className="leads-kpi-title">Leads Únicos</span>
+          <strong className="leads-kpi-num text-tabular">{data?.summary.uniqueLeads ?? '—'}</strong>
+          <span className="leads-kpi-detail">Contatos rastreados no período de {days} dias</span>
+        </div>
+        <div className="leads-kpi-card">
+          <span className="leads-kpi-title">Criados no CRM</span>
+          <strong className="leads-kpi-num text-tabular">{data?.summary.created ?? '—'}</strong>
+          <span className="leads-kpi-detail">Novos leads inseridos no Supabase</span>
+        </div>
+        <div className="leads-kpi-card">
+          <span className="leads-kpi-title">Em Qualificação / Atendimento</span>
+          <strong className="leads-kpi-num text-tabular font-cyan">
+            {data?.summary.inQualification ?? 0}
+          </strong>
+          <span className="leads-kpi-detail">Em diálogo ativo com o bot</span>
+        </div>
+        <div className="leads-kpi-card">
+          <span className="leads-kpi-title">Transferências ao Consultor</span>
+          <strong className="leads-kpi-num text-tabular">{data?.summary.transferConfirmed ?? '—'}</strong>
+          <span className="leads-kpi-detail">Handoff confirmado pelo WhatsApp</span>
         </div>
       </section>
 
-      {error && <section className="leads-message error"><strong>Acesso ou leitura indisponível.</strong><span>{error}</span></section>}
-      {data && <section className="leads-message info"><strong>Escopo confirmado.</strong><span>{data.trackingNotice}</span></section>}
+      {/* Barra de Filtros e Busca */}
+      <section className="leads-filters-bar">
+        <div className="leads-search-box">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Buscar por nome, cidade, UF, interesse ou telefone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="leads-search-input"
+          />
+          {searchTerm && (
+            <button type="button" onClick={() => setSearchTerm('')} className="clear-search-btn">
+              ✕
+            </button>
+          )}
+        </div>
 
-      {data && <>
-        <section className="leads-kpis" aria-label="Resumo dos leads n8n">
-          <article><span>Leads únicos</span><strong>{data.summary.uniqueLeads}</strong><small>CRM confirmado no n8n</small></article>
-          <article><span>Novos no CRM</span><strong>{data.summary.created}</strong><small>Eventos de criação</small></article>
-          <article><span>Atualizações</span><strong>{data.summary.updated}</strong><small>Eventos de reincidência</small></article>
-          <article><span>Transferências</span><strong>{data.summary.transferConfirmed}</strong><small>Graph aceito pelo workflow</small></article>
-        </section>
+        <div className="leads-filter-pills">
+          <button
+            type="button"
+            className={`pill-btn ${statusFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('all')}
+          >
+            Todos ({data?.leads.length ?? 0})
+          </button>
+          <button
+            type="button"
+            className={`pill-btn ${statusFilter === 'crm' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('crm')}
+          >
+            No CRM ({(data?.summary.created ?? 0) + (data?.summary.updated ?? 0)})
+          </button>
+          <button
+            type="button"
+            className={`pill-btn ${statusFilter === 'qualificacao' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('qualificacao')}
+          >
+            Em Qualificação ({data?.summary.inQualification ?? 0})
+          </button>
+        </div>
+      </section>
 
-        <section className="leads-table-card">
-          <div className="leads-table-head"><div><p className="leads-eyebrow">Origem n8n</p><h2>Fila qualificada</h2></div><span>Atualizado {formatDate(data.generatedAt)}</span></div>
-          {data.leads.length === 0 ? <div className="leads-empty">Nenhum lead n8n com CRM confirmado no período selecionado.</div> : <div className="leads-table-wrap"><table><thead><tr><th>Contato</th><th>Interesse</th><th>CRM</th><th>Transferência</th><th>Consultor</th><th>Último evento</th><th aria-label="Detalhes" /></tr></thead><tbody>
-            {data.leads.map((lead) => <Fragment key={lead.leadId}>
+      <section className="leads-table-container">
+        <table className="leads-table">
+          <thead>
+            <tr>
+              <th>Contato / Nome</th>
+              <th>Localização</th>
+              <th>Interesse & Segmento</th>
+              <th>Origem / Campanha</th>
+              <th>Status CRM</th>
+              <th>Transferência</th>
+              <th>Última Interação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLeads.map((lead) => {
+              const isOpen = expanded === lead.leadId
+              const isCrm = lead.crmStatus === 'criado' || lead.crmStatus === 'atualizado'
+
+              return (
+                <Fragment key={lead.leadId}>
+                  <tr
+                    className={`lead-main-row ${isOpen ? 'is-expanded' : ''}`}
+                    onClick={() => setExpanded(isOpen ? null : lead.leadId)}
+                  >
+                    <td>
+                      <div className="lead-identity">
+                        <span className="lead-name font-semibold">{lead.name || 'Contato Sem Nome'}</span>
+                        <span className="lead-contact-muted text-tabular">{lead.currentContactData || '—'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="lead-location">
+                        {lead.city || '—'} {lead.state && lead.state !== '--' ? `· ${lead.state}` : ''}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="lead-interest-cell">
+                        <span className="lead-interest-text">{lead.interest || 'Em qualificação'}</span>
+                        <span className="lead-tag">{lead.segment || 'Agro'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="lead-campaign-text">{lead.campaign || 'WhatsApp Direto'}</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${isCrm ? 'badge-emerald' : 'badge-cyan'}`}>
+                        {lead.crmStatus === 'criado'
+                          ? 'Criado CRM'
+                          : lead.crmStatus === 'atualizado'
+                          ? 'Atualizado CRM'
+                          : 'Em Qualificação'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="transfer-status-text">{statusLabel(lead.transfer)}</span>
+                    </td>
+                    <td className="text-tabular">{formatDate(lead.occurredAt)}</td>
+                  </tr>
+
+                  {isOpen && (
+                    <tr className="lead-details-row">
+                      <td colSpan={7}>
+                        <div className="lead-drawer">
+                          <div className="drawer-grid">
+                            <div className="drawer-item">
+                              <span className="drawer-lbl">ID Interno</span>
+                              <span className="drawer-val font-mono">{lead.leadId}</span>
+                            </div>
+                            <div className="drawer-item">
+                              <span className="drawer-lbl">Consultor Atribuído</span>
+                              <span className="drawer-val">{lead.consultant || 'Atendimento Chatbot'}</span>
+                            </div>
+                            <div className="drawer-item">
+                              <span className="drawer-lbl">Qualificação Mínima</span>
+                              <span className="drawer-val">{lead.qualified ? '✅ Concluída' : '⏳ Em andamento'}</span>
+                            </div>
+                            <div className="drawer-item">
+                              <span className="drawer-lbl">Reincidência</span>
+                              <span className="drawer-val">{lead.recurrence ? `Sim (${lead.recurrenceOrigin || 'CRM'})` : 'Primeiro Contato'}</span>
+                            </div>
+                          </div>
+                          {lead.currentObservation && (
+                            <div className="drawer-obs">
+                              <span className="drawer-lbl">Última Mensagem / Observação</span>
+                              <p className="obs-text">{lead.currentObservation}</p>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              )
+            })}
+            {filteredLeads.length === 0 && !loading && (
               <tr>
-                <td><strong>{lead.name || 'Sem nome confirmado'}</strong><small>{[lead.city, lead.state].filter(Boolean).join(' · ') || 'Localização não registrada'}</small></td>
-                <td><strong>{lead.interest || 'Não informado'}</strong><small>{lead.segment || lead.campaign || '—'}</small></td>
-                <td><span className={`lead-pill ${lead.crmStatus === 'criado' ? 'created' : 'updated'}`}>{lead.crmStatus}</span>{lead.recurrence && <small>Reincidente</small>}</td>
-                <td><span className={`lead-pill ${lead.transfer === 'enviada' ? 'sent' : 'pending'}`}>{statusLabel(lead.transfer)}</span></td>
-                <td>{lead.consultant || 'Não definido'}</td>
-                <td>{formatDate(lead.occurredAt)}</td>
-                <td><button className="lead-details" onClick={() => setExpanded(expanded === lead.leadId ? null : lead.leadId)} type="button">{expanded === lead.leadId ? 'Fechar' : 'Detalhes'}</button></td>
+                <td colSpan={7} className="text-center py-8 text-muted">
+                  Nenhum lead encontrado para os filtros selecionados no período de {days} dias.
+                </td>
               </tr>
-              {expanded === lead.leadId && <tr className="lead-expand"><td colSpan={7}><div className="lead-detail-grid"><div><span>Dados registrados no contato atual</span><p>{lead.currentContactData || 'Sem detalhe adicional.'}</p></div><div><span>Observação atual do CRM</span><p>{lead.currentObservation || 'Sem observação disponível.'}</p></div><div><span>Eventos n8n no período</span><p>{lead.n8nEvents.length} evento(s). O histórico anterior ao período e o desfecho humano serão exibidos após a migração de rastreio no Supabase.</p></div></div></td></tr>}
-            </Fragment>)}
-          </tbody></table></div>}
-        </section>
-      </>}
-    </main>
+            )}
+          </tbody>
+        </table>
+      </section>
+    </div>
   )
 }

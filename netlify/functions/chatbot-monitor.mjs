@@ -287,7 +287,14 @@ async function n8nJson(path) {
   const baseUrl = process.env.N8N_ARAUNAH_BASE_URL?.replace(/\/$/, '')
   const apiKey = process.env.N8N_ARAUNAH_API_KEY
   if (!baseUrl || !apiKey) throw new Error('Integração n8n não configurada no servidor.')
-  const response = await fetch(`${baseUrl}${path}`, { headers: { 'X-N8N-API-KEY': apiKey, Accept: 'application/json' }, signal: AbortSignal.timeout(20_000) })
+  const response = await fetch(`${baseUrl}${path}`, {
+    headers: {
+      'X-N8N-API-KEY': apiKey,
+      Accept: 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+    },
+    signal: AbortSignal.timeout(20_000),
+  })
   if (!response.ok) throw new Error(`Leitura n8n indisponível (HTTP ${response.status}).`)
   return response.json()
 }
