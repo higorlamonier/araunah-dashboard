@@ -1,5 +1,74 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-23 16:15] — Antigravity (Google DeepMind)
+
+### 🎯 Demanda / Objetivo da Sessão (/goal)
+1. **Corrigir imagens das Publicações & Reels Recentes no Instagram:** Exibir miniaturas reais, proporção de aspecto, badges de tipo (Reel/Carrossel/Foto) e links diretos para cada post.
+2. **Revisar e potencializar a didática visual das abas:**
+   - *Leads CRM:* Adicionar um funil operacional visual de 4 etapas (Captação ➔ Triagem IA ➔ Persistência CRM ➔ Handoff Consultor) com taxas percentuais de conversão em tempo real.
+   - *Chatbot n8n:* Adicionar diagrama em blocos conectados da arquitetura técnica (Webhook ➔ Gemini AI Engine ➔ Supabase CRM ➔ Meta Graph API) com conectores de sinal animados.
+   - *Meta Ads:* Adicionar guia didático de métricas com fórmulas claras para CPL, Taxa de Conversão, ROAS e regras de aquisição.
+3. **Verificação geral na atualização de dados e deploy em produção.**
+
+### ✅ O que foi realizado
+- [x] **Galeria Visual de Publicações & Reels (`src/components/InstagramTab.tsx` e `src/App.css`):**
+  - Consumo dinâmico de `data?.instagramInsights?.recentMedia` fornecido pela Meta Graph API v22.0.
+  - Implementado componente `ig-media-card` com proporção vertical 4:5 (`aspect-ratio: 4 / 5`), `referrerPolicy="no-referrer"` (evita bloqueios de hotlink da CDN da Meta), lazy loading assíncrono e fallback inteligente para falhas pontuais de carregamento.
+  - Badges translúcidos em glassmorphism (Reel, Carrossel, Foto), gatilho central de reprodução com animação hover e overlay inferior de legenda com contador de reações (❤️ likes, 💬 comentários) e link direto ("Ver no Instagram ↗").
+- [x] **Funil Operacional de Leads CRM (`src/LeadsPage.tsx` e `src/LeadsPage.css`):**
+  - Implementado o componente `.leads-funnel-card` com 4 estágios horizontais:
+    1. *Captação Inbound* (100% entradas via Webhook e Meta Ads)
+    2. *Triagem IA* (qualificação automática pelo agente Gemini WhatsApp)
+    3. *Persistência CRM* (gravação via RPC Supabase `bot_n8n_lead_upsert`)
+    4. *Handoff Consultor* (transferência confirmada via Meta Graph API)
+  - Cálculo dinâmico das taxas de passagem entre etapas a partir do sumário real do n8n.
+- [x] **Diagrama de Arquitetura do Chatbot n8n (`src/ChatbotMonitorPage.tsx` e `src/ChatbotMonitorPage.css`):**
+  - Adicionado o componente `.n8n-pipeline-diagram` mapeando os 4 blocos determinísticos do workflow ativo `CHATBOT-ARAUNAH WHATSAPP`:
+    - *Bloco 1 (Trigger):* Webhook Inbound (WhatsApp Cloud API - Payload `messages[0]`, formato E.164)
+    - *Bloco 2 (AI Agent):* Gemini AI Engine (Triagem Agronômica - Cultura, Região, Hectares)
+    - *Bloco 3 (Persistence):* Supabase CRM (RPC Postgres `bot_n8n_lead_upsert`)
+    - *Bloco 4 (Outbound):* Meta Graph API (Template `araunah_alerta`, repasses confirmados)
+  - Conectores com sinal pulsante animado em CSS (`@keyframes movePulse`) indicando fluxo contínuo.
+- [x] **Guia Didático e Didática em Meta Ads (`src/components/MetaAdsTab.tsx` e `src/App.css`):**
+  - Adicionado card superior `.meta-didactic-card` com fórmulas e conceitos-chave (Investimento, Leads Gerados, CPL Médio `Gasto ÷ Leads`, Taxa de Conversão `Leads ÷ Cliques %`).
+  - Classificação visual dos dias com alta eficiência e tooltips unificados sem sobreposição.
+- [x] **Pipeline de Dados e Serveless Netlify (`netlify/functions/dashboard-data.mjs` e `scripts/fetch-meta-direct.mjs`):**
+  - Integração das publicações reais das contas Araunah (`@araunah.agua` e `@araunah.agro`) diretamente da Graph API v22.0 no payload unificado.
+- [x] **Validação Automatizada de 5 Etapas & Deploy em Produção:**
+  - Build local Vite/TS limpo em 168ms; lint sem erros.
+  - Deploy publicado no Netlify Production: `https://meta.araunah.com` (Deploy ID: `6ab424534140532312054906`).
+  - Script `scripts/verify-live.mjs` executou e validou os 5 estágios com 100% de sucesso:
+    1. SPA Assets e CSS bundle com todas as novas classes.
+    2. API do Chatbot n8n ativa e sem degradação (`isDegraded = false`).
+    3. API de Leads CRM com dados reais de setembro/2026.
+    4. Seletor de períodos (7d, 15d, 30d) dinâmico e consistente.
+    5. Galeria de publicações do Instagram com miniaturas e permalinks válidos.
+- **Arquivos modificados:**
+  - `src/components/InstagramTab.tsx` (galeria visual de posts e reels com badges e fallback)
+  - `src/App.css` (estilos para cartões de mídia do Instagram e guia didático Meta Ads)
+  - `src/LeadsPage.tsx` (mini funil operacional de 4 etapas)
+  - `src/LeadsPage.css` (estilos para o funil de leads com setas e taxas)
+  - `src/ChatbotMonitorPage.tsx` (diagrama de blocos conectados da arquitetura n8n)
+  - `src/ChatbotMonitorPage.css` (estilos e animação de pulso do pipeline n8n)
+  - `src/components/MetaAdsTab.tsx` (guia didático com fórmulas de aquisição)
+  - `src/types.ts` (definição de tipos para `recentMedia`)
+  - `data/social/latest.json` (posts reais com miniaturas da Graph API v22.0)
+  - `netlify/functions/dashboard-data.mjs` (inclusão de `recentMedia` no snapshot)
+  - `scripts/fetch-meta-direct.mjs` (coleta direta de posts da Graph API v22.0)
+  - `scripts/verify-live.mjs` (validação de 5 etapas na produção)
+
+### ⏸️ Onde parou (Estado Atual)
+- Todas as solicitações do `/goal` foram concluídas com êxito, testadas em looping e validadas ao vivo no domínio de produção `https://meta.araunah.com`.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado. Sistema operando em nível máximo de estabilidade.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] Quando houver novas contas no Instagram da Araunah (ex: novas verticais), cadastrar os IDs em `ACCOUNTS_TO_FETCH` em `scripts/fetch-meta-direct.mjs`.
+- [ ] Monitorar a validade do `META_ACCESS_TOKEN` de longo prazo configurado nas variáveis de ambiente do Netlify.
+
+---
+
 ## [2026-09-23 15:55] — Antigravity (Google DeepMind)
 
 ### 🎯 Demanda / Objetivo da Sessão (/goal)
