@@ -236,15 +236,23 @@ function buildLeads(executions, start) {
     })),
   }))
 
+  const uniqueLeads = leads.length
+  const inQualification = leads.filter((l) => l.crmStatus === 'em-qualificacao').length
+  const created = leads.filter((l) => l.crmStatus === 'criado').length
+  const updated = leads.filter((l) => l.crmStatus === 'atualizado').length
+  const transferConfirmed = leads.filter((l) => l.transfer === 'enviada').length
+  const recurrent = leads.filter((l) => l.recurrence).length
+
   return {
     leads,
     summary: {
-      uniqueLeads: leads.length,
-      created: events.filter((e) => e.crmStatus === 'criado').length,
-      updated: events.filter((e) => e.crmStatus === 'atualizado').length,
-      inQualification: events.filter((e) => e.crmStatus === 'em-qualificacao').length,
-      transferConfirmed: events.filter((e) => e.transfer === 'enviada').length,
-      recurrent: events.filter((e) => e.recurrence).length,
+      uniqueLeads,
+      created,
+      updated,
+      inQualification,
+      transferConfirmed,
+      recurrent,
+      totalInteractions: events.length,
     },
   }
 }
@@ -290,8 +298,8 @@ async function fetchExecutions(start) {
     return dur > 1200 || r.status === 'error'
   })
 
-  // 3. Busca detalhes com includeData apenas das execuções qualificadas (até 30)
-  const detailPromises = candidateRows.slice(0, 30).map(async (row) => {
+  // 3. Busca detalhes com includeData apenas das execuções qualificadas (até 45)
+  const detailPromises = candidateRows.slice(0, 45).map(async (row) => {
     try {
       const res = await fetch(`${baseUrl}/api/v1/executions/${row.id}?includeData=true`, {
         headers: {
@@ -299,7 +307,7 @@ async function fetchExecutions(start) {
           Accept: 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
         },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(7000),
       })
       if (!res.ok) return null
       return res.json()

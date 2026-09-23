@@ -32,7 +32,10 @@ assert.ok(cssContent.includes('.ig-media-card'), 'CSS must contain .ig-media-car
 assert.ok(cssContent.includes('.leads-funnel-card'), 'CSS must contain .leads-funnel-card');
 assert.ok(cssContent.includes('.n8n-pipeline-diagram'), 'CSS must contain .n8n-pipeline-diagram');
 assert.ok(cssContent.includes('.meta-didactic-card'), 'CSS must contain .meta-didactic-card');
-console.log('  ✓ CSS Bundle contains all new styles: .posts-visual-grid, .ig-media-card, .leads-funnel-card, .n8n-pipeline-diagram, .meta-didactic-card.');
+assert.ok(cssContent.includes('.leads-pagination-bar'), 'CSS must contain .leads-pagination-bar');
+assert.ok(cssContent.includes('.account-card.is-selected'), 'CSS must contain .account-card.is-selected');
+assert.ok(cssContent.includes('.property-card.is-selected'), 'CSS must contain .property-card.is-selected');
+console.log('  ✓ CSS Bundle contains all new styles: .posts-visual-grid, .ig-media-card, .leads-funnel-card, .n8n-pipeline-diagram, .meta-didactic-card, .leads-pagination-bar, .account-card.is-selected, .property-card.is-selected.');
 
 // Verify JS bundle contains the 3 Instagram accounts
 const jsRes = await fetch('https://meta.araunah.com' + jsMatch[1]);
@@ -57,8 +60,8 @@ console.log('  ✓ Workflow:', chatData.workflow?.name, '(Active:', chatData.wor
 console.log('  ✓ Inbound messages:', chatData.totals?.inbound);
 console.log('  ✓ Executions analyzed:', chatData.coverage?.executionsInRange);
 
-// 3. VERIFY LEADS CRM API & RECENT LEADS DATA
-console.log('\n3. Checking Leads CRM API (n8n Real Data)...');
+// 3. VERIFY LEADS CRM API & MATHEMATICAL INTEGRITY (NO 600% BUG)
+console.log('\n3. Checking Leads CRM API (Mathematical Consistency)...');
 const leadsRes = await fetch('https://meta.araunah.com/leads-api/summary?days=30&internal=1', {
   headers: { 'x-dashboard-view': '1' }
 });
@@ -66,9 +69,12 @@ assert.equal(leadsRes.status, 200, 'Leads API must return 200');
 const leadsData = await leadsRes.json();
 assert.ok(leadsData.summary?.uniqueLeads > 0, 'Unique leads must be > 0');
 assert.ok(Array.isArray(leadsData.leads), 'Leads must be an array');
+assert.equal(leadsData.summary.uniqueLeads, leadsData.leads.length, 'uniqueLeads must match leads.length exactly');
+assert.ok(leadsData.summary.inQualification <= leadsData.summary.uniqueLeads, 'inQualification cannot exceed uniqueLeads (no 600% bug)');
 console.log('  ✓ Unique leads found:', leadsData.summary?.uniqueLeads);
+console.log('  ✓ In qualification (unique leads):', leadsData.summary?.inQualification);
 console.log('  ✓ Created in CRM:', leadsData.summary?.created);
-console.log('  ✓ In qualification:', leadsData.summary?.inQualification);
+console.log('  ✓ Mathematical sanity: inQualification <= uniqueLeads PASSED.');
 console.log('  ✓ Sample lead:', leadsData.leads[0]?.name, 'from', leadsData.leads[0]?.city, '(' + leadsData.leads[0]?.occurredAt + ')');
 
 // 4. VERIFY PERIOD SWITCHING (7d, 15d, 30d) DYNAMIC DIFFERENCES
