@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Tipografia */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+
+  /* Escala Dark Obsidian Agrotech */
+  --bg-app: #080b09;
+  --bg-app-gradient: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.06) 0%, rgba(8, 11, 9, 0) 60%), #080b09;
+  --bg-surface: rgba(16, 22, 19, 0.72);
+  --bg-surface-solid: #101613;
+  --bg-surface-hover: rgba(24, 34, 29, 0.85);
+  --bg-surface-elevated: #18221d;
+  --bg-surface-subtle: rgba(12, 17, 14, 0.9);
+
+  /* Micro-borders & Contornos */
+  --border-hairline: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(16, 185, 129, 0.4);
+  --border-glow: 0 0 0 1px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.12);
+
+  /* Texto & Contraste */
+  --text-primary: #f0fdf4;
+  --text-secondary: #94a3b8;
+  --text-muted: #5f7166;
+  --text-inverse: #052e16;
+
+  /* Acentos de Marca & Domínio */
+  --accent-emerald: #10b981;
+  --accent-emerald-glow: rgba(16, 185, 129, 0.18);
+  --accent-lime: #a3e635;
+  --accent-meta: #38bdf8;
+  --accent-meta-dark: #0284c7;
+  --accent-whatsapp: #22c55e;
+  --accent-purple: #a855f7;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  /* Status Semântico */
+  --status-ok: #10b981;
+  --status-ok-bg: rgba(16, 185, 129, 0.12);
+  --status-warning: #f59e0b;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-error: #f43f5e;
+  --status-error-bg: rgba(244, 63, 94, 0.12);
+  --status-info: #38bdf8;
+  --status-info-bg: rgba(56, 189, 248, 0.12);
+
+  /* Sombras & Profundidade */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 8px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-elevated: 0 16px 48px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Raios de borda */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Transições físicas */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 160ms var(--ease-spring);
+  --transition-normal: 240ms var(--ease-spring);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-app-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Tabular numbers em qualquer métrica ou dados */
+.font-tabular,
+.metric-value,
+.data-table,
+.monitor-metric,
+.count,
+td {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Scrollbar refinada */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}

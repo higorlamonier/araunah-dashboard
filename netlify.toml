@@ -1,6 +1,41 @@
 [build]
   command = "npm ci && npm run validate:data && npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Cloudflare Access protects /leads and /leads-api at the edge. The function
+# validates the Access JWT again to prevent access via the Netlify hostname.
+[[redirects]]
+  from = "/chatbot-api/*"
+  to = "/.netlify/functions/chatbot-monitor"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/chatbot"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/chatbot/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/leads-api/*"
+  to = "/.netlify/functions/n8n-leads"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/leads"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/leads/*"
+  to = "/index.html"
+  status = 200

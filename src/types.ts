@@ -54,6 +54,7 @@ export interface DashboardPeriodData {
 
 export interface DashboardSnapshot {
   client: { id: string; name: string; segment: string; siteUrl?: string }
+  requestId?: string
   period: { start: string; end: string; label: string }
   freshness: {
     generatedAt: string
@@ -98,4 +99,6 @@ export interface DashboardSnapshot {
   }
   daily: DailyMetric[]
   insights: Insight[]
+  isFallback?: boolean
+  fallbackReason?: string
 }

@@ -1,0 +1,535 @@
+/* ==========================================================================
+   Chatbot Monitor — Dark Obsidian Agrotech Theme (Linear / Datadog style)
+   ========================================================================== */
+
+.monitor-shell {
+  width: min(1520px, calc(100% - 32px));
+  min-height: calc(100vh - 32px);
+  margin: 16px auto;
+  padding: 32px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.monitor-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.monitor-mark {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.15));
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: var(--accent-whatsapp);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.2);
+}
+
+.monitor-brand strong {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.monitor-brand small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.monitor-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.monitor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.monitor-status.ok {
+  background: var(--status-ok-bg);
+  color: var(--status-ok);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.monitor-status.warning {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.monitor-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.monitor-back-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
+
+/* Hero */
+.monitor-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.monitor-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-whatsapp);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.monitor-hero h1 {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.monitor-hero p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+.monitor-periods {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monitor-periods-control {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.monitor-periods-control button {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all var(--transition-fast);
+}
+
+.monitor-periods-control button.active {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.monitor-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all var(--transition-fast);
+}
+
+.monitor-refresh-btn:hover:not(:disabled) {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-focus);
+}
+
+/* Service Health Grid (4 Nodes) */
+.service-health-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.service-card {
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.service-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-card-head span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.service-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+}
+
+.service-dot.ok {
+  background: var(--status-ok);
+  box-shadow: 0 0 10px var(--status-ok);
+}
+
+.service-dot.warning {
+  background: var(--status-warning);
+  box-shadow: 0 0 10px var(--status-warning);
+}
+
+.service-card strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.service-card small {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+/* KPIs (6 Columns) */
+.monitor-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.monitor-metric {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.monitor-metric:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-subtle);
+}
+
+.monitor-metric::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--metric-accent, var(--border-hairline));
+}
+
+.monitor-metric.teal { --metric-accent: #2dd4bf; }
+.monitor-metric.purple { --metric-accent: var(--accent-purple); }
+.monitor-metric.blue { --metric-accent: var(--accent-meta); }
+.monitor-metric.whatsapp { --metric-accent: var(--accent-whatsapp); }
+.monitor-metric.red { --metric-accent: var(--status-error); }
+
+.monitor-metric span {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.monitor-metric strong {
+  font-size: clamp(1.6rem, 2vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin: 4px 0 2px;
+}
+
+.monitor-metric.red strong {
+  color: var(--status-error);
+}
+
+.monitor-metric small {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Technical Funnel (Interactive Pipeline) */
+.pipeline-funnel-card {
+  grid-column: span 12;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.funnel-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  position: relative;
+}
+
+.funnel-stage {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.funnel-stage:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-subtle);
+}
+
+.funnel-stage-num {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.funnel-stage-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.funnel-stage-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.funnel-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.funnel-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-whatsapp), #10b981);
+  transition: width var(--transition-normal);
+}
+
+.funnel-stage-rate {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* Secondary Grid: Delivery, Health & Incidents */
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.monitor-card {
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-delivery { grid-column: span 6; }
+.card-health { grid-column: span 6; }
+.card-daily { grid-column: span 12; }
+.card-incidents { grid-column: span 12; }
+
+.stat-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-tile {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-tile.danger {
+  border-color: rgba(244, 63, 94, 0.3);
+  background: rgba(244, 63, 94, 0.06);
+}
+
+.stat-tile.danger strong {
+  color: var(--status-error);
+}
+
+.stat-tile span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-tile strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Incidents Terminal */
+.incident-terminal {
+  display: grid;
+  gap: 8px;
+}
+
+.incident-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(244, 63, 94, 0.05);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-left: 3px solid var(--status-error);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.incident-node {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.incident-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.incident-clear {
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--accent-emerald);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 1200px) {
+  .monitor-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .funnel-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .card-delivery,
+  .card-health {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  .monitor-shell {
+    margin: 8px;
+    padding: 18px 14px;
+    width: calc(100% - 16px);
+  }
+  .service-health-grid {
+    grid-template-columns: 1fr;
+  }
+  .monitor-kpis {
+    grid-template-columns: 1fr;
+  }
+  .funnel-pipeline {
+    grid-template-columns: 1fr;
+  }
+  .stat-tiles-grid {
+    grid-template-columns: 1fr;
+  }
+}

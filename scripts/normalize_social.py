@@ -143,6 +143,9 @@ def build_period(period_key: str, config: dict):
     all_dates = sorted({*(r.get('date') for r in facebook_rows if r.get('date')), *(r.get('date') for r in instagram_rows if r.get('date'))})
     facebook = normalize_facebook(facebook_rows)
     instagram = normalize_instagram(instagram_rows)
+    period_end = all_dates[-1]
+    facebook_last_date = max(r.get('date') for r in facebook_rows if r.get('date'))
+    instagram_last_date = max(r.get('date') for r in instagram_rows if r.get('date'))
     return {
         'key': period_key,
         'days': config['days'],
@@ -198,8 +201,8 @@ def build_period(period_key: str, config: dict):
         ],
         'freshness': {
             'sources': [
-                {'source': 'Meta Ads', 'status': 'ok', 'lastDate': max(r.get('date') for r in facebook_rows if r.get('date'))},
-                {'source': 'Instagram Insights', 'status': 'ok', 'lastDate': max(r.get('date') for r in instagram_rows if r.get('date'))},
+                {'source': 'Meta Ads', 'status': 'ok' if facebook_last_date == period_end else 'partial', 'lastDate': facebook_last_date},
+                {'source': 'Instagram Insights', 'status': 'ok' if instagram_last_date == period_end else 'partial', 'lastDate': instagram_last_date},
                 {'source': 'GA4', 'status': 'missing'},
                 {'source': 'Google Ads', 'status': 'missing'},
             ],
