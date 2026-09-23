@@ -1,5 +1,63 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-23 17:50] — Antigravity (Google DeepMind)
+
+### 🎯 Demanda / Objetivo da Sessão
+1. **Seletor Interativo de Contas do Instagram:** Permitir selecionar e filtrar métricas, gráficos e publicações recentes exclusivamente para a conta clicada (`@araunah.agro`, `@araunah.agua`, `@araunah.florestas`) ou consolidado geral.
+2. **Seletor Interativo de Propriedades GA4:** Permitir filtrar métricas e sessões diárias por propriedade (`araunah.com` vs `araunahtech.com.br`) ou consolidado.
+3. **Reformulação Geral do Leads CRM:**
+   - Eliminar discrepância numérica onde o funil exibia 600% e as pílulas de filtro mostravam 30 leads mas a tabela só tinha 5.
+   - Implementar paginação limpa, didática e fluida na tabela de leads (10 por página, com controles de primeira, anterior, números, próxima, última e contador dinâmico).
+   - Exibir volume total de interações/mensagens trocadas por lead e timeline interativa de conversas no drawer lateral.
+   - Tornar a interface do CRM altamente intuitiva, elegante e didática.
+4. **Deploy e Validação em Produção (meta.araunah.com).**
+
+### ✅ O que foi realizado
+- [x] **Correção da Lógica no Backend (`netlify/functions/n8n-leads.mjs`):**
+  - Identificada e corrigida a causa raiz da discrepância "600% Triados / 30 vs 5": o endpoint estava calculando `inQualification` e status a partir do total de execuções brutas do webhook n8n (30 trocas de mensagens) em vez do número de leads únicos agrupados por telefone (5 leads reais).
+  - Atualizado `buildLeads` para que `summary.uniqueLeads`, `summary.inQualification`, `summary.created` e `summary.updated` sejam calculados estritamente sobre a lista deduplicada de leads únicos (`leads.length` e `leads.filter(...)`).
+  - Adicionado `summary.totalInteractions` (`events.length`) reportando a volumetria total de mensagens processadas pelo bot sem distorcer o contador de leads.
+  - Aumentada a amostragem de execuções avaliadas em `fetchExecutions` de 30 para 45 com timeout seguro de 7s.
+- [x] **Seletor Interativo de Contas no Instagram (`src/components/InstagramTab.tsx` e `src/App.css`):**
+  - Implementado estado `selectedAccount` (`all`, `araunah.agro`, `araunah.agua`, `araunah.florestas`).
+  - Cards de perfil transformados em seletores visuais clicáveis com anel de destaque verde esmeralda (`.is-selected`), badge `✓ Selecionado` e tag de contexto `● Visualizando insights desta conta`.
+  - Adicionado botão de reset `✕ Ver Todas as Contas (Consolidado)` no cabeçalho e na barra de controle.
+  - KPIs de seguidores, alcance, impressões, gráficos diários e galeria de publicações/reels filtram em tempo real para a conta selecionada.
+- [x] **Seletor Interativo de Propriedades no GA4 (`src/components/GoogleTab.tsx` e `src/App.css`):**
+  - Implementado estado `selectedProperty` (`all`, `G-GF93ZH8ZXV` / `araunah.com`, `G-3RRV0EMSRL` / `araunahtech.com.br`).
+  - Cards de propriedade com seleção visual ativa em ciano elétrico (`.is-selected`), badge de confirmação e botão para alternar para visualização consolidada.
+  - Métricas de Sessões, Usuários Ativos, Visualizações, Taxa de Rejeição e histograma de sessões diárias recalculados instantaneamente.
+- [x] **Nova Interface do Leads CRM com Paginação e Métricas 1:1 (`src/LeadsPage.tsx` e `src/LeadsPage.css`):**
+  - Corrigido o cálculo do funil: `triagemRate` agora calcula `Math.min(100, Math.round((inQual / totalLeads) * 100))`, garantindo percentual matematicamente consistente.
+  - Adicionado subtítulo no topo do funil: `X leads únicos identificados · Y mensagens trocadas com o chatbot`.
+  - Pílulas de filtro (`Todos`, `Em Qualificação`, `No CRM`, `Transferidos`) agora refletem exatamente o total de leads exibidos na tabela (1:1).
+  - Implementada paginação completa com `PAGE_SIZE = 10`, barra de controle com "Mostrando X a Y de Z leads", botões « (primeira), ‹ (anterior), páginas numéricas, › (próxima), » (última) e reset automático ao filtrar ou pesquisar.
+  - Tabela com indicador de mensagens por lead (`X msgs`), badges de status com cores contrastantes e drawer com timeline de histórico de mensagens.
+- [x] **Build, Lint e Deploy em Produção:**
+  - `npm run build` e ESLint 100% limpos.
+  - Deploy publicado no Netlify: `https://meta.araunah.com` (Deploy ID: `6ab43b1ae165d14643dd9b3d`).
+  - Script de validação `scripts/verify-live.mjs` testado contra a produção com aprovação total de integridade.
+- **Arquivos modificados:**
+  - `netlify/functions/n8n-leads.mjs` (cálculo de sumário baseado em leads únicos e não em execuções de webhook)
+  - `src/LeadsPage.tsx` (paginação, pílulas 1:1, contador de mensagens e drawer interativo)
+  - `src/LeadsPage.css` (estilos da paginação, timeline de histórico e layout)
+  - `src/components/InstagramTab.tsx` (seletor de contas com filtro dinâmico de métricas e mídias)
+  - `src/components/GoogleTab.tsx` (seletor de propriedades GA4 com filtro de métricas e gráficos)
+  - `src/App.css` (estilos para estados `.is-selected` dos cards de conta e propriedade)
+  - `scripts/verify-live.mjs` (validação de integridade do payload de leads e novos estilos)
+
+### ⏸️ Onde parou (Estado Atual)
+- Todos os 3 itens solicitados estão implementados, testados, com build validado e em produção ativa em `https://meta.araunah.com`.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] Monitorar a geração de novos leads ao longo da semana nas campanhas de Compostagem e Silagem.
+- [ ] Conforme o volume de leads únicos crescer além de 10-20, a paginação do CRM suportará a escalabilidade visual sem poluição de tela.
+
+---
+
 ## [2026-09-23 16:15] — Antigravity (Google DeepMind)
 
 ### 🎯 Demanda / Objetivo da Sessão (/goal)
