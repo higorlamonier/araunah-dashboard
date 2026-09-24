@@ -33,4 +33,79 @@ assert.equal(JSON.stringify(result.leads).includes('não deve sair'), false)
 
 const blocked = await handler(new Request('https://meta.araunah.com/leads-api/summary'))
 assert.equal(blocked.status, 503)
-console.log('OK: n8n leads parser and secure Access gate passed')
+
+// Test 2: Phone correlation across qualification and CRM transfer
+const qualExecution = {
+  startedAt: '2026-09-24T16:00:00.000Z',
+  data: {
+    resultData: {
+      runData: {
+        'Extrair Mensagem ou Botão': [{ data: { main: [[{ json: { telefone: '553899884538', nome_cliente: 'Rowena Petroll' } }]] } }],
+        'VALIDAR DADOS MINIMOS DO LEAD': [{ data: { main: [[{ json: { qualificacao_minima_completa: false, mensagem_cliente: 'Qual o interesse?' } }]] } }],
+      },
+    },
+  },
+}
+const crmExecution = {
+  startedAt: '2026-09-24T16:30:00.000Z',
+  data: {
+    resultData: {
+      runData: {
+        'API SUPABASE': [{ data: { main: [[{ json: { id: 30068, status: 'criado' } }]] } }],
+        'ORGANIZAR DADOS DO AGENT': [{ data: { main: [[{ json: {
+          lead_nome: 'ROWENA BETINA PETROLL', cidade: 'PARACATU', uf: 'MG', interesse: 'compostagem', segmento: 'Agro',
+          campanha: 'Campanhas Meta Ads', consultor_responsavel: 'ADRIANO CAMARGO', qualificacao_minima_completa: true,
+          informações: 'Lead qualificado', data: 'Dados do lead', lead_telefone_original: '553899884538',
+        } }]] } }],
+        'IF Lead Reincidente Atualizado': [{ data: { main: [[{ json: { lead_reincidente: false } }]] } }],
+        'Enviar Resposta do Robô (Transferencia)': [{ data: { main: [[{ json: { messages: [{ id: 'graph-rowena' }] } }]] } }],
+      },
+    },
+  },
+}
+
+const mergedResult = __test__.buildLeads([qualExecution, crmExecution], new Date('2026-09-01T00:00:00.000Z'))
+assert.equal(mergedResult.summary.uniqueLeads, 1, 'Should merge 2 executions of same phone into 1 lead')
+assert.equal(mergedResult.summary.created, 1, 'Should count as created, not in-qualification')
+assert.equal(mergedResult.summary.inQualification, 0, 'Should not count as in-qualification')
+assert.equal(mergedResult.summary.transferConfirmed, 1, 'Should confirm transfer')
+assert.equal(mergedResult.leads[0].leadId, '30068', 'Should use CRM lead ID')
+assert.equal(mergedResult.leads[0].crmStatus, 'criado')
+assert.equal(mergedResult.leads[0].consultant, 'ADRIANO CAMARGO')
+assert.equal(Object.hasOwn(mergedResult.leads[0], 'phone'), false)
+assert.equal(Object.hasOwn(mergedResult.leads[0], 'rawPhone'), false)
+assert.equal(mergedResult.leads[0].n8nEvents.length, 2, 'Should preserve interaction history')
+
+// Test 3: StaticData conversationStates sync when execution only has bot qualification
+const stateSyncExecution = {
+  startedAt: '2026-09-24T16:20:00.000Z',
+  data: {
+    resultData: {
+      runData: {
+        'Extrair Mensagem ou Botão': [{ data: { main: [[{ json: { telefone: '553899884538', nome_cliente: 'Rowena Petroll' } }]] } }],
+        'VALIDAR DADOS MINIMOS DO LEAD': [{ data: { main: [[{ json: { qualificacao_minima_completa: false } }]] } }],
+      },
+    },
+  },
+}
+const mockConvStates = {
+  'whatsapp:553899884538': {
+    status: 'transferred',
+    crmLeadId: 30068,
+    qualification: {
+      nome: { value: 'Rowena Betina Petroll' },
+      cidade: { value: 'Paracatu' },
+      uf: { value: 'MG' },
+      interesse: { value: 'compostagem de esterco de confinamento' },
+    },
+  },
+}
+const stateSyncResult = __test__.buildLeads([stateSyncExecution], new Date('2026-09-01T00:00:00.000Z'), mockConvStates)
+assert.equal(stateSyncResult.summary.uniqueLeads, 1)
+assert.equal(stateSyncResult.summary.inQualification, 0, 'Transferred state must not be in qualification')
+assert.equal(stateSyncResult.leads[0].crmStatus, 'criado')
+assert.equal(stateSyncResult.leads[0].leadId, '30068')
+assert.equal(stateSyncResult.leads[0].name, 'Rowena Betina Petroll')
+assert.equal(stateSyncResult.leads[0].transfer, 'enviada')
+
+console.log('OK: all n8n leads tests (CRM fixtures, phone correlation, staticData sync) passed!')

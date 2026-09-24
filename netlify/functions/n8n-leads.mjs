@@ -138,7 +138,7 @@ function maskPhone(phone) {
   return `${clean.slice(0, 4)}****${clean.slice(-4)}`
 }
 
-function buildLeadEvent(execution) {
+function buildLeadEvent(execution, conversationStates = {}) {
   const crm = firstNodeItem(execution, 'API SUPABASE')
   const leadId = crm.id
   const organized = firstNodeItem(execution, 'ORGANIZAR DADOS DO AGENT')
@@ -152,8 +152,10 @@ function buildLeadEvent(execution) {
 
   // Caso 1: Lead persistido no CRM (API SUPABASE)
   if (leadId && crm.status) {
+    const rawPhone = String(organized.lead_telefone_original || extrair.telefone || extrair.de_numero || crm.telefone || '').replace(/\D/g, '')
     return {
       leadId: String(leadId),
+      rawPhone: rawPhone || undefined,
       occurredAt: executionDate(execution),
       crmStatus: String(crm.status),
       name: String(organized.lead_nome ?? '').trim(),
@@ -177,14 +179,45 @@ function buildLeadEvent(execution) {
   const confirmed = validador.dados_minimos_confirmados || {}
   const candidateName = confirmed.nome || extrair.nome_cliente || organized.lead_nome
   if (candidateName || extrair.telefone) {
-    const rawPhone = extrair.telefone || extrair.de_numero || ''
+    const rawPhone = String(extrair.telefone || extrair.de_numero || organized.lead_telefone_original || '').replace(/\D/g, '')
+    const convState = rawPhone ? conversationStates[`whatsapp:${rawPhone}`] : null
+    const isTransferredInState = convState?.status === 'transferred' || Boolean(convState?.crmLeadId)
     const virtualId = rawPhone ? `waba-${rawPhone}` : `n8n-${execution.id || Date.now()}`
     const city = String(confirmed.cidade || extrair.cidade || organized.cidade || '').trim()
     const state = String(confirmed.uf || extrair.uf || (extrair.mensagem?.length === 2 ? extrair.mensagem.toUpperCase() : '') || '').trim()
     const interest = String(confirmed.interesse || extrair.interesse || organized.interesse || '').trim()
 
+    if (isTransferredInState) {
+      const effectiveLeadId = convState?.crmLeadId ? String(convState.crmLeadId) : virtualId
+      const confirmedName = convState?.qualification?.nome?.value || candidateName
+      const confirmedCity = convState?.qualification?.cidade?.value || city
+      const confirmedUf = convState?.qualification?.uf?.value || state
+      const confirmedInteresse = convState?.qualification?.interesse?.value || interest
+      return {
+        leadId: effectiveLeadId,
+        rawPhone: rawPhone || undefined,
+        occurredAt: executionDate(execution),
+        crmStatus: 'criado',
+        name: String(confirmedName || 'Lead WhatsApp').trim(),
+        city: confirmedCity || 'Em atendimento',
+        state: confirmedUf || '--',
+        interest: confirmedInteresse || 'Aguardando interesse',
+        segment: String(organized.segmento || extrair.segmento || 'Agro').trim(),
+        campaign: String(extrair.campanha || organized.campanha || 'WhatsApp Direto').trim(),
+        consultant: String(organized.consultor_responsavel || 'ADRIANO CAMARGO').trim(),
+        qualified: true,
+        recurrence: false,
+        recurrenceOrigin: '',
+        crmPersisted: true,
+        transfer: 'enviada',
+        currentObservation: redactObservation(validador.mensagem_cliente || extrair.mensagem || ''),
+        currentContactData: maskPhone(rawPhone),
+      }
+    }
+
     return {
       leadId: virtualId,
+      rawPhone: rawPhone || undefined,
       occurredAt: executionDate(execution),
       crmStatus: 'em-qualificacao',
       name: String(candidateName || 'Lead WhatsApp').trim(),
@@ -207,34 +240,67 @@ function buildLeadEvent(execution) {
   return null
 }
 
-function buildLeads(executions, start) {
+function buildLeads(executions, start, conversationStates = {}) {
   const events = executions
     .filter((execution) => executionDate(execution) && new Date(executionDate(execution)) >= start)
-    .map(buildLeadEvent)
+    .map((execution) => buildLeadEvent(execution, conversationStates))
     .filter(Boolean)
     .sort((left, right) => String(right.occurredAt).localeCompare(String(left.occurredAt)))
 
   const grouped = new Map()
   for (const event of events) {
-    const current = grouped.get(event.leadId)
+    const groupKey = event.rawPhone ? `phone-${event.rawPhone}` : event.leadId
+    const current = grouped.get(groupKey)
     if (!current) {
-      grouped.set(event.leadId, { ...event, n8nEvents: [event] })
+      grouped.set(groupKey, { ...event, n8nEvents: [event] })
     } else {
       current.n8nEvents.push(event)
+      if (!current.crmPersisted && event.crmPersisted) {
+        current.crmPersisted = true
+        current.crmStatus = event.crmStatus
+        current.leadId = event.leadId
+        if (event.consultant && event.consultant !== 'Chatbot IA (Qualificação)') {
+          current.consultant = event.consultant
+        }
+        if (event.transfer && event.transfer !== 'em-atendimento-ia') {
+          current.transfer = event.transfer
+        }
+        if (event.currentContactData && !event.currentContactData.includes('****')) {
+          current.currentContactData = event.currentContactData
+        }
+      }
+      if (current.crmPersisted && current.leadId.startsWith('waba-') && event.leadId && !event.leadId.startsWith('waba-')) {
+        current.leadId = event.leadId
+      }
+      if (current.transfer === 'em-atendimento-ia' && event.transfer && event.transfer !== 'em-atendimento-ia') {
+        current.transfer = event.transfer
+      }
+      if (current.consultant === 'Chatbot IA (Qualificação)' && event.consultant && event.consultant !== 'Chatbot IA (Qualificação)') {
+        current.consultant = event.consultant
+      }
+      if (current.crmStatus === 'em-qualificacao' && event.crmStatus && event.crmStatus !== 'em-qualificacao') {
+        current.crmStatus = event.crmStatus
+      }
+      if (event.qualified) {
+        current.qualified = true
+      }
     }
   }
 
-  const leads = [...grouped.values()].map((lead) => ({
-    ...lead,
-    n8nEvents: lead.n8nEvents.map((event) => ({
-      occurredAt: event.occurredAt,
-      crmStatus: event.crmStatus,
-      recurrence: event.recurrence,
-      transfer: event.transfer,
-      currentObservation: event.currentObservation,
-      currentContactData: event.currentContactData,
-    })),
-  }))
+  const leads = [...grouped.values()].map((lead) => {
+    const { rawPhone, ...leadData } = lead
+    return {
+      ...leadData,
+      n8nEvents: lead.n8nEvents.map((event) => ({
+        occurredAt: event.occurredAt,
+        crmStatus: event.crmStatus,
+        recurrence: event.recurrence,
+        transfer: event.transfer,
+        currentObservation: event.currentObservation,
+        currentContactData: event.currentContactData,
+      })),
+    }
+  })
 
   const uniqueLeads = leads.length
   const inQualification = leads.filter((l) => l.crmStatus === 'em-qualificacao').length
@@ -263,8 +329,27 @@ async function fetchExecutions(start) {
   const workflowId = process.env.N8N_CHATBOT_WORKFLOW_ID ?? DEFAULT_WORKFLOW_ID
   if (!baseUrl || !apiKey) throw new Error('Integração n8n não configurada no ambiente do servidor.')
 
-  if (leadsMemoryCache.expiresAt > Date.now() && Array.isArray(leadsMemoryCache.data)) {
+  if (leadsMemoryCache.expiresAt > Date.now() && leadsMemoryCache.data) {
     return leadsMemoryCache.data
+  }
+
+  // 0. Busca workflow para carregar estados de conversação persistidos
+  let conversationStates = {}
+  try {
+    const wfRes = await fetch(`${baseUrl}/api/v1/workflows/${workflowId}`, {
+      headers: {
+        'X-N8N-API-KEY': apiKey,
+        Accept: 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+      },
+      signal: AbortSignal.timeout(6000),
+    })
+    if (wfRes.ok) {
+      const wfJson = await wfRes.json()
+      conversationStates = wfJson?.staticData?.global?.araunahConversationState ?? {}
+    }
+  } catch (err) {
+    console.warn('n8n conversationStates fetch notice:', err.message)
   }
 
   // 1. Busca rápida de cabeçalhos de até 300 execuções com paginação
@@ -319,8 +404,9 @@ async function fetchExecutions(start) {
   const results = await Promise.all(detailPromises)
   const executions = results.filter(Boolean)
 
-  leadsMemoryCache = { expiresAt: Date.now() + (2 * 60 * 1000), data: executions }
-  return executions
+  const output = { executions, conversationStates }
+  leadsMemoryCache = { expiresAt: Date.now() + (2 * 60 * 1000), data: output }
+  return output
 }
 
 export default async function handler(request) {
@@ -331,11 +417,13 @@ export default async function handler(request) {
     const range = Number(url.searchParams.get('days') ?? 30)
     if (!Number.isInteger(range) || ![7, 15, 30, 60, 90].includes(range)) return json({ error: 'Período inválido.' }, 400)
     const start = new Date(Date.now() - (range * 24 * 60 * 60 * 1000))
-    const executions = await fetchExecutions(start).catch((err) => {
+    const payload = await fetchExecutions(start).catch((err) => {
       console.warn('n8n live fetch notice:', err.message)
-      return []
+      return { executions: [], conversationStates: {} }
     })
-    const result = buildLeads(executions, start)
+    const executions = Array.isArray(payload) ? payload : (payload.executions || [])
+    const conversationStates = payload.conversationStates || {}
+    const result = buildLeads(executions, start, conversationStates)
     return json({
       schema: 'araunah.n8n-leads.v1',
       source: 'n8n: CHATBOT-ARAUNAH WHATSAPP',
