@@ -1,5 +1,37 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-24 18:20] — Antigravity (Google DeepMind) — CORRELAÇÃO DE LEADS POR TELEFONE E SINCRONIZAÇÃO DE ESTADO TRANSFERRED
+
+### 🎯 Demanda / Objetivo da Sessão
+- Corrigir o problema onde o lead "Rowena Petroll" não aparecia na transferência (CRM) no dashboard `meta.araunah.com`, permanecendo presa em "EM QUALIFICAÇÃO".
+- Unificar o agrupamento de interações de leads no endpoint `/leads-api/summary`.
+
+### ✅ O que foi realizado
+- [x] **Agrupamento por Telefone Normalizado em `netlify/functions/n8n-leads.mjs`:**
+  - Anteriormente, o backend agrupava os eventos estritamente por `event.leadId`. Execuções em qualificação geravam `leadId = 'waba-...'`, enquanto execuções de persistência no CRM geravam `leadId = String(crm.id)`. Isso criava dois cards separados para o mesmo lead (um qualificado/preso e outro criado).
+  - Implementado agrupamento por telefone normalizado (`rawPhone ? 'phone-' + rawPhone : event.leadId`). Eventos de uma mesma pessoa agora se consolidam em um único lead card.
+  - Se qualquer evento ou estado da conversa confirmar CRM ou transferência (`criado`, `atualizado`, `transfer: 'enviada'`), o lead agregado é promovido para o status de CRM persistido com seu ID real.
+- [x] **Sincronização de Estado com `araunahConversationState`:**
+  - O endpoint agora busca os estados persistidos de conversa do workflow n8n (`staticData.global.araunahConversationState`).
+  - Leads marcados como `status: 'transferred'` ou com `crmLeadId` no robô são imediatamente refletidos como transferidos no dashboard, mesmo se suas execuções anteriores no histórico não tiverem executado o nó `API SUPABASE` diretamente.
+- [x] **Privacidade e Proteção de Dados:**
+  - Chaves internas de telefone (`phone`, `rawPhone`) são removidas antes de serializar o retorno da API para evitar exposição de dados sensíveis fora do `currentContactData` mascarado.
+- [x] **Testes Automatizados e Deploy:**
+  - Atualizado `scripts/test-n8n-leads.mjs` com fixtures de correlation por telefone, persistência e privacidade: 100% aprovado.
+  - Deploy em produção realizado com sucesso: `https://meta.araunah.com` (Deploy ID: `6ab593919ad382412783f3cb`).
+  - Verificado em produção: Rowena Petroll (Lead 30068) transferida com sucesso, consultor Adriano Camargo, 5 interações na timeline.
+
+### ⏸️ Onde parou (Estado Atual)
+- Em produção ativa e validada.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] Conforme novos leads forem transferidos pelo chatbot, verificar sua exibição unificada na aba Leads CRM.
+
+---
+
 ## [2026-09-23 17:50] — Antigravity (Google DeepMind)
 
 ### 🎯 Demanda / Objetivo da Sessão
