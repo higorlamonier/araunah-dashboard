@@ -131,12 +131,26 @@ function redactObservation(value) {
   return typeof value === 'string' ? value.trim().slice(0, 1400) : ''
 }
 
-function maskPhone(phone) {
+function formatContactPhone(phone) {
   if (!phone || typeof phone !== 'string') return ''
   const clean = phone.replace(/\D/g, '')
-  if (clean.length < 8) return '****'
-  return `${clean.slice(0, 4)}****${clean.slice(-4)}`
+  if (!clean || clean.length < 8) return ''
+  if (clean.length === 13 && clean.startsWith('55')) {
+    return `+55 (${clean.slice(2, 4)}) ${clean.slice(4, 9)}-${clean.slice(9)}`
+  }
+  if (clean.length === 12 && clean.startsWith('55')) {
+    return `+55 (${clean.slice(2, 4)}) ${clean.slice(4, 8)}-${clean.slice(8)}`
+  }
+  if (clean.length === 11) {
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7)}`
+  }
+  if (clean.length === 10) {
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 6)}-${clean.slice(6)}`
+  }
+  return clean.length >= 8 ? `+${clean}` : clean
 }
+
+const maskPhone = formatContactPhone
 
 function buildLeadEvent(execution, conversationStates = {}) {
   const crm = firstNodeItem(execution, 'API SUPABASE')
@@ -171,7 +185,7 @@ function buildLeadEvent(execution, conversationStates = {}) {
       crmPersisted: recurrence.crm_persistencia_confirmada === true || Boolean(crm.status),
       transfer: transferConfirmed ? 'enviada' : recurrenceReply.atendimento_humano_oferecido === true ? 'oferecida-em-reincidencia' : 'nao-confirmada',
       currentObservation: redactObservation(organized['informações']),
-      currentContactData: redactObservation(organized.data),
+      currentContactData: formatContactPhone(rawPhone) || redactObservation(organized.data),
     }
   }
 
@@ -265,7 +279,7 @@ function buildLeads(executions, start, conversationStates = {}) {
         if (event.transfer && event.transfer !== 'em-atendimento-ia') {
           current.transfer = event.transfer
         }
-        if (event.currentContactData && !event.currentContactData.includes('****')) {
+        if (event.currentContactData) {
           current.currentContactData = event.currentContactData
         }
       }
