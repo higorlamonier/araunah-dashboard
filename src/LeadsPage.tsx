@@ -6,6 +6,8 @@ type LeadEvent = {
   crmStatus: string
   recurrence: boolean
   transfer: string
+  leadMessage?: string
+  botMessage?: string
   currentObservation: string
   currentContactData: string
 }
@@ -26,6 +28,8 @@ type Lead = {
   recurrenceOrigin: string
   crmPersisted: boolean
   transfer: string
+  leadMessage?: string
+  botMessage?: string
   currentObservation: string
   currentContactData: string
   n8nEvents: LeadEvent[]
@@ -548,10 +552,31 @@ export default function LeadsPage({
                               </div>
                             </div>
 
-                            {lead.currentObservation && (
-                              <div className="drawer-obs">
-                                <span className="drawer-lbl">Última Mensagem / Registro da IA:</span>
-                                <p className="obs-text">{lead.currentObservation}</p>
+                            {(lead.leadMessage || lead.botMessage || lead.currentObservation) && (
+                              <div className="drawer-conversation-block">
+                                <span className="drawer-lbl">Diálogo Recente (Mensagem do Lead & Resposta da IA):</span>
+                                <div className="conversation-bubbles">
+                                  {lead.leadMessage && (
+                                    <div className="chat-bubble chat-bubble-lead">
+                                      <div className="chat-bubble-header">
+                                        <span className="chat-avatar">👤</span>
+                                        <span className="chat-sender-name font-semibold">{lead.name || 'Cliente / Lead'}</span>
+                                        <span className="chat-role-tag">Mensagem do Lead</span>
+                                      </div>
+                                      <p className="chat-bubble-text">{lead.leadMessage}</p>
+                                    </div>
+                                  )}
+                                  {(lead.botMessage || lead.currentObservation) && (
+                                    <div className="chat-bubble chat-bubble-bot">
+                                      <div className="chat-bubble-header">
+                                        <span className="chat-avatar">🤖</span>
+                                        <span className="chat-sender-name font-semibold">Assistente Virtual (Araunah IA)</span>
+                                        <span className="chat-role-tag">Resposta do Chatbot</span>
+                                      </div>
+                                      <p className="chat-bubble-text">{lead.botMessage || lead.currentObservation}</p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
 
@@ -561,11 +586,24 @@ export default function LeadsPage({
                                 <div className="timeline-items">
                                   {lead.n8nEvents.map((evt, idx) => (
                                     <div key={idx} className="timeline-item">
-                                      <span className="timeline-time text-tabular">{formatDate(evt.occurredAt)}</span>
-                                      <span className="timeline-status badge badge-neutral">{evt.crmStatus}</span>
-                                      {evt.currentObservation && (
-                                        <p className="timeline-msg">{evt.currentObservation}</p>
-                                      )}
+                                      <div className="timeline-header">
+                                        <span className="timeline-time text-tabular">{formatDate(evt.occurredAt)}</span>
+                                        <span className="timeline-status badge badge-neutral">{evt.crmStatus}</span>
+                                      </div>
+                                      <div className="timeline-messages">
+                                        {evt.leadMessage && (
+                                          <div className="timeline-msg-lead">
+                                            <span className="timeline-role">👤 Cliente:</span>
+                                            <p className="timeline-text">{evt.leadMessage}</p>
+                                          </div>
+                                        )}
+                                        {(evt.botMessage || evt.currentObservation) && (
+                                          <div className="timeline-msg-bot">
+                                            <span className="timeline-role">🤖 IA:</span>
+                                            <p className="timeline-text">{evt.botMessage || evt.currentObservation}</p>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
                                   ))}
                                 </div>

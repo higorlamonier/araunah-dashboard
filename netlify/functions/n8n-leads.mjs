@@ -167,6 +167,12 @@ function buildLeadEvent(execution, conversationStates = {}) {
   // Caso 1: Lead persistido no CRM (API SUPABASE)
   if (leadId && crm.status) {
     const rawPhone = String(organized.lead_telefone_original || extrair.telefone || extrair.de_numero || crm.telefone || '').replace(/\D/g, '')
+    const convState = rawPhone ? conversationStates[`whatsapp:${rawPhone}`] : null
+    const convLeadMsgs = convState?.leadMessages || []
+    const latestConvLeadMsg = convLeadMsgs.length > 0 ? convLeadMsgs[convLeadMsgs.length - 1].text : ''
+    const leadMsg = redactObservation(extrair.mensagem || latestConvLeadMsg || '')
+    const botMsg = redactObservation(validador.mensagem_cliente || validador.output || organized['informações'] || convState?.lastAssistantText || '')
+
     return {
       leadId: String(leadId),
       rawPhone: rawPhone || undefined,
@@ -184,7 +190,9 @@ function buildLeadEvent(execution, conversationStates = {}) {
       recurrenceOrigin: String(recurrence.recorrencia_origem ?? '').trim(),
       crmPersisted: recurrence.crm_persistencia_confirmada === true || Boolean(crm.status),
       transfer: transferConfirmed ? 'enviada' : recurrenceReply.atendimento_humano_oferecido === true ? 'oferecida-em-reincidencia' : 'nao-confirmada',
-      currentObservation: redactObservation(organized['informações']),
+      leadMessage: leadMsg,
+      botMessage: botMsg,
+      currentObservation: botMsg || leadMsg,
       currentContactData: formatContactPhone(rawPhone) || redactObservation(organized.data),
     }
   }
@@ -195,6 +203,10 @@ function buildLeadEvent(execution, conversationStates = {}) {
   if (candidateName || extrair.telefone) {
     const rawPhone = String(extrair.telefone || extrair.de_numero || organized.lead_telefone_original || '').replace(/\D/g, '')
     const convState = rawPhone ? conversationStates[`whatsapp:${rawPhone}`] : null
+    const convLeadMsgs = convState?.leadMessages || []
+    const latestConvLeadMsg = convLeadMsgs.length > 0 ? convLeadMsgs[convLeadMsgs.length - 1].text : ''
+    const leadMsg = redactObservation(extrair.mensagem || latestConvLeadMsg || '')
+    const botMsg = redactObservation(validador.mensagem_cliente || validador.output || convState?.lastAssistantText || '')
     const isTransferredInState = convState?.status === 'transferred' || Boolean(convState?.crmLeadId)
     const virtualId = rawPhone ? `waba-${rawPhone}` : `n8n-${execution.id || Date.now()}`
     const city = String(confirmed.cidade || extrair.cidade || organized.cidade || '').trim()
@@ -224,8 +236,10 @@ function buildLeadEvent(execution, conversationStates = {}) {
         recurrenceOrigin: '',
         crmPersisted: true,
         transfer: 'enviada',
-        currentObservation: redactObservation(validador.mensagem_cliente || extrair.mensagem || ''),
-        currentContactData: maskPhone(rawPhone),
+        leadMessage: leadMsg,
+        botMessage: botMsg,
+        currentObservation: botMsg || leadMsg,
+        currentContactData: formatContactPhone(rawPhone),
       }
     }
 
@@ -246,8 +260,10 @@ function buildLeadEvent(execution, conversationStates = {}) {
       recurrenceOrigin: '',
       crmPersisted: false,
       transfer: 'em-atendimento-ia',
-      currentObservation: redactObservation(validador.mensagem_cliente || extrair.mensagem || ''),
-      currentContactData: maskPhone(rawPhone),
+      leadMessage: leadMsg,
+      botMessage: botMsg,
+      currentObservation: botMsg || leadMsg,
+      currentContactData: formatContactPhone(rawPhone),
     }
   }
 
@@ -269,6 +285,12 @@ function buildLeads(executions, start, conversationStates = {}) {
       grouped.set(groupKey, { ...event, n8nEvents: [event] })
     } else {
       current.n8nEvents.push(event)
+      if (event.leadMessage && !current.leadMessage) {
+        current.leadMessage = event.leadMessage
+      }
+      if (event.botMessage && !current.botMessage) {
+        current.botMessage = event.botMessage
+      }
       if (!current.crmPersisted && event.crmPersisted) {
         current.crmPersisted = true
         current.crmStatus = event.crmStatus
@@ -305,11 +327,15 @@ function buildLeads(executions, start, conversationStates = {}) {
     const { rawPhone, ...leadData } = lead
     return {
       ...leadData,
+      leadMessage: lead.leadMessage || '',
+      botMessage: lead.botMessage || '',
       n8nEvents: lead.n8nEvents.map((event) => ({
         occurredAt: event.occurredAt,
         crmStatus: event.crmStatus,
         recurrence: event.recurrence,
         transfer: event.transfer,
+        leadMessage: event.leadMessage || '',
+        botMessage: event.botMessage || '',
         currentObservation: event.currentObservation,
         currentContactData: event.currentContactData,
       })),
