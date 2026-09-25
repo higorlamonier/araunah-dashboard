@@ -1,5 +1,42 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-25 08:37] — Antigravity (Google DeepMind) — EXIBIÇÃO DO DIÁLOGO COMPLETO (MENSAGEM DO LEAD + RESPOSTA DA IA)
+
+### 🎯 Demanda / Objetivo da Sessão
+- Atender à demanda do usuário: *"Esta mostrando apenas a interação/mensagem da IA, quero saber o que o cliente/lead disse tambem"*.
+- Exibir com clareza o diálogo completo em cada lead: a mensagem real enviada pelo cliente/lead (inbound) e a resposta formulada pelo chatbot/assistente (outbound).
+
+### ✅ O que foi realizado
+- [x] **Captura e Estruturação de Mensagens em `netlify/functions/n8n-leads.mjs`:**
+  - Extração precisa do texto do cliente: extraído do nó `Extrair Mensagem ou Botão` (`firstNodeItem(execution, 'Extrair Mensagem ou Botão').mensagem`) com fallback para o histórico de `convState.leadMessages` do estado da conversa no n8n.
+  - Extração da resposta da IA: obtido de `VALIDAR DADOS MINIMOS DO LEAD` (`mensagem_cliente` / `output`) ou do agrupamento de informações.
+  - Exposição de `leadMessage` e `botMessage` de forma segregada no objeto de lead e nos itens de `n8nEvents` do histórico.
+  - Propagação correta na agregação multi-turnos de leads por telefone.
+- [x] **Interface Visual no Frontend (`src/LeadsPage.tsx` e `src/LeadsPage.css`):**
+  - Tipagem atualizada em TypeScript com `leadMessage?: string; botMessage?: string`.
+  - No Drawer de detalhes do Lead: substituído o bloco estático anterior pelo componente de conversa `.drawer-conversation-block` com balões dedicados:
+    - 👤 **Mensagem do Lead** (`.chat-bubble-lead`): destaque em ciano (`#38bdf8`), avatar e identificação do remetente.
+    - 🤖 **Resposta do Chatbot** (`.chat-bubble-bot`): destaque em esmeralda (`#10b981`), avatar de assistente virtual Araunah IA.
+  - No Histórico de Interações (`.drawer-timeline`): cada evento do histórico agora exibe ambos os papéis (`👤 Cliente:` e `🤖 IA:`) com formatação visual individual.
+- [x] **Testes, Deploy e Validação Live em Produção:**
+  - Testes unitários `node scripts/test-n8n-leads.mjs` 100% aprovados.
+  - Build de produção (`npm run build`) concluído com sucesso.
+  - Deploy publicado no Netlify em `https://meta.araunah.com` (Deploy ID: `6ab65c3a59d057987118a8fc`).
+  - `scripts/verify-live.mjs` aprovado em todos os 5 estágios.
+  - Verificação ao vivo no endpoint de produção confirmou 100% dos leads (17/17) com `leadMessage` e `botMessage` populados (ex: lead "Ambientalista" exibindo a mensagem do livro de sustentabilidade e a resposta generativa da IA).
+
+### ⏸️ Onde parou (Estado Atual)
+- Em produção ativa e validada em `https://meta.araunah.com`.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] Monitorar o fluxo de atendimento em tempo real conforme novos leads interagem pelo WhatsApp.
+- [ ] Explorar filtros rápidos por palavras-chave ou termos buscados pelo lead no dashboard se desejado pelo time comercial.
+
+---
+
 ## [2026-09-25 08:30] — Antigravity (Google DeepMind) — EXIBIÇÃO DE CONTATOS COMPLETOS E BOTÃO DIRETO DE WHATSAPP
 
 ### 🎯 Demanda / Objetivo da Sessão
