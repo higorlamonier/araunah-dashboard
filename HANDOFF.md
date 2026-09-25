@@ -1,5 +1,39 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-25 08:30] — Antigravity (Google DeepMind) — EXIBIÇÃO DE CONTATOS COMPLETOS E BOTÃO DIRETO DE WHATSAPP
+
+### 🎯 Demanda / Objetivo da Sessão
+- Exibir os números de telefone completos em `currentContactData` sem máscara de asteriscos (`****`), atendendo à solicitação do usuário.
+- Permitir acesso rápido e direto ao contato via WhatsApp no dashboard.
+
+### ✅ O que foi realizado
+- [x] **Substituição de `maskPhone` por `formatContactPhone` em `netlify/functions/n8n-leads.mjs`:**
+  - Em vez de mascarar os dígitos centrais (`5538****4538`), a função agora formata os telefones com todos os dígitos visíveis no padrão brasileiro E.164:
+    - 13 dígitos: `+55 (DD) 9XXXX-XXXX`
+    - 12 dígitos: `+55 (DD) XXXX-XXXX` (ex: `+55 (38) 9988-4538` para Rowena)
+    - 11/10 dígitos: `(DD) XXXXX-XXXX` / `(DD) XXXX-XXXX`
+  - Aplicado tanto para leads criados no CRM quanto em qualificação e no drawer de eventos.
+- [x] **Acesso Direto ao WhatsApp no Frontend (`src/LeadsPage.tsx` e `src/LeadsPage.css`):**
+  - Implementado helper `getWhatsAppUrl(phoneStr)` que normaliza os dígitos e gera o link direto `https://wa.me/55...`.
+  - Na tabela de leads: adicionado botão/link elegante de WhatsApp (`.lead-wa-link`) ao lado do telefone completo, com abertura em nova aba sem propagar o clique da linha.
+  - No drawer lateral de detalhes: adicionado o campo dedicado "Telefone / WhatsApp" com botão "Abrir Conversa →" (`.drawer-wa-btn`).
+- [x] **Validação e Deploy em Produção:**
+  - Testes unitários `node scripts/test-n8n-leads.mjs` 100% aprovados.
+  - Deploy publicado no Netlify (`meta.araunah.com`, Deploy ID: `6ab65a3ec3b29d24551f33a4`).
+  - Script `scripts/verify-live.mjs` aprovado em todos os 5 estágios.
+  - Verificação ao vivo no endpoint de produção: `Rowena Betina Petroll` exibe `+55 (38) 9988-4538` e todos os outros leads exibem seus telefones completos.
+
+### ⏸️ Onde parou (Estado Atual)
+- Em produção ativa e validada.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] O time comercial pode clicar diretamente no botão WhatsApp de qualquer lead na tabela para iniciar contato.
+
+---
+
 ## [2026-09-24 18:20] — Antigravity (Google DeepMind) — CORRELAÇÃO DE LEADS POR TELEFONE E SINCRONIZAÇÃO DE ESTADO TRANSFERRED
 
 ### 🎯 Demanda / Objetivo da Sessão
