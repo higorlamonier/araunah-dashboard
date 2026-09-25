@@ -52,7 +52,23 @@ type Payload = {
   leads: Lead[]
 }
 
-const periods = [7, 15, 30, 60, 90]
+type PeriodKey = 'today' | 7 | 15 | 30 | 'all'
+
+type PeriodOption = {
+  key: PeriodKey
+  label: string
+  shortLabel: string
+  badgeLabel: string
+}
+
+const PERIOD_OPTIONS: PeriodOption[] = [
+  { key: 'today', label: 'Hoje (Dia Atual)', shortLabel: 'Hoje (24h)', badgeLabel: 'Hoje (Dia Atual)' },
+  { key: 7, label: '7 dias', shortLabel: '7 dias', badgeLabel: 'Últimos 7 dias' },
+  { key: 15, label: '15 dias', shortLabel: '15 dias', badgeLabel: 'Últimos 15 dias' },
+  { key: 30, label: '30 dias', shortLabel: '30 dias', badgeLabel: 'Últimos 30 dias' },
+  { key: 'all', label: 'Todo o Período', shortLabel: 'Todo o período', badgeLabel: 'Todo o Histórico' },
+]
+
 const PAGE_SIZE = 10
 
 function statusLabel(value: string) {
@@ -79,6 +95,15 @@ function getWhatsAppUrl(phoneStr: string | undefined): string | null {
   return `https://wa.me/${full}`
 }
 
+function normalizeText(text: string | undefined | null): string {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+}
+
 export default function LeadsPage({
   onBackToDashboard,
   embedded = false,
@@ -86,7 +111,7 @@ export default function LeadsPage({
   onBackToDashboard?: () => void
   embedded?: boolean
 }) {
-  const [days, setDays] = useState(30)
+  const [days, setDays] = useState<PeriodKey>(7)
   const [data, setData] = useState<Payload | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -94,6 +119,11 @@ export default function LeadsPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'crm' | 'qualificacao' | 'transfer'>('all')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const currentPeriodOption = useMemo(
+    () => PERIOD_OPTIONS.find((opt) => opt.key === days) ?? PERIOD_OPTIONS[1],
+    [days]
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -132,13 +162,16 @@ export default function LeadsPage({
     setCurrentPage(1)
   }
 
-  const handlePeriodChange = (p: number) => {
+  const handlePeriodChange = (p: PeriodKey) => {
     setDays(p)
     setCurrentPage(1)
   }
 
   const filteredLeads = useMemo(() => {
     const leads = data?.leads ?? []
+    const term = normalizeText(searchTerm)
+    const termDigits = searchTerm.replace(/\D/g, '')
+
     return leads.filter((lead) => {
       // Filtros de status
       if (statusFilter === 'crm' && lead.crmStatus !== 'criado' && lead.crmStatus !== 'atualizado') {
@@ -150,17 +183,44 @@ export default function LeadsPage({
       if (statusFilter === 'transfer' && lead.transfer !== 'enviada') {
         return false
       }
-      // Busca textual
-      if (!searchTerm) return true
-      const term = searchTerm.toLowerCase()
-      return (
-        lead.name?.toLowerCase().includes(term) ||
-        lead.city?.toLowerCase().includes(term) ||
-        lead.state?.toLowerCase().includes(term) ||
-        lead.interest?.toLowerCase().includes(term) ||
-        lead.campaign?.toLowerCase().includes(term) ||
-        lead.currentContactData?.toLowerCase().includes(term)
-      )
+
+      // Busca textual ampla
+      if (!term) return true
+
+      // Busca por dígitos de telefone (ex: 9979 ou 349979)
+      const phoneDigits = lead.currentContactData?.replace(/\D/g, '') || ''
+      if (termDigits.length >= 3 && phoneDigits.includes(termDigits)) {
+        return true
+      }
+
+      // Busca nos campos principais do lead
+      if (
+        normalizeText(lead.name).includes(term) ||
+        normalizeText(lead.city).includes(term) ||
+        normalizeText(lead.state).includes(term) ||
+        normalizeText(lead.interest).includes(term) ||
+        normalizeText(lead.segment).includes(term) ||
+        normalizeText(lead.campaign).includes(term) ||
+        normalizeText(lead.consultant).includes(term) ||
+        normalizeText(lead.currentContactData).includes(term) ||
+        normalizeText(lead.leadMessage).includes(term) ||
+        normalizeText(lead.botMessage).includes(term) ||
+        normalizeText(lead.currentObservation).includes(term)
+      ) {
+        return true
+      }
+
+      // Busca em qualquer mensagem histórica do diálogo
+      if (Array.isArray(lead.n8nEvents)) {
+        return lead.n8nEvents.some(
+          (e) =>
+            normalizeText(e.leadMessage).includes(term) ||
+            normalizeText(e.botMessage).includes(term) ||
+            normalizeText(e.currentObservation).includes(term)
+        )
+      }
+
+      return false
     })
   }, [data?.leads, searchTerm, statusFilter])
 
@@ -230,14 +290,14 @@ export default function LeadsPage({
               </a>
             )}
             <div className="leads-segmented-control">
-              {periods.map((item) => (
+              {PERIOD_OPTIONS.map((item) => (
                 <button
-                  key={item}
+                  key={item.key}
                   type="button"
-                  className={`leads-segmented-btn ${days === item ? 'active' : ''}`}
-                  onClick={() => handlePeriodChange(item)}
+                  className={`leads-segmented-btn ${days === item.key ? 'active' : ''}`}
+                  onClick={() => handlePeriodChange(item.key)}
                 >
-                  {item}d
+                  {item.label}
                 </button>
               ))}
             </div>
@@ -251,14 +311,14 @@ export default function LeadsPage({
       {embedded && (
         <div className="leads-embedded-toolbar">
           <div className="leads-segmented-control">
-            {periods.map((item) => (
+            {PERIOD_OPTIONS.map((item) => (
               <button
-                key={item}
+                key={item.key}
                 type="button"
-                className={`leads-segmented-btn ${days === item ? 'active' : ''}`}
-                onClick={() => handlePeriodChange(item)}
+                className={`leads-segmented-btn ${days === item.key ? 'active' : ''}`}
+                onClick={() => handlePeriodChange(item.key)}
               >
-                {item} dias
+                {item.shortLabel}
               </button>
             ))}
           </div>
@@ -286,7 +346,7 @@ export default function LeadsPage({
               {totalInteractions > 0 ? ` · ${totalInteractions} mensagens trocadas com o chatbot` : ''}
             </p>
           </div>
-          <span className="funnel-period-badge">Período de {days} dias</span>
+          <span className="funnel-period-badge">Período: {currentPeriodOption.badgeLabel}</span>
         </div>
 
         <div className="leads-funnel-stages">
@@ -340,7 +400,7 @@ export default function LeadsPage({
         <div className="leads-kpi-card highlight-emerald">
           <span className="leads-kpi-title">Leads Únicos</span>
           <strong className="leads-kpi-num text-tabular">{totalLeads}</strong>
-          <span className="leads-kpi-detail">Contatos rastreados no período de {days} dias</span>
+          <span className="leads-kpi-detail">Contatos rastreados ({currentPeriodOption.badgeLabel})</span>
         </div>
         <div className="leads-kpi-card">
           <span className="leads-kpi-title">Em Qualificação IA</span>
@@ -365,13 +425,19 @@ export default function LeadsPage({
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Buscar por nome, cidade, UF, interesse ou telefone..."
+            placeholder="Buscar por nome, telefone, cidade, interesse ou conteúdo da conversa..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="leads-search-input"
           />
           {searchTerm && (
-            <button type="button" onClick={() => handleSearchChange('')} className="clear-search-btn">
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              className="clear-search-btn"
+              title="Limpar busca"
+              aria-label="Limpar busca"
+            >
               ✕
             </button>
           )}
@@ -411,6 +477,25 @@ export default function LeadsPage({
         </div>
       </section>
 
+      {/* Indicador de Busca Ativa */}
+      {searchTerm && (
+        <div className="leads-search-feedback">
+          <span className="search-feedback-text">
+            🔍 <strong>{filteredLeads.length}</strong> {filteredLeads.length === 1 ? 'lead encontrado' : 'leads encontrados'} para "<em>{searchTerm}</em>"
+          </span>
+          <div className="search-feedback-actions">
+            <button type="button" onClick={() => handleSearchChange('')} className="search-feedback-clear">
+              ✕ Limpar busca
+            </button>
+            {days !== 'all' && (
+              <button type="button" onClick={() => handlePeriodChange('all')} className="search-feedback-expand">
+                🔎 Buscar em Todo o Período
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Tabela de Leads com Paginação */}
       <section className="leads-table-container">
         <table className="leads-table">
@@ -430,13 +515,29 @@ export default function LeadsPage({
               <tr>
                 <td colSpan={7} className="leads-empty-row">
                   <div className="leads-empty-state">
-                    <span className="empty-icon">📂</span>
-                    <p>Nenhum lead encontrado com os filtros atuais.</p>
-                    {searchTerm && (
-                      <button type="button" onClick={() => handleSearchChange('')} className="clear-filter-link">
-                        Limpar busca
-                      </button>
-                    )}
+                    <span className="empty-icon">🔍</span>
+                    <p className="empty-title">
+                      {searchTerm
+                        ? `Nenhum lead encontrado para "${searchTerm}"`
+                        : 'Nenhum lead encontrado com os filtros atuais.'}
+                    </p>
+                    <p className="empty-subtitle">
+                      {searchTerm
+                        ? 'A busca pesquisa em nomes, telefones, cidades, interesses e nas mensagens do diálogo.'
+                        : 'Tente selecionar outro status ou ampliar o período.'}
+                    </p>
+                    <div className="empty-state-actions">
+                      {searchTerm && (
+                        <button type="button" onClick={() => handleSearchChange('')} className="pill-btn active">
+                          ✕ Limpar busca
+                        </button>
+                      )}
+                      {days !== 'all' && (
+                        <button type="button" onClick={() => handlePeriodChange('all')} className="pill-btn">
+                          🔎 Buscar em Todo o Período
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>

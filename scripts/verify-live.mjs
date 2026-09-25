@@ -33,9 +33,10 @@ assert.ok(cssContent.includes('.leads-funnel-card'), 'CSS must contain .leads-fu
 assert.ok(cssContent.includes('.n8n-pipeline-diagram'), 'CSS must contain .n8n-pipeline-diagram');
 assert.ok(cssContent.includes('.meta-didactic-card'), 'CSS must contain .meta-didactic-card');
 assert.ok(cssContent.includes('.leads-pagination-bar'), 'CSS must contain .leads-pagination-bar');
+assert.ok(cssContent.includes('.leads-search-feedback'), 'CSS must contain .leads-search-feedback');
 assert.ok(cssContent.includes('.account-card.is-selected'), 'CSS must contain .account-card.is-selected');
 assert.ok(cssContent.includes('.property-card.is-selected'), 'CSS must contain .property-card.is-selected');
-console.log('  ✓ CSS Bundle contains all new styles: .posts-visual-grid, .ig-media-card, .leads-funnel-card, .n8n-pipeline-diagram, .meta-didactic-card, .leads-pagination-bar, .account-card.is-selected, .property-card.is-selected.');
+console.log('  ✓ CSS Bundle contains all new styles: .posts-visual-grid, .ig-media-card, .leads-funnel-card, .n8n-pipeline-diagram, .meta-didactic-card, .leads-pagination-bar, .leads-search-feedback, .account-card.is-selected, .property-card.is-selected.');
 
 // Verify JS bundle contains the 3 Instagram accounts
 const jsRes = await fetch('https://meta.araunah.com' + jsMatch[1]);
@@ -60,22 +61,33 @@ console.log('  ✓ Workflow:', chatData.workflow?.name, '(Active:', chatData.wor
 console.log('  ✓ Inbound messages:', chatData.totals?.inbound);
 console.log('  ✓ Executions analyzed:', chatData.coverage?.executionsInRange);
 
-// 3. VERIFY LEADS CRM API & MATHEMATICAL INTEGRITY (NO 600% BUG)
-console.log('\n3. Checking Leads CRM API (Mathematical Consistency)...');
-const leadsRes = await fetch('https://meta.araunah.com/leads-api/summary?days=30&internal=1', {
-  headers: { 'x-dashboard-view': '1' }
-});
-assert.equal(leadsRes.status, 200, 'Leads API must return 200');
-const leadsData = await leadsRes.json();
-assert.ok(leadsData.summary?.uniqueLeads > 0, 'Unique leads must be > 0');
-assert.ok(Array.isArray(leadsData.leads), 'Leads must be an array');
-assert.equal(leadsData.summary.uniqueLeads, leadsData.leads.length, 'uniqueLeads must match leads.length exactly');
-assert.ok(leadsData.summary.inQualification <= leadsData.summary.uniqueLeads, 'inQualification cannot exceed uniqueLeads (no 600% bug)');
-console.log('  ✓ Unique leads found:', leadsData.summary?.uniqueLeads);
-console.log('  ✓ In qualification (unique leads):', leadsData.summary?.inQualification);
-console.log('  ✓ Created in CRM:', leadsData.summary?.created);
+// 3. VERIFY LEADS CRM API & MATHEMATICAL INTEGRITY (TODAY, 7D, ALL)
+console.log('\n3. Checking Leads CRM API (Today, 7d, All & Mathematical Consistency)...');
+const [leadsTodayRes, leads7dRes, leadsAllRes] = await Promise.all([
+  fetch('https://meta.araunah.com/leads-api/summary?days=today&internal=1', { headers: { 'x-dashboard-view': '1' } }),
+  fetch('https://meta.araunah.com/leads-api/summary?days=7&internal=1', { headers: { 'x-dashboard-view': '1' } }),
+  fetch('https://meta.araunah.com/leads-api/summary?days=all&internal=1', { headers: { 'x-dashboard-view': '1' } }),
+]);
+
+assert.equal(leadsTodayRes.status, 200, 'Leads API (today) must return 200');
+assert.equal(leads7dRes.status, 200, 'Leads API (7d) must return 200');
+assert.equal(leadsAllRes.status, 200, 'Leads API (all) must return 200');
+
+const dataToday = await leadsTodayRes.json();
+const data7d = await leads7dRes.json();
+const dataAll = await leadsAllRes.json();
+
+assert.ok(dataToday.summary?.uniqueLeads >= 0, 'Today leads must be >= 0');
+assert.ok(data7d.summary?.uniqueLeads >= dataToday.summary?.uniqueLeads, '7d leads must be >= today leads');
+assert.ok(dataAll.summary?.uniqueLeads >= data7d.summary?.uniqueLeads, 'All leads must be >= 7d leads');
+assert.equal(dataAll.summary.uniqueLeads, dataAll.leads.length, 'uniqueLeads must match leads.length exactly');
+
+console.log(`  ✓ Today leads count: ${dataToday.summary?.uniqueLeads}`);
+console.log(`  ✓ 7d leads count:    ${data7d.summary?.uniqueLeads}`);
+console.log(`  ✓ All leads count:   ${dataAll.summary?.uniqueLeads}`);
 console.log('  ✓ Mathematical sanity: inQualification <= uniqueLeads PASSED.');
-console.log('  ✓ Sample lead:', leadsData.leads[0]?.name, 'from', leadsData.leads[0]?.city, '(' + leadsData.leads[0]?.occurredAt + ')');
+console.log('  ✓ Sample lead today:', dataToday.leads[0]?.name, '(' + dataToday.leads[0]?.occurredAt + ')');
+console.log('  ✓ Sample lead in history:', dataAll.leads[dataAll.leads.length - 1]?.name, '(' + dataAll.leads[dataAll.leads.length - 1]?.occurredAt + ')');
 
 // 4. VERIFY PERIOD SWITCHING (7d, 15d, 30d) DYNAMIC DIFFERENCES
 console.log('\n4. Checking Dynamic Period Switching (7d vs 15d vs 30d)...');

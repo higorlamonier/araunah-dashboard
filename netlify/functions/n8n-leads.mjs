@@ -271,13 +271,15 @@ function buildLeadEvent(execution, conversationStates = {}) {
 }
 
 function buildLeads(executions, start, conversationStates = {}) {
-  const events = executions
-    .filter((execution) => executionDate(execution) && new Date(executionDate(execution)) >= start)
+  // 1. Processa execuções detalhadas do n8n
+  const events = (executions || [])
+    .filter((execution) => executionDate(execution))
     .map((execution) => buildLeadEvent(execution, conversationStates))
     .filter(Boolean)
-    .sort((left, right) => String(right.occurredAt).localeCompare(String(left.occurredAt)))
 
   const grouped = new Map()
+
+  // Agrupa eventos vindos diretamente das execuções
   for (const event of events) {
     const groupKey = event.rawPhone ? `phone-${event.rawPhone}` : event.leadId
     const current = grouped.get(groupKey)
@@ -323,24 +325,132 @@ function buildLeads(executions, start, conversationStates = {}) {
     }
   }
 
-  const leads = [...grouped.values()].map((lead) => {
+  // 2. Enriquece e sintetiza com a base completa de estados de conversação do n8n (staticData)
+  for (const [key, state] of Object.entries(conversationStates || {})) {
+    if (!state || typeof state !== 'object') continue
+    const rawPhone = key.replace(/^whatsapp:/, '').replace(/\D/g, '')
+    const groupKey = rawPhone ? `phone-${rawPhone}` : key
+    const dateStr = state.lastInboundAt || state.updatedAt || state.closedAt || null
+    const leadMsgs = Array.isArray(state.leadMessages) ? state.leadMessages : []
+    const latestLeadMsg = leadMsgs.length > 0 ? leadMsgs[leadMsgs.length - 1].text : ''
+    const botMsg = state.lastAssistantText || ''
+    const isTransferred = state.status === 'transferred' || Boolean(state.crmLeadId)
+    const qual = state.qualification || {}
+    const name = qual.nome?.value || state.name || 'Lead WhatsApp'
+    const city = qual.cidade?.value || 'Em atendimento'
+    const stateUf = qual.uf?.value || '--'
+    const interest = qual.interesse?.value || 'Aguardando interesse'
+
+    const existing = grouped.get(groupKey)
+    if (existing) {
+      if (!existing.leadMessage && latestLeadMsg) existing.leadMessage = latestLeadMsg
+      if (!existing.botMessage && botMsg) existing.botMessage = botMsg
+      if ((!existing.name || existing.name === 'Lead WhatsApp') && name) existing.name = String(name).trim()
+      if ((!existing.city || existing.city === 'Em atendimento') && city && city !== 'Em atendimento') existing.city = city
+      if ((!existing.state || existing.state === '--') && stateUf && stateUf !== '--') existing.state = stateUf
+      if ((!existing.interest || existing.interest === 'Aguardando interesse') && interest && interest !== 'Aguardando interesse') existing.interest = interest
+      if (isTransferred) {
+        existing.crmPersisted = true
+        existing.crmStatus = 'criado'
+        existing.transfer = 'enviada'
+        if (state.crmLeadId) existing.leadId = String(state.crmLeadId)
+        if (existing.consultant === 'Chatbot IA (Qualificação)') existing.consultant = 'ADRIANO CAMARGO'
+      }
+      if (leadMsgs.length > 0) {
+        const existingTexts = new Set(existing.n8nEvents.map((e) => e.leadMessage).filter(Boolean))
+        for (let i = 0; i < leadMsgs.length; i++) {
+          const msg = leadMsgs[i]
+          if (msg.text && !existingTexts.has(msg.text)) {
+            existing.n8nEvents.push({
+              occurredAt: msg.at || dateStr,
+              crmStatus: existing.crmStatus,
+              recurrence: existing.recurrence,
+              transfer: existing.transfer,
+              leadMessage: msg.text,
+              botMessage: i === leadMsgs.length - 1 ? botMsg : '',
+              currentObservation: i === leadMsgs.length - 1 ? (botMsg || msg.text) : msg.text,
+              currentContactData: existing.currentContactData || formatContactPhone(rawPhone),
+            })
+            existingTexts.add(msg.text)
+          }
+        }
+      }
+    } else {
+      const syntheticEvents = leadMsgs.length > 0 ? leadMsgs.map((m, idx) => ({
+        occurredAt: m.at || dateStr,
+        crmStatus: isTransferred ? 'criado' : 'em-qualificacao',
+        recurrence: false,
+        transfer: isTransferred ? 'enviada' : 'em-atendimento-ia',
+        leadMessage: m.text || '',
+        botMessage: idx === leadMsgs.length - 1 ? botMsg : '',
+        currentObservation: idx === leadMsgs.length - 1 ? (botMsg || m.text) : (m.text || ''),
+        currentContactData: formatContactPhone(rawPhone),
+      })) : [{
+        occurredAt: dateStr,
+        crmStatus: isTransferred ? 'criado' : 'em-qualificacao',
+        recurrence: false,
+        transfer: isTransferred ? 'enviada' : 'em-atendimento-ia',
+        leadMessage: latestLeadMsg,
+        botMessage: botMsg,
+        currentObservation: botMsg || latestLeadMsg || '',
+        currentContactData: formatContactPhone(rawPhone),
+      }]
+
+      grouped.set(groupKey, {
+        leadId: state.crmLeadId ? String(state.crmLeadId) : (rawPhone ? `waba-${rawPhone}` : `n8n-${key}`),
+        rawPhone: rawPhone || undefined,
+        occurredAt: dateStr,
+        crmStatus: isTransferred ? 'criado' : 'em-qualificacao',
+        name: String(name).trim(),
+        city,
+        state: stateUf,
+        interest,
+        segment: 'Agro',
+        campaign: 'WhatsApp Direto',
+        consultant: isTransferred ? 'ADRIANO CAMARGO' : 'Chatbot IA (Qualificação)',
+        qualified: Boolean(qual.nome?.value && qual.cidade?.value),
+        recurrence: false,
+        recurrenceOrigin: '',
+        crmPersisted: isTransferred,
+        transfer: isTransferred ? 'enviada' : 'em-atendimento-ia',
+        leadMessage: latestLeadMsg,
+        botMessage: botMsg,
+        currentObservation: botMsg || latestLeadMsg || '',
+        currentContactData: formatContactPhone(rawPhone),
+        n8nEvents: syntheticEvents,
+      })
+    }
+  }
+
+  // 3. Mapeia e filtra pelo período solicitado
+  const allLeads = [...grouped.values()].map((lead) => {
     const { rawPhone, ...leadData } = lead
     return {
       ...leadData,
       leadMessage: lead.leadMessage || '',
       botMessage: lead.botMessage || '',
-      n8nEvents: lead.n8nEvents.map((event) => ({
-        occurredAt: event.occurredAt,
-        crmStatus: event.crmStatus,
-        recurrence: event.recurrence,
-        transfer: event.transfer,
-        leadMessage: event.leadMessage || '',
-        botMessage: event.botMessage || '',
-        currentObservation: event.currentObservation,
-        currentContactData: event.currentContactData,
-      })),
+      n8nEvents: (lead.n8nEvents || [])
+        .map((event) => ({
+          occurredAt: event.occurredAt,
+          crmStatus: event.crmStatus,
+          recurrence: event.recurrence,
+          transfer: event.transfer,
+          leadMessage: event.leadMessage || '',
+          botMessage: event.botMessage || '',
+          currentObservation: event.currentObservation,
+          currentContactData: event.currentContactData,
+        }))
+        .sort((left, right) => String(right.occurredAt || '').localeCompare(String(left.occurredAt || ''))),
     }
   })
+
+  const leads = allLeads
+    .filter((lead) => {
+      if (!start) return true
+      if (!lead.occurredAt) return false
+      return new Date(lead.occurredAt) >= start
+    })
+    .sort((left, right) => String(right.occurredAt || '').localeCompare(String(left.occurredAt || '')))
 
   const uniqueLeads = leads.length
   const inQualification = leads.filter((l) => l.crmStatus === 'em-qualificacao').length
@@ -348,6 +458,7 @@ function buildLeads(executions, start, conversationStates = {}) {
   const updated = leads.filter((l) => l.crmStatus === 'atualizado').length
   const transferConfirmed = leads.filter((l) => l.transfer === 'enviada').length
   const recurrent = leads.filter((l) => l.recurrence).length
+  const totalInteractions = leads.reduce((sum, l) => sum + (l.n8nEvents?.length || 1), 0)
 
   return {
     leads,
@@ -358,7 +469,7 @@ function buildLeads(executions, start, conversationStates = {}) {
       inQualification,
       transferConfirmed,
       recurrent,
-      totalInteractions: events.length,
+      totalInteractions,
     },
   }
 }
@@ -411,8 +522,7 @@ async function fetchExecutions(start) {
     const rows = Array.isArray(payload.data) ? payload.data : []
     allRows.push(...rows)
     cursor = payload.nextCursor ?? payload.next_cursor ?? null
-    const oldest = rows.length > 0 ? new Date(rows[rows.length - 1].startedAt || 0) : null
-    if (!cursor || rows.length === 0 || (start && oldest && oldest < start)) break
+    if (!cursor || rows.length === 0) break
   }
 
   // 2. Filtra candidatos no período: conversas reais com bot (duração > 1200ms) ou erros operacionais
@@ -449,14 +559,35 @@ async function fetchExecutions(start) {
   return output
 }
 
+function parsePeriod(param) {
+  const raw = String(param ?? '30').trim().toLowerCase()
+  if (['today', '1', '1d', 'dia', 'hoje'].includes(raw)) {
+    // Horário de Brasília (UTC-3): início do dia às 00:00:00 BRT
+    const now = new Date()
+    const brtOffsetMs = 3 * 60 * 60 * 1000
+    const brtDate = new Date(now.getTime() - brtOffsetMs)
+    const midnightBrt = new Date(Date.UTC(brtDate.getUTCFullYear(), brtDate.getUTCMonth(), brtDate.getUTCDate(), 3, 0, 0, 0))
+    const start = midnightBrt <= now ? midnightBrt : new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    return { key: 'today', days: 1, start }
+  }
+  if (['all', 'total', '0', 'tudo', 'completo'].includes(raw)) {
+    return { key: 'all', days: 0, start: null }
+  }
+  const days = Number(raw.replace(/\D/g, ''))
+  if (!Number.isInteger(days) || days <= 0) {
+    return { key: 30, days: 30, start: new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)) }
+  }
+  return { key: days, days, start: new Date(Date.now() - (days * 24 * 60 * 60 * 1000)) }
+}
+
 export default async function handler(request) {
   if (request.method !== 'GET') return json({ error: 'Método não permitido.' }, 405)
   try {
     await requireAccess(request)
     const url = new URL(request.url)
-    const range = Number(url.searchParams.get('days') ?? 30)
-    if (!Number.isInteger(range) || ![7, 15, 30, 60, 90].includes(range)) return json({ error: 'Período inválido.' }, 400)
-    const start = new Date(Date.now() - (range * 24 * 60 * 60 * 1000))
+    const rangeParam = url.searchParams.get('days') || url.searchParams.get('period') || '30'
+    const period = parsePeriod(rangeParam)
+    const start = period.start
     const payload = await fetchExecutions(start).catch((err) => {
       console.warn('n8n live fetch notice:', err.message)
       return { executions: [], conversationStates: {} }
@@ -468,7 +599,7 @@ export default async function handler(request) {
       schema: 'araunah.n8n-leads.v1',
       source: 'n8n: CHATBOT-ARAUNAH WHATSAPP',
       generatedAt: new Date().toISOString(),
-      rangeDays: range,
+      rangeDays: period.key,
       summary: result.summary,
       leads: result.leads,
       trackingNotice: 'O n8n confirma CRM e transferência. Responsável humano, primeira resposta, resolução/perda e motivo exigem a migração de rastreio no Supabase.',

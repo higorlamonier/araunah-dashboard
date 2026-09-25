@@ -108,4 +108,51 @@ assert.equal(stateSyncResult.leads[0].leadId, '30068')
 assert.equal(stateSyncResult.leads[0].name, 'Rowena Betina Petroll')
 assert.equal(stateSyncResult.leads[0].transfer, 'enviada')
 
-console.log('OK: all n8n leads tests (CRM fixtures, phone correlation, staticData sync) passed!')
+// Test 4: Synthesis from conversationStates with period filtering ('today', '7d', 'all')
+const mockMultiConvStates = {
+  'whatsapp:5511999990001': {
+    status: 'open',
+    lastInboundAt: '2026-09-25T12:00:00.000Z',
+    name: 'Lead Hoje',
+    leadMessages: [{ text: 'Mensagem de hoje', at: '2026-09-25T12:00:00.000Z' }],
+    lastAssistantText: 'Olá de hoje',
+    qualification: { nome: { value: 'Lead Hoje' }, cidade: { value: 'Uberlândia' }, uf: { value: 'MG' } },
+  },
+  'whatsapp:5511999990002': {
+    status: 'open',
+    lastInboundAt: '2026-09-21T10:00:00.000Z',
+    name: 'Lead 4 Dias Atrás',
+    leadMessages: [{ text: 'Mensagem de 4 dias atrás', at: '2026-09-21T10:00:00.000Z' }],
+    lastAssistantText: 'Olá de 4 dias',
+    qualification: { nome: { value: 'Lead 4 Dias' }, cidade: { value: 'Frutal' }, uf: { value: 'MG' } },
+  },
+  'whatsapp:5511999990003': {
+    status: 'transferred',
+    crmLeadId: 9999,
+    lastInboundAt: '2026-08-20T10:00:00.000Z',
+    name: 'Lead Mes Passado',
+    leadMessages: [{ text: 'Mensagem antiga', at: '2026-08-20T10:00:00.000Z' }],
+    lastAssistantText: 'Olá antigo',
+    qualification: { nome: { value: 'Lead Antigo' }, cidade: { value: 'Patos' }, uf: { value: 'MG' } },
+  },
+}
+
+// Today filter
+const todayStart = new Date('2026-09-25T00:00:00.000Z')
+const resToday = __test__.buildLeads([], todayStart, mockMultiConvStates)
+assert.equal(resToday.summary.uniqueLeads, 1, 'Only today lead should match')
+assert.equal(resToday.leads[0].name, 'Lead Hoje')
+assert.equal(resToday.leads[0].leadMessage, 'Mensagem de hoje')
+
+// 7 days filter
+const sevenDaysStart = new Date('2026-09-18T00:00:00.000Z')
+const res7d = __test__.buildLeads([], sevenDaysStart, mockMultiConvStates)
+assert.equal(res7d.summary.uniqueLeads, 2, 'Today + 4 days ago leads should match')
+
+// All period filter (null start)
+const resAll = __test__.buildLeads([], null, mockMultiConvStates)
+assert.equal(resAll.summary.uniqueLeads, 3, 'All 3 leads should match')
+assert.equal(resAll.leads[0].name, 'Lead Hoje', 'Should sort most recent first')
+assert.equal(resAll.summary.transferConfirmed, 1)
+
+console.log('OK: all n8n leads tests (CRM fixtures, phone correlation, staticData sync, period filters) passed!')

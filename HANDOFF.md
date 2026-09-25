@@ -1,5 +1,59 @@
 # HANDOFF — araunah-dashboard
 
+## [2026-09-25 11:05] — Antigravity (Google DeepMind) — FILTROS DE PERÍODO (DIA ATUAL, 7 DIAS, TODO O PERÍODO) E BUSCA AMPLIADA NO CRM
+
+### 🎯 Demanda / Objetivo da Sessão
+- Atender à demanda do usuário: *"No https://meta.araunah.com/leads aba 'Leads CRM' esta me dando mensagens e historico apenas do dia atual, quero ter acesso/filtro do: dia atual, 7 dias, todo o periodo e conseguir pesquisar"*.
+- Corrigir a limitação que exibia apenas leads recentes do dia atual (decorrente do limite de 300 execuções do n8n que cobriam poucas horas).
+- Fornecer filtros dedicados e intuitivos para:
+  1. **Dia Atual ("Hoje / 24h")**
+  2. **7 Dias ("7 dias")**
+  3. **Todo o Período ("Todo o Histórico")**
+  (além de 15 dias e 30 dias).
+- Implementar busca textual completa e inteligente cobrindo nomes, cidades, telefones (com ou sem formatação), estados, interesses, segmentos, campanhas e o texto completo dos diálogos e mensagens trocadas.
+
+### ✅ O que foi realizado
+- [x] **Diagnóstico da Causa Raiz e Unificação da Base de Conversas em `netlify/functions/n8n-leads.mjs`:**
+  - O endpoint anteriormente gerava leads exclusivamente iterando sobre a lista de `executions`. Como o n8n executa múltiplos webhooks, disparos e follow-ups por hora, os 300 cabeçalhos de execução buscados continham apenas mensagens das últimas 2-3 horas do dia atual (25/09/2026), excluindo todos os leads anteriores!
+  - No entanto, a base de persistência determinística `staticData.global.araunahConversationState` do n8n guarda **todos os 187 leads e conversas** dos últimos meses com diálogos completos (`leadMessages`), respostas da IA (`lastAssistantText`), qualificações e status.
+  - Refatorada a função `buildLeads` para unificar bidirecionalmente `conversationStates` e `executions`:
+    - Leads com execuções ativas são enriquecidos com nós de CRM, consultor e status de persistência.
+    - Leads com diálogos em `conversationStates` têm todas as suas mensagens históricas mapeadas na timeline `n8nEvents`.
+    - Suporte a filtros de data com paridade estrita: `today` (5 leads hoje), `7d` (69 leads nos últimos 7 dias) e `all` (187 leads em todo o histórico).
+- [x] **Suporte a Períodos Flexíveis no Backend e Frontend:**
+  - Nova função `parsePeriod(rangeParam)` em `n8n-leads.mjs` aceitando `today`, `1`, `7`, `15`, `30`, `60`, `90` e `all` (0).
+  - No frontend (`src/LeadsPage.tsx` e `src/LeadsPage.css`), adicionado `PERIOD_OPTIONS`:
+    - `Hoje (Dia Atual)` / `Hoje (24h)`
+    - `7 dias`
+    - `15 dias`
+    - `30 dias`
+    - `Todo o Período`
+  - Controles segmentados atualizados tanto na visualização independente (`/leads`) quanto no painel embutido no dashboard.
+  - Badges informativos no funil de conversão e nos cartões de KPI refletindo o período selecionado em tempo real.
+- [x] **Sistema de Busca Completa e Resiliente:**
+  - Adicionada normalização de caracteres (`normalizeText`) sem distinção de acentos ou maiúsculas/minúsculas (ex: busca por "Eder" encontra "Éder", "Sao Paulo" encontra "São Paulo").
+  - Busca por dígitos puros de telefone (ex: digitar `9979` ou `349979` encontra o lead correspondente com máscara).
+  - A busca agora vasculha também o **conteúdo interno das mensagens** do cliente (`leadMessage`), da resposta da IA (`botMessage`) e de todas as mensagens na timeline de `n8nEvents` (ex: buscar "esterco", "compostagem", "livro", "Pirapora").
+  - Adicionado banner de feedback de busca: `🔍 X leads encontrados para "<termo>"` com atalho para limpar busca e atalho para expandir a busca para "Todo o Período".
+  - Empty state educativo orientando o usuário e oferecendo botão para ver em todo o histórico.
+- [x] **Testes Automatizados, Build e Deploy em Produção:**
+  - Testes unitários `scripts/test-n8n-leads.mjs` atualizados com Test 4 (cobertura de síntese e filtros `today`, `7d`, `all`) 100% aprovados.
+  - Build Vite/TypeScript concluído sem erros (`dist/assets/index-D_Nj-iDs.js` e `dist/assets/index-DObS_Sy6.css`).
+  - Deploy publicado no Netlify em `https://meta.araunah.com` (Deploy ID: `6ab67f80fc8681d07d1187e9`).
+  - Suite de verificação em produção `scripts/verify-live.mjs` executada e 100% aprovada nos 5 estágios (Hoje: 5 leads | 7d: 69 leads | Todo o período: 187 leads).
+
+### ⏸️ Onde parou (Estado Atual)
+- Em produção ativa e validada em `https://meta.araunah.com` e `https://meta.araunah.com/leads`.
+
+### ⚠️ Problemas, Riscos ou Bloqueios Conhecidos
+- *Nenhum bloqueio identificado.*
+
+### 🚀 Próximos Passos Recomendados (Checklist para a Próxima IA)
+- [ ] Monitorar a resposta dos usuários comerciais ao novo filtro "Todo o Período" (187 leads com paginação de 10 por página).
+- [ ] Avaliar se novos campos de qualificação adicionados no n8n devem ter pílulas de filtro dedicadas.
+
+---
+
 ## [2026-09-25 08:37] — Antigravity (Google DeepMind) — EXIBIÇÃO DO DIÁLOGO COMPLETO (MENSAGEM DO LEAD + RESPOSTA DA IA)
 
 ### 🎯 Demanda / Objetivo da Sessão
