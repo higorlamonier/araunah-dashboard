@@ -877,12 +877,11 @@ export default function LeadsPage({
   const crmRate = uniqueLeads > 0 ? Math.min(100, Math.round((crmPersistedCount / uniqueLeads) * 100)) : 0
   const mesaRate = crmPersistedCount > 0 ? Math.min(100, Math.round((mesaCount / crmPersistedCount) * 100)) : 0
 
-  const hasPartialSources =
-    !error &&
-    Boolean(
-      (data && (!data.coverage || !data.coverage.complete)) ||
-        (data?.sourceHealth && Object.values(data.sourceHealth).some((item) => item && item.status !== 'ok'))
-    )
+  const sourceHealth = data?.sourceHealth
+  const sourceErrors = useMemo(() => {
+    if (!sourceHealth) return []
+    return Object.values(sourceHealth).filter((item) => item && item.status === 'error' && item.message)
+  }, [sourceHealth])
 
   return (
     <div className={`leads-page ${embedded ? 'leads-embedded-pane' : ''}`}>
@@ -1025,17 +1024,17 @@ export default function LeadsPage({
 
       {data && !syncBarDismissed && !error && (
         <aside
-          className={`status-badge-bar ${hasPartialSources ? 'warning' : 'success'}`}
+          className={`status-badge-bar ${sourceErrors.length > 0 ? 'warning' : 'success'}`}
           role="status"
           aria-live="polite"
         >
           <div className="status-badge-info">
             <span className="status-badge-pill">
-              {isSyncing ? 'SINCRONIZANDO' : hasPartialSources ? 'PARCIAL' : 'SINCRONIZADO'}
+              {isSyncing ? 'SINCRONIZANDO' : sourceErrors.length > 0 ? 'ATENÇÃO' : 'SINCRONIZADO'}
             </span>
             <span>
-              {hasPartialSources
-                ? `Leitura (${currentPeriodOption.shortLabel}) concluída com cobertura parcial · Meta + n8n + CRM oficial · ${formatDate(data.generatedAt)}`
+              {sourceErrors.length > 0
+                ? `Falha ao consultar fonte(s): ${sourceErrors.map((s) => s.message).join(' · ')} · ${formatDate(data.generatedAt)}`
                 : `Base sincronizada (${currentPeriodOption.shortLabel}) com Meta Lead Ads, n8n Chatbot e CRM oficial · ${formatDate(data.generatedAt)}`}
               {data.searchMeta?.globalDatabase
                 ? ` · Busca direta no banco ativa (${data.searchMeta.matchesOutsidePeriod} fora do período)`
@@ -1069,29 +1068,25 @@ export default function LeadsPage({
       ) : null}
 
       {(() => {
-        const reasonsSig = (data?.coverage?.reasons ?? []).join('|')
-        const partialKey = `partial:${days}:${reasonsSig}`
-        if (!hasPartialSources || dismissedAlerts[partialKey]) return null
+        const errSig = sourceErrors.map((s) => s.message).join('|')
+        const srcErrKey = `srcerr:${days}:${errSig}`
+        if (error || sourceErrors.length === 0 || dismissedAlerts[srcErrKey]) return null
         return (
-          <div className="leads-error-card" role="status">
+          <div className="leads-error-card" role="alert">
             <button
               type="button"
               className="leads-banner-close"
-              onClick={() => setDismissedAlerts((prev) => ({ ...prev, [partialKey]: true }))}
-              aria-label="Fechar aviso de leitura parcial"
+              onClick={() => setDismissedAlerts((prev) => ({ ...prev, [srcErrKey]: true }))}
+              aria-label="Fechar alerta de falha nas fontes"
             >
               ✕
             </button>
-            <strong>Leitura parcial das fontes</strong>
-            <p>
-              Os totais podem estar incompletos para o período selecionado. Antes de reenviar um lead, confira seu cadastro no CRM.
-            </p>
-            {data?.coverage?.reasons?.length ? (
-              <details>
-                <summary>Ver detalhes da leitura</summary>
-                <ul>{data.coverage.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
-              </details>
-            ) : null}
+            <strong>Falha na leitura das fontes</strong>
+            <ul>
+              {sourceErrors.map((s) => (
+                <li key={s.message}>{s.message}</li>
+              ))}
+            </ul>
           </div>
         )
       })()}

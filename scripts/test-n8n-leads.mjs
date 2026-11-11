@@ -896,8 +896,74 @@ assert(conversation.n8nEvents.every((event) => !Object.hasOwn(event, 'messageId'
     const capRes = await handler(new Request('https://meta.araunah.com/leads-api/summary?days=30&refresh=1'))
     const capBody = await capRes.json()
     assert.equal(capRes.status, 200)
-    assert.equal(capBody.sourceHealth.crm.status, 'partial')
-    assert.ok(capBody.coverage.reasons.some((reason) => reason.includes('Listagem inicial do CRM limitada aos 100')))
+    assert.equal(capBody.sourceHealth.crm.status, 'ok')
+    assert.equal(capBody.coverage.reasons.some((reason) => reason.includes('Listagem inicial do CRM limitada')), false)
+  } finally {
+    globalThis.fetch = prevFetch
+    for (const key of Object.keys(process.env)) if (!(key in envBackup)) delete process.env[key]
+    Object.assign(process.env, envBackup)
+  }
+}
+
+// Test 12: Recovered morning Meta errors + <500ms webhook status callbacks do not generate false warnings
+{
+  const prevFetch = globalThis.fetch
+  const envBackup = { ...process.env }
+  delete process.env.CF_ACCESS_TEAM_DOMAIN
+  delete process.env.CF_ACCESS_AUD
+  delete process.env.CF_ACCESS_ALLOWED_EMAILS
+  process.env.N8N_ARAUNAH_BASE_URL = 'https://n8n.synthetic.invalid'
+  process.env.N8N_ARAUNAH_API_KEY = 'synthetic-n8n-key'
+  process.env.N8N_META_WORKFLOW_ID = 'meta-recovered-wf'
+  process.env.ARAUNAH_LEADS_API_URL = 'https://crm.synthetic.invalid/functions/v1/api-leads'
+  process.env.ARAUNAH_LEADS_API_TOKEN = 'synthetic-crm-token'
+  __test__.resetCache()
+
+  const errStart = new Date(Date.now() - 3600_000).toISOString()
+  const errStop = new Date(Date.now() - 3599_990).toISOString()
+  const okStart = new Date(Date.now() - 60_000).toISOString()
+  const okStop = new Date(Date.now() - 59_500).toISOString()
+  const cbStart = new Date(Date.now() - 30_000).toISOString()
+  const cbStop = new Date(Date.now() - 29_800).toISOString()
+
+  globalThis.fetch = async (url, init = {}) => {
+    const parsed = new URL(url)
+    if (parsed.pathname.includes('/functions/v1/api-leads')) {
+      const rpc = JSON.parse(init.body)
+      return Response.json({ jsonrpc: '2.0', id: rpc.id, result: { content: [{ type: 'text', text: JSON.stringify([]) }] } })
+    }
+    if (parsed.pathname.includes('/workflows/')) return Response.json({ staticData: { global: { araunahConversationState: {} } } })
+    if (parsed.pathname.endsWith('/executions')) {
+      const wf = parsed.searchParams.get('workflowId')
+      if (wf === 'meta-recovered-wf') {
+        return Response.json({
+          data: [
+            { id: 'm-ok-new', mode: 'webhook', status: 'success', startedAt: okStart, stoppedAt: okStop },
+            { id: 'm-err-old', mode: 'webhook', status: 'error', startedAt: errStart, stoppedAt: errStop },
+          ],
+          nextCursor: null,
+        })
+      }
+      return Response.json({
+        data: [{ id: 'c-cb-200ms', mode: 'webhook', status: 'success', startedAt: cbStart, stoppedAt: cbStop }],
+        nextCursor: null,
+      })
+    }
+    if (parsed.pathname.includes('/executions/m-ok-new')) {
+      return Response.json({ id: 'm-ok-new', startedAt: okStart, stoppedAt: okStop, data: { resultData: { runData: {} } } })
+    }
+    throw new Error('Unexpected URL in Test 12: ' + url)
+  }
+
+  try {
+    const res = await handler(new Request('https://meta.araunah.com/leads-api/summary?days=7&refresh=1'))
+    const body = await res.json()
+    assert.equal(res.status, 200)
+    assert.equal(body.coverage.complete, true)
+    assert.deepEqual(body.coverage.reasons, [])
+    assert.equal(body.sourceHealth.n8nChatbot.status, 'ok')
+    assert.equal(body.sourceHealth.n8nMeta.status, 'ok')
+    assert.equal(body.sourceHealth.crm.status, 'ok')
   } finally {
     globalThis.fetch = prevFetch
     for (const key of Object.keys(process.env)) if (!(key in envBackup)) delete process.env[key]

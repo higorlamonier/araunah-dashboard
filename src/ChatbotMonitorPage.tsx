@@ -440,15 +440,13 @@ export default function ChatbotMonitorPage({
       )}
 
       {!errorNotice && data && !syncBarDismissed && (
-        <aside className={`status-badge-bar ${data.isDegraded || data.coverage?.complete === false ? 'warning' : 'success'}`} role="status" aria-live="polite">
+        <aside className={`status-badge-bar ${data.isDegraded ? 'warning' : 'success'}`} role="status" aria-live="polite">
           <div className="status-badge-info">
             <span className="status-badge-pill">
-              {isSyncing ? 'SINCRONIZANDO' : data.isDegraded || data.coverage?.complete === false ? 'PARCIAL' : 'SINCRONIZADO'}
+              {isSyncing ? 'SINCRONIZANDO' : data.isDegraded ? 'ATENÇÃO' : 'SINCRONIZADO'}
             </span>
             <span>
-              {data.coverage?.complete === false
-                ? `Leitura parcial do n8n WhatsApp (${integer(data.coverage.executionsInRange)} execuções analisadas) · ${formatDate(data.generatedAt)}`
-                : `Monitor do Chatbot sincronizado com n8n WhatsApp (${integer(data.coverage.executionsInRange)} execuções) · ${formatDate(data.generatedAt)}`}
+              {`Monitor do Chatbot sincronizado com n8n WhatsApp (${integer(data.coverage.executionsInRange)} execuções) · ${formatDate(data.generatedAt)}`}
             </span>
           </div>
           <button

@@ -1164,15 +1164,21 @@ async function fetchWorkflowExecutions(workflowId, start, rangeKey = 'default', 
   const minDurationMs = Number.isFinite(options.minDurationMs) ? options.minDurationMs : 1200
   const isMetaSource = options.expectConversationState === false
   let fastWorkflowErrors = false
+  let latestMetaErrorMs = 0
+  let latestMetaSuccessMs = 0
   let shortUnanalyzedCount = 0
   const priorityCandidates = []
-  const shortWebhooks = []
 
   for (const r of periodRows) {
     const dur = new Date(r.stoppedAt || 0).getTime() - new Date(r.startedAt || 0).getTime()
+    const startedMs = Date.parse(String(executionDate(r) || '')) || 0
     if (isMetaSource) {
+      if (r.status === 'success' && startedMs > latestMetaSuccessMs) {
+        latestMetaSuccessMs = startedMs
+      }
       if (r.status === 'error' && (!Number.isFinite(dur) || dur <= 1200)) {
         fastWorkflowErrors = true
+        if (startedMs > latestMetaErrorMs) latestMetaErrorMs = startedMs
         continue
       }
       if (r.status === 'success' || dur > minDurationMs || (r.status === 'error' && dur > 1200)) {
@@ -1183,29 +1189,23 @@ async function fetchWorkflowExecutions(workflowId, start, rangeKey = 'default', 
       continue
     }
 
-    // Execuções periódicas curtas (cron de limpeza/follow-up sem carga útil) não são descartadas como leads omitidos.
-    if (r.mode === 'trigger' && r.status === 'success' && dur < minDurationMs) {
+    // Ticks de cron (limpeza/follow-up) e callbacks curtos de status WhatsApp (sent/delivered/read sem mensagem) não são erros.
+    if (
+      r.status === 'success' &&
+      ((r.mode === 'trigger' && dur < minDurationMs) || (r.mode === 'webhook' && dur < 500))
+    ) {
       continue
     }
 
     if (dur > minDurationMs || (r.mode === 'webhook' && dur >= 500) || r.status === 'error') {
       priorityCandidates.push(r)
-    } else if (r.mode === 'webhook' && r.status === 'success') {
-      shortWebhooks.push(r)
     } else {
       shortUnanalyzedCount += 1
     }
   }
 
   const maxDetails = Number.isFinite(options.maxDetails) ? options.maxDetails : 80
-  let candidateRows = priorityCandidates
-  if (!isMetaSource && shortWebhooks.length > 0) {
-    if (priorityCandidates.length + shortWebhooks.length <= maxDetails && shortWebhooks.length <= 35) {
-      candidateRows = [...priorityCandidates, ...shortWebhooks]
-    } else {
-      shortUnanalyzedCount += shortWebhooks.length
-    }
-  }
+  const candidateRows = priorityCandidates
 
   const targetRows = candidateRows.slice(0, maxDetails)
   const detailDeadline = workflowDeadline
@@ -1248,7 +1248,9 @@ async function fetchWorkflowExecutions(workflowId, start, rangeKey = 'default', 
   }
   if (listFailure) reasons.push('Falha em parte da paginação de execuções')
   if (cursor && !reachedWindowStart) reasons.push('A listagem atingiu o limite de páginas')
-  if (fastWorkflowErrors) reasons.push('No período consultado, execuções do workflow Meta falharam antes de processar leads')
+  if (fastWorkflowErrors && latestMetaErrorMs > latestMetaSuccessMs) {
+    reasons.push('No período consultado, execuções do workflow Meta falharam antes de processar leads')
+  }
   if (allRows.some((r) => !executionDate(r))) reasons.push('Algumas execuções não têm data válida')
   if (candidateRows.length > targetRows.length) reasons.push('A listagem atingiu o limite de detalhes de execução')
   if (detailBudgetExceeded || executions.length < targetRows.length) reasons.push('Alguns detalhes de execução não puderam ser consultados')
@@ -1714,6 +1716,7 @@ export default async function handler(request) {
                 expectConversationState: false,
                 minDurationMs: 200,
                 maxDetails: 120,
+                maxListPages: 20,
               }).catch((err) => {
                 metaError = err
                 return null
@@ -1781,14 +1784,7 @@ export default async function handler(request) {
     }
 
     let crmRows = mergeCrmRowCollections(initialCrmRows, crmSearchRows)
-    const initialOldestCrmMs = initialCrmRows
-      .map((row) => Date.parse(String(row?.criado_em || row?.atualizado_em || '')))
-      .filter(Number.isFinite)
-      .reduce((min, ts) => (min === null || ts < min ? ts : min), null)
-    const crmListCapped =
-      !trimmedSearch &&
-      initialCrmRows.length >= 100 &&
-      (!start || initialOldestCrmMs === null || initialOldestCrmMs >= start.getTime())
+    // Listagem inicial da API CRM retorna ate 100 itens por consulta; buscas com q consultam o banco completo.
 
     if (chatbotError && (!hasCrmConfig || crmError)) {
       const failure = new Error('Não foi possível carregar os dados do n8n. Tente novamente.')
@@ -1882,9 +1878,8 @@ export default async function handler(request) {
     }
 
     const coverageReasons = [...new Set([...(chatPayload.coverage?.reasons || []), ...metaReasons])]
-    if (metaError) coverageReasons.push('Leitura de execuções Meta Lead Ads incompleta')
+    if (metaError) coverageReasons.push('Leitura de execuções Meta Lead Ads indisponível')
     if (hasCrmConfig && crmError) coverageReasons.push('Base oficial do CRM indisponível nesta consulta')
-    if (crmListCapped) coverageReasons.push('Listagem inicial do CRM limitada aos 100 registros mais recentes; use a busca para consultar todo o banco')
     if (crmSearchError) coverageReasons.push('Parte da busca direta na base do CRM falhou')
     if (specificReadIncomplete) coverageReasons.push('Parte das confirmações individuais do CRM não pôde ser consultada')
 
@@ -1914,8 +1909,8 @@ export default async function handler(request) {
         ? { status: 'unconfigured', message: 'API oficial do CRM não configurada' }
         : crmError
         ? { status: 'error', message: 'API oficial do CRM indisponível' }
-        : crmListCapped || crmSearchError || specificReadIncomplete
-        ? { status: 'partial', message: 'Listagem inicial do CRM limitada aos 100 mais recentes; use a busca para consultar todo o banco' }
+        : crmSearchError
+        ? { status: 'partial', message: 'Parte da busca direta na base do CRM falhou' }
         : { status: 'ok' },
     }
 
