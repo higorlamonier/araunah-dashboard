@@ -11,43 +11,52 @@ function compactNum(val: number) {
   return new Intl.NumberFormat('pt-BR').format(val)
 }
 
-const ACCOUNTS = [
+const DEFAULT_ACCOUNTS = [
   {
-    username: 'araunah.agro',
+    username: 'araunah.compostagem',
     name: 'Araunah Agro (Compostagem)',
-    followers: 23645,
-    posts: 1383,
+    displayName: 'Araunah Agro (Compostagem)',
+    followers: 23827,
+    posts: 1391,
     status: 'Oficial & Meta Ads',
     url: 'https://instagram.com/araunah.compostagem',
     isPrimary: true,
-    engaged: 420,
+    engaged: 564,
     visits: 690,
-    likes: 12
+    likes: 42,
+    reach: 41264,
+    views: 71780,
   },
   {
     username: 'araunah.agua',
     name: 'Araunah Água',
-    followers: 3037,
-    posts: 157,
+    displayName: 'Araunah Água',
+    followers: 3068,
+    posts: 160,
     status: 'Conectado (Graph API)',
     url: 'https://instagram.com/araunah.agua',
     isPrimary: false,
-    engaged: 95,
+    engaged: 116,
     visits: 165,
-    likes: 3
+    likes: 17,
+    reach: 3140,
+    views: 4105,
   },
   {
     username: 'araunah.florestas',
     name: 'Araunah Florestas',
-    followers: 477,
-    posts: 56,
+    displayName: 'Araunah Florestas',
+    followers: 486,
+    posts: 58,
     status: 'Monitorado (Graph API)',
     url: 'https://instagram.com/araunah.florestas',
     isPrimary: false,
-    engaged: 19,
+    engaged: 109,
     visits: 32,
-    likes: 0
-  }
+    likes: 8,
+    reach: 3510,
+    views: 5902,
+  },
 ]
 
 // Fallback elegante com imagens de tecnologia agrícola caso a API externa sofra rate-limit
@@ -103,11 +112,38 @@ const FALLBACK_POSTS = [
 ]
 
 export default function InstagramTab({ data, activePeriod, loading }: InstagramTabProps) {
-  // Estado de seleção de conta do Instagram
-  const [selectedAccount, setSelectedAccount] = useState<'all' | 'araunah.agro' | 'araunah.agua' | 'araunah.florestas'>('all')
+  const [selectedAccount, setSelectedAccount] = useState<'all' | 'araunah.compostagem' | 'araunah.agro' | 'araunah.agua' | 'araunah.florestas'>('all')
+
+  const accounts = useMemo(() => {
+    const liveAccounts = data?.instagramInsights?.accounts
+    if (!liveAccounts || liveAccounts.length === 0) return DEFAULT_ACCOUNTS
+    return DEFAULT_ACCOUNTS.map((fallbackAcc) => {
+      const live = liveAccounts.find(
+        (c) => c.username === fallbackAcc.username || (fallbackAcc.username === 'araunah.compostagem' && c.isPrimary),
+      )
+      if (!live) return fallbackAcc
+      return {
+        ...fallbackAcc,
+        username: live.username || fallbackAcc.username,
+        name: live.name || fallbackAcc.name,
+        displayName: live.displayName || fallbackAcc.displayName,
+        followers: live.followers || fallbackAcc.followers,
+        posts: live.posts || fallbackAcc.posts,
+        status: live.status || fallbackAcc.status,
+        url: live.url || fallbackAcc.url,
+        isPrimary: live.isPrimary ?? fallbackAcc.isPrimary,
+        engaged: live.interactions ?? fallbackAcc.engaged,
+        reach: live.reach || fallbackAcc.reach,
+        views: live.views || fallbackAcc.views,
+      }
+    })
+  }, [data?.instagramInsights?.accounts])
+
+  const periodLabel = activePeriod === 'today' ? 'Hoje' : activePeriod === '15d' ? '15 dias' : activePeriod === '30d' ? '30 dias' : '7 dias'
 
   const igTotals = data?.instagramInsights?.totals ?? {
-    followersCount: 3037,
+    followersCount: 27381,
+    postsCount: 1609,
     accountsEngaged: 0,
     followsAndUnfollows: 0,
     follows: 0,
@@ -131,13 +167,13 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
     return recentMediaList.filter((m) => {
       // Caso a mídia tenha o atributo account explícito
       const acc = (m as unknown as { account?: string })?.account
-      if (acc) return acc === selectedAccount
+      if (acc) return ((selectedAccount === 'araunah.compostagem' || selectedAccount === 'araunah.agro') && (acc === 'araunah.compostagem' || acc === 'araunah.agro')) || acc === selectedAccount
 
       // Inferência por URL ou termos da legenda
       if (selectedAccount === 'araunah.agua') {
         return m.permalink?.includes('araunah.agua') || m.caption?.toLowerCase().includes('água') || m.caption?.toLowerCase().includes('polyter')
       }
-      if (selectedAccount === 'araunah.agro') {
+      if (selectedAccount === 'araunah.compostagem' || selectedAccount === 'araunah.agro') {
         return m.permalink?.includes('araunah.compostagem') || m.permalink?.includes('araunah.agro') || m.caption?.toLowerCase().includes('compostagem') || m.caption?.toLowerCase().includes('adubo') || m.caption?.toLowerCase().includes('feira') || m.caption?.toLowerCase().includes('revolvedora')
       }
       if (selectedAccount === 'araunah.florestas') {
@@ -154,24 +190,32 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
     setImageErrors((prev) => ({ ...prev, [id]: true }))
   }
 
-  // Métricas dinâmicas de acordo com a conta selecionada
   const activeAccountData = useMemo(() => {
+    const sumFollowers = accounts.reduce((acc, a) => acc + a.followers, 0)
+    const sumPosts = accounts.reduce((acc, a) => acc + a.posts, 0)
+    const sumEngaged = accounts.reduce((acc, a) => acc + (a.engaged || 0), 0)
+
     if (selectedAccount === 'all') {
+      const primary = accounts.find((a) => a.isPrimary || a.username === 'araunah.compostagem')
+      const agua = accounts.find((a) => a.username === 'araunah.agua')
+      const florestas = accounts.find((a) => a.username === 'araunah.florestas')
       return {
         label: 'Rede Araunah Instagram',
         handle: '3 Contas Integradas',
-        followers: 27159,
-        posts: 1596,
-        engaged: igTotals.accountsEngaged || 534,
+        followers: igTotals.followersCount || sumFollowers,
+        posts: sumPosts,
+        engaged: igTotals.accountsEngaged || sumEngaged,
         visits: data?.socialTotals?.instagramProfileVisits ?? 887,
-        likes: data?.socialTotals?.instagramMediaLikes ?? 15,
-        subtext: '23.6k @araunah.agro · 3.0k @araunah.agua · 477 @araunah.florestas',
+        likes: data?.socialTotals?.instagramMediaLikes ?? sumEngaged,
+        subtext: `${((primary?.followers || 23827) / 1000).toFixed(1)}k @araunah.compostagem · ${((agua?.followers || 3068) / 1000).toFixed(1)}k @araunah.agua · ${florestas?.followers || 486} @araunah.florestas`,
       }
     }
-    const acc = ACCOUNTS.find((a) => a.username === selectedAccount)
+    const acc = accounts.find(
+      (a) => a.username === selectedAccount || (selectedAccount === 'araunah.agro' && (a.isPrimary || a.username === 'araunah.compostagem')),
+    )
     if (!acc) return null
     return {
-      label: acc.name,
+      label: acc.displayName || acc.name,
       handle: `@${acc.username}`,
       followers: acc.followers,
       posts: acc.posts,
@@ -180,10 +224,10 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
       likes: acc.likes,
       subtext: `Métricas exclusivas do perfil @${acc.username}`,
     }
-  }, [selectedAccount, igTotals.accountsEngaged, data?.socialTotals])
+  }, [selectedAccount, accounts, igTotals.accountsEngaged, igTotals.followersCount, data?.socialTotals])
 
-  const toggleAccount = (username: 'araunah.agro' | 'araunah.agua' | 'araunah.florestas') => {
-    setSelectedAccount((prev) => (prev === username ? 'all' : username))
+  const toggleAccount = (username: string) => {
+    setSelectedAccount((prev) => (prev === username ? 'all' : (username as typeof selectedAccount)))
   }
 
   return (
@@ -212,8 +256,8 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
         </div>
 
         <div className="accounts-cards-grid">
-          {ACCOUNTS.map((acc) => {
-            const isSelected = selectedAccount === acc.username
+          {accounts.map((acc) => {
+            const isSelected = selectedAccount === acc.username || (selectedAccount === 'araunah.agro' && acc.username === 'araunah.compostagem')
 
             return (
               <div
@@ -221,11 +265,11 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
                 role="button"
                 tabIndex={0}
                 className={`account-card ${acc.isPrimary ? 'primary-account' : ''} ${isSelected ? 'is-selected' : ''}`}
-                onClick={() => toggleAccount(acc.username as 'araunah.agro' | 'araunah.agua' | 'araunah.florestas')}
+                onClick={() => toggleAccount(acc.username)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    toggleAccount(acc.username as 'araunah.agro' | 'araunah.agua' | 'araunah.florestas')
+                    toggleAccount(acc.username)
                   }
                 }}
               >
@@ -235,7 +279,7 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
                   </div>
                   <div>
                     <h4 className="account-handle">@{acc.username}</h4>
-                    <span className="account-desc">{acc.name}</span>
+                    <span className="account-desc">{acc.displayName || acc.name}</span>
                   </div>
                   <span className={`badge ${isSelected ? 'badge-emerald' : acc.isPrimary ? 'badge-emerald' : 'badge-neutral'}`}>
                     {isSelected ? '✓ Selecionado' : acc.status}
@@ -292,7 +336,7 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
             {compactNum(activeAccountData?.engaged ?? igTotals.accountsEngaged)}
           </div>
           <div className="kpi-subtext">
-            <span>Período de {activePeriod}</span>
+            <span>Período de {periodLabel}</span>
           </div>
         </div>
 
@@ -338,7 +382,7 @@ export default function InstagramTab({ data, activePeriod, loading }: InstagramT
 
         <div className="engagement-bars-container">
           {daily.map((item) => {
-            const factor = selectedAccount === 'all' ? 1 : selectedAccount === 'araunah.agro' ? 0.78 : selectedAccount === 'araunah.agua' ? 0.18 : 0.04
+            const factor = selectedAccount === 'all' ? 1 : (selectedAccount === 'araunah.compostagem' || selectedAccount === 'araunah.agro') ? 0.78 : selectedAccount === 'araunah.agua' ? 0.18 : 0.04
             const displayVal = Math.round(item.accountsEngaged * factor)
             const pct = Math.min(100, Math.round((displayVal / maxEngaged) * 100))
             const [, month, day] = item.date.split('-')

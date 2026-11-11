@@ -36,12 +36,14 @@ type DailyRow = {
   callbacksFailed: number
 }
 type Incident = { occurredAt: string; status: string; lastNode: string }
+type MonitorPeriodKey = 'today' | '7d' | '15d' | '30d' | 'month' | 'custom'
 type Payload = {
   source: string
   generatedAt: string
   rangeDays: number
+  period?: { key: string; label: string; type: string; start?: string; end?: string }
   workflow: { id?: string; name: string; active: boolean; updatedAt: string | null }
-  coverage: { start: string; end: string; timezone: string; executionsFetched: number; executionsInRange: number }
+  coverage: { start: string; end: string; timezone: string; executionsFetched: number; executionsInRange: number; complete?: boolean }
   totals: Totals
   daily: DailyRow[]
   incidents: Incident[]
@@ -50,8 +52,22 @@ type Payload = {
   degradationReason?: string
 }
 
-const PERIODS = [7, 15, 30]
+const PERIODS: Array<{ key: MonitorPeriodKey; label: string; shortLabel: string }> = [
+  { key: 'today', label: 'Dia atual', shortLabel: 'Hoje' },
+  { key: '7d', label: '7 dias', shortLabel: '7d' },
+  { key: '15d', label: '15 dias', shortLabel: '15d' },
+  { key: 'month', label: 'Mês', shortLabel: 'Mês' },
+  { key: 'custom', label: 'Período específico', shortLabel: 'Custom' },
+]
 const TZ = 'America/Sao_Paulo'
+
+function formatDateInput(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function daysAgoInput(days: number) {
+  return formatDateInput(new Date(Date.now() - days * 86_400_000))
+}
 
 function integer(value: number) {
   return new Intl.NumberFormat('pt-BR').format(value)
@@ -85,21 +101,35 @@ export default function ChatbotMonitorPage({
   onBackToDashboard?: () => void
   embedded?: boolean
 } = {}) {
-  const [days, setDays] = useState(15)
+  const [periodKey, setPeriodKey] = useState<MonitorPeriodKey>('7d')
+  const [customStart, setCustomStart] = useState(() => daysAgoInput(7))
+  const [customEnd, setCustomEnd] = useState(() => formatDateInput(new Date()))
   const [data, setData] = useState<Payload | null>(null)
   const [errorNotice, setErrorNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncBarDismissed, setSyncBarDismissed] = useState(false)
   const activeRequest = useRef<AbortController | null>(null)
+  const lastSyncMsRef = useRef<number>(0)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (forceRefresh = false, silent = false) => {
     activeRequest.current?.abort()
     const controller = new AbortController()
     activeRequest.current = controller
-    setLoading(true)
+    if (forceRefresh && !silent) {
+      setSyncBarDismissed(false)
+    }
+    if (!silent) setLoading(true)
+    setIsSyncing(true)
 
     try {
-      const timeout = window.setTimeout(() => controller.abort(), 35_000)
-      const response = await fetch(`/chatbot-api/summary?days=${days}`, {
+      let query = periodKey === 'custom'
+        ? `period=custom&start=${encodeURIComponent(customStart)}&end=${encodeURIComponent(customEnd)}`
+        : `period=${periodKey}`
+      if (forceRefresh) query += '&refresh=1'
+
+      const timeout = window.setTimeout(() => controller.abort(), 20_000)
+      const response = await fetch(`/chatbot-api/summary?${query}`, {
         cache: 'no-store',
         signal: controller.signal,
       })
@@ -108,6 +138,7 @@ export default function ChatbotMonitorPage({
       const body = (await response.json().catch(() => ({}))) as Payload & { error?: string }
       if (response.ok && body.workflow) {
         setData(body)
+        lastSyncMsRef.current = Date.now()
         if (body.isDegraded) {
           setErrorNotice(body.degradationReason ?? 'Consulta com alta latência. Exibindo contingência segura.')
         } else {
@@ -124,14 +155,32 @@ export default function ChatbotMonitorPage({
       if (activeRequest.current === controller) {
         activeRequest.current = null
         setLoading(false)
+        setIsSyncing(false)
       }
     }
-  }, [days])
+  }, [periodKey, customStart, customEnd])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0)
+    const timer = window.setTimeout(() => void load(true, false), 0)
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void load(true, true)
+      }
+    }, 120_000)
+    const handleVisibilityOrOnline = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine !== false) {
+        if (Date.now() - lastSyncMsRef.current > 60_000) {
+          void load(true, true)
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityOrOnline)
+    window.addEventListener('online', handleVisibilityOrOnline)
     return () => {
       window.clearTimeout(timer)
+      window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityOrOnline)
+      window.removeEventListener('online', handleVisibilityOrOnline)
       activeRequest.current?.abort()
     }
   }, [load])
@@ -140,7 +189,7 @@ export default function ChatbotMonitorPage({
   const currentData = data ?? {
     source: 'n8n: CHATBOT-ARAUNAH WHATSAPP',
     generatedAt: new Date().toISOString(),
-    rangeDays: days,
+    rangeDays: 7,
     workflow: { id: 'eXj1wyXmjshhMOtl', name: 'CHATBOT-ARAUNAH WHATSAPP', active: true, updatedAt: null },
     coverage: { start: '', end: '', timezone: TZ, executionsFetched: 0, executionsInRange: 0 },
     totals: {
@@ -228,28 +277,58 @@ export default function ChatbotMonitorPage({
             <div className="monitor-periods-control" role="tablist" aria-label="Selecionar período">
               {PERIODS.map((period) => (
                 <button
-                  className={days === period ? 'active' : ''}
-                  key={period}
-                  onClick={() => setDays(period)}
+                  className={periodKey === period.key ? 'active' : ''}
+                  key={period.key}
+                  onClick={() => setPeriodKey(period.key)}
                   type="button"
                   role="tab"
-                  aria-selected={days === period}
+                  aria-selected={periodKey === period.key}
                 >
-                  {period} dias
+                  {period.shortLabel}
                 </button>
               ))}
             </div>
 
+            {periodKey === 'custom' && (
+              <div className="monitor-custom-range">
+                <input
+                  type="date"
+                  className="monitor-date-input"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  aria-label="Data inicial"
+                />
+                <span className="range-separator">até</span>
+                <input
+                  type="date"
+                  className="monitor-date-input"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  aria-label="Data final"
+                />
+                <button type="button" className="monitor-apply-btn" onClick={() => void load()} disabled={isSyncing}>
+                  Filtrar
+                </button>
+              </div>
+            )}
+
+            {data?.generatedAt && (
+              <span className="monitor-sync-time-chip" title="Última sincronização com o workflow WhatsApp no n8n">
+                <span>Sincronizado</span>
+                <strong>{formatDate(data.generatedAt)}</strong>
+              </span>
+            )}
+
             <button
               className="monitor-refresh-btn"
-              onClick={() => void load()}
-              disabled={loading}
+              onClick={() => void load(true, false)}
+              disabled={isSyncing}
               type="button"
             >
-              {loading ? (
+              {isSyncing ? (
                 <>
                   <span className="spinner-icon" />
-                  <span>Consultando…</span>
+                  <span>{loading ? 'Consultando…' : 'Sincronizando…'}</span>
                 </>
               ) : (
                 <>
@@ -282,28 +361,58 @@ export default function ChatbotMonitorPage({
             <div className="monitor-periods-control" role="tablist">
               {PERIODS.map((period) => (
                 <button
-                  className={days === period ? 'active' : ''}
-                  key={period}
-                  onClick={() => setDays(period)}
+                  className={periodKey === period.key ? 'active' : ''}
+                  key={period.key}
+                  onClick={() => setPeriodKey(period.key)}
                   type="button"
                   role="tab"
-                  aria-selected={days === period}
+                  aria-selected={periodKey === period.key}
                 >
-                  {period}d
+                  {period.label}
                 </button>
               ))}
             </div>
 
+            {periodKey === 'custom' && (
+              <div className="monitor-custom-range">
+                <input
+                  type="date"
+                  className="monitor-date-input"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  aria-label="Data inicial"
+                />
+                <span className="range-separator">até</span>
+                <input
+                  type="date"
+                  className="monitor-date-input"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  aria-label="Data final"
+                />
+                <button type="button" className="monitor-apply-btn" onClick={() => void load()} disabled={isSyncing}>
+                  Filtrar
+                </button>
+              </div>
+            )}
+
+            {data?.generatedAt && (
+              <span className="monitor-sync-time-chip" title="Última sincronização com o workflow WhatsApp no n8n">
+                <span>Sincronizado</span>
+                <strong>{formatDate(data.generatedAt)}</strong>
+              </span>
+            )}
+
             <button
               className="monitor-refresh-btn"
-              onClick={() => void load()}
-              disabled={loading}
+              onClick={() => void load(true, false)}
+              disabled={isSyncing}
               type="button"
             >
-              {loading ? (
+              {isSyncing ? (
                 <>
                   <span className="spinner-icon" />
-                  <span>Consultando…</span>
+                  <span>{loading ? 'Consultando…' : 'Sincronizando…'}</span>
                 </>
               ) : (
                 <>
@@ -324,11 +433,50 @@ export default function ChatbotMonitorPage({
             <span className="status-badge-pill">Contingência</span>
             <span>{errorNotice}</span>
           </div>
-          <button className="status-badge-dismiss" onClick={() => setErrorNotice(null)} type="button">
+          <button className="status-badge-dismiss" onClick={() => setErrorNotice(null)} type="button" aria-label="Fechar aviso de contingência">
             ✕
           </button>
         </aside>
       )}
+
+      {!errorNotice && data && !syncBarDismissed && (
+        <aside className={`status-badge-bar ${data.isDegraded || data.coverage?.complete === false ? 'warning' : 'success'}`} role="status" aria-live="polite">
+          <div className="status-badge-info">
+            <span className="status-badge-pill">
+              {isSyncing ? 'SINCRONIZANDO' : data.isDegraded || data.coverage?.complete === false ? 'PARCIAL' : 'SINCRONIZADO'}
+            </span>
+            <span>
+              {data.coverage?.complete === false
+                ? `Leitura parcial do n8n WhatsApp (${integer(data.coverage.executionsInRange)} execuções analisadas) · ${formatDate(data.generatedAt)}`
+                : `Monitor do Chatbot sincronizado com n8n WhatsApp (${integer(data.coverage.executionsInRange)} execuções) · ${formatDate(data.generatedAt)}`}
+            </span>
+          </div>
+          <button
+            className="status-badge-dismiss"
+            onClick={() => setSyncBarDismissed(true)}
+            type="button"
+            aria-label="Fechar aviso de sincronização do chatbot"
+          >
+            ✕
+          </button>
+        </aside>
+      )}
+
+      <section className="conversation-scope-card" aria-label="Escopo das conversas do chatbot">
+        <div>
+          <span className="conversation-scope-kicker">FONTE DE TODAS AS CONVERSAS</span>
+          <h2>Chatbot n8n é a visão de cada interação do WhatsApp</h2>
+          <p>
+            Este monitor acompanha todas as mensagens recebidas, inclusive conversas em triagem. A Central de Leads recebe
+            somente conversões confirmadas por CRM, Meta Lead Ads ou WhatsApp Bot.
+          </p>
+        </div>
+        <div className="conversation-scope-total">
+          <span>Conversas recebidas</span>
+          <strong className="font-tabular">{integer(totals.inbound)}</strong>
+          <small>no período selecionado</small>
+        </div>
+      </section>
 
       {/* Diagrama de Arquitetura Conectada n8n */}
       <section className="n8n-pipeline-diagram">
@@ -529,7 +677,7 @@ export default function ChatbotMonitorPage({
             <h2>Funil Técnico de Processamento</h2>
             <span>Ciclo de vida da mensagem: do webhook inicial à entrega ao cliente</span>
           </div>
-          <span className="card-header-badge font-tabular">{days} dias analisados</span>
+          <span className="card-header-badge font-tabular">{currentData.rangeDays} dias analisados</span>
         </div>
 
         <div className="funnel-pipeline">
@@ -646,7 +794,7 @@ export default function ChatbotMonitorPage({
             <div className="info-item">
               <div className="info-label">
                 <span>Execuções Analisadas</span>
-                <small>Janela de {days} dias</small>
+                <small>Janela de {currentData.rangeDays} dias</small>
               </div>
               <strong className="font-tabular">{integer(currentData.coverage.executionsInRange)}</strong>
             </div>

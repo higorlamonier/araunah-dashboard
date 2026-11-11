@@ -4,18 +4,18 @@ import { dashboardData } from './data/dashboardData'
 import type { DashboardPeriodData, PeriodKey } from './types'
 import MetaAdsTab from './components/MetaAdsTab'
 import InstagramTab from './components/InstagramTab'
-import GoogleTab from './components/GoogleTab'
 import ChatbotMonitorPage from './ChatbotMonitorPage'
 import LeadsPage from './LeadsPage'
 
 const BR_TIMEZONE = 'America/Sao_Paulo'
 const PERIOD_OPTIONS: Array<{ key: PeriodKey; label: string }> = [
+  { key: 'today', label: 'Hoje' },
   { key: '7d', label: '7 dias' },
   { key: '15d', label: '15 dias' },
   { key: '30d', label: '30 dias' },
 ]
 
-type ActiveTab = 'meta' | 'instagram' | 'google' | 'chatbot' | 'leads'
+type ActiveTab = 'meta' | 'instagram' | 'chatbot' | 'leads'
 
 interface TabConfig {
   id: ActiveTab
@@ -50,18 +50,7 @@ const TABS: TabConfig[] = [
     path: '/instagram',
     title: 'Tração & Engajamento Instagram',
     eyebrow: 'Instagram Graph API · Presença Multicanal',
-    subtitle: 'Acompanhamento dos perfis @araunah.agro, @araunah.agua e @araunah.florestas.',
-  },
-  {
-    id: 'google',
-    label: 'Google Ads & GA4',
-    icon: '📈',
-    badge: 'Analytics',
-    badgeClass: 'cyan',
-    path: '/google',
-    title: 'Google Analytics 4 & Google Ads',
-    eyebrow: 'Google Analytics 4 & Google Ads MCC',
-    subtitle: 'Métricas de tráfego web consolidado nos domínios araunah.com e araunahtech.com.br, canais e consentimento.',
+    subtitle: 'Acompanhamento dos perfis @araunah.compostagem, @araunah.agua e @araunah.florestas.',
   },
   {
     id: 'chatbot',
@@ -76,14 +65,14 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'leads',
-    label: 'Leads CRM',
+    label: 'Central de Leads',
     icon: '👥',
     badge: 'Tempo Real',
     badgeClass: 'purple',
     path: '/leads',
-    title: 'Leads Qualificados do Chatbot',
-    eyebrow: 'Base de Leads CRM · n8n & Supabase',
-    subtitle: 'Contatos em qualificação e registros de CRM em tempo real processados por IA no WhatsApp.',
+    title: 'Central de Leads Araunah',
+    eyebrow: 'Meta Lead Ads · n8n · CRM oficial',
+    subtitle: 'Captação, qualificação e histórico comercial consolidados em uma única operação.',
   },
 ]
 
@@ -92,7 +81,6 @@ function getInitialTab(): ActiveTab {
   const path = window.location.pathname.toLowerCase()
   if (path.startsWith('/leads')) return 'leads'
   if (path.startsWith('/chatbot')) return 'chatbot'
-  if (path.startsWith('/google')) return 'google'
   if (path.startsWith('/instagram')) return 'instagram'
   if (path.startsWith('/meta')) return 'meta'
   return 'meta'
@@ -148,7 +136,7 @@ function periodFromLegacy(snapshot: typeof dashboardData): DashboardPeriodData {
 async function fetchDashboardData(period: PeriodKey, signal: AbortSignal): Promise<typeof dashboardData> {
   const timeout = AbortSignal.timeout(30_000)
   const requestSignal = AbortSignal.any([signal, timeout])
-  const response = await fetch(`/.netlify/functions/dashboard-data?period=${period}`, {
+  const response = await fetch(`/.netlify/functions/dashboard-data?period=${period}&refresh=1`, {
     cache: 'no-store',
     signal: requestSignal,
   })
@@ -173,6 +161,11 @@ export default function App() {
   } | null>(null)
 
   const activeRequest = useRef<AbortController | null>(null)
+  const lastSyncMsRef = useRef<number>(0)
+  const activeTabRef = useRef<ActiveTab>(activeTab)
+  useEffect(() => {
+    activeTabRef.current = activeTab
+  }, [activeTab])
   const current =
     snapshot.periods?.[selectedPeriod] ??
     (snapshot.facebookAds ? (snapshot as unknown as DashboardPeriodData) : periodFromLegacy(snapshot))
@@ -204,19 +197,30 @@ export default function App() {
 
     try {
       const nextSnapshot = await fetchDashboardData(targetPeriod, controller.signal)
+      lastSyncMsRef.current = Date.now()
       const periodData = (nextSnapshot.periods?.[targetPeriod] ?? nextSnapshot) as unknown as DashboardPeriodData
       setSnapshot((currentSnapshot) => ({
         ...currentSnapshot,
+        freshness: nextSnapshot.freshness,
         periods: {
           ...currentSnapshot.periods,
           [targetPeriod]: periodData,
         },
       }))
 
+      const degradedSources = (nextSnapshot.freshness?.sources ?? []).filter(
+        (s) => s.status !== 'ok' && s.source !== 'GA4' && s.source !== 'Google Ads',
+      )
       if (nextSnapshot.isFallback) {
         setStatusNotice({
           type: 'warning',
           message: nextSnapshot.fallbackReason ?? 'Fontes externas em revalidação. Mantivemos o snapshot consolidado mais recente.',
+          requestId: nextSnapshot.requestId,
+        })
+      } else if (degradedSources.length > 0) {
+        setStatusNotice({
+          type: 'warning',
+          message: `Atualização concluída com fonte(s) parcial(is)/indisponível(is): ${degradedSources.map((s) => s.source).join(', ')}.`,
           requestId: nextSnapshot.requestId,
         })
       } else {
@@ -241,12 +245,39 @@ export default function App() {
     }
   }, [selectedPeriod])
 
-  const handleSelectPeriod = useCallback((key: PeriodKey) => {
-    setSelectedPeriod(key)
-    void refreshData(key)
+  useEffect(() => {
+    const initial = window.setTimeout(() => void refreshData(), 0)
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && (activeTabRef.current === 'meta' || activeTabRef.current === 'instagram')) {
+        void refreshData()
+      }
+    }, 5 * 60 * 1000)
+    const handleVisibilityOrOnline = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        navigator.onLine !== false &&
+        (activeTabRef.current === 'meta' || activeTabRef.current === 'instagram') &&
+        Date.now() - lastSyncMsRef.current > 180_000
+      ) {
+        void refreshData()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityOrOnline)
+    window.addEventListener('online', handleVisibilityOrOnline)
+    return () => {
+      window.clearTimeout(initial)
+      window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityOrOnline)
+      window.removeEventListener('online', handleVisibilityOrOnline)
+      activeRequest.current?.abort()
+    }
   }, [refreshData])
 
-  const showPeriodSelector = activeTab === 'meta' || activeTab === 'instagram' || activeTab === 'google'
+  const handleSelectPeriod = useCallback((key: PeriodKey) => {
+    setSelectedPeriod(key)
+  }, [])
+
+  const showPeriodSelector = activeTab === 'meta' || activeTab === 'instagram'
 
   return (
     <main className="app-frame">
@@ -277,8 +308,6 @@ export default function App() {
                         ? 'var(--accent-meta)'
                         : tab.id === 'instagram'
                         ? '#ec4899'
-                        : tab.id === 'google'
-                        ? '#38bdf8'
                         : tab.id === 'chatbot'
                         ? 'var(--accent-whatsapp)'
                         : 'var(--accent-purple)',
@@ -305,7 +334,7 @@ export default function App() {
           <div className="sidebar-note" style={{ padding: '10px 14px' }}>
             <span>Conexões Diretas</span>
             <strong style={{ fontSize: '0.78rem', color: 'var(--accent-emerald)' }}>
-              ● Meta Graph v22 · n8n · GA4
+              ● Meta Graph v22 · n8n
             </strong>
           </div>
         </div>
@@ -412,10 +441,6 @@ export default function App() {
 
         {activeTab === 'instagram' && (
           <InstagramTab data={current} activePeriod={selectedPeriod} loading={isRefreshing} />
-        )}
-
-        {activeTab === 'google' && (
-          <GoogleTab activePeriod={selectedPeriod} />
         )}
 
         {activeTab === 'chatbot' && (

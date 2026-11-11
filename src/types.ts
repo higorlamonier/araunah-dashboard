@@ -37,7 +37,7 @@ export interface InstagramInsightsDaily {
   accounts: number
 }
 
-export type PeriodKey = '7d' | '15d' | '30d'
+export type PeriodKey = 'today' | '7d' | '15d' | '30d'
 
 export interface DashboardPeriodData {
   key: PeriodKey
@@ -77,6 +77,7 @@ export interface DashboardSnapshot {
   instagramInsights?: {
     totals: {
       followersCount: number
+      postsCount?: number
       followerCount1d: number
       accountsEngaged: number
       followsAndUnfollows: number
@@ -85,6 +86,22 @@ export interface DashboardSnapshot {
       rows: number
       accounts: number
     }
+    accounts?: Array<{
+      id?: string
+      username: string
+      name?: string
+      displayName?: string
+      followers: number
+      follows?: number
+      posts: number
+      profilePictureUrl?: string | null
+      isPrimary?: boolean
+      status?: string
+      url?: string
+      reach?: number
+      interactions?: number
+      views?: number
+    }>
     daily: InstagramInsightsDaily[]
     recentMedia?: Array<{
       id: string

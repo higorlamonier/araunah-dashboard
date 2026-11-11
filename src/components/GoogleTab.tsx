@@ -58,20 +58,28 @@ function compactNum(val: number) {
 
 export default function GoogleTab({ activePeriod }: GoogleTabProps) {
   const [data, setData] = useState<GoogleData | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [selectedProperty, setSelectedProperty] = useState<'all' | 'G-GF93ZH8ZXV' | 'G-3RRV0EMSRL'>('all')
   const loading = !data || data.period !== activePeriod
 
   useEffect(() => {
     let alive = true
-    fetch(`/.netlify/functions/google-data?period=${activePeriod}`)
-      .then((res) => res.json())
+    fetch(`/.netlify/functions/google-data?period=${activePeriod}`, { cache: 'no-store' })
+      .then(async (res) => {
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json.error || `GA4 indisponível (HTTP ${res.status}).`)
+        return json as GoogleData
+      })
       .then((json) => {
         if (alive) {
           setData(json)
+          setError(null)
         }
       })
       .catch((err) => {
-        console.error('Google Data error:', err)
+        if (alive) {
+          setError(err instanceof Error ? err.message : 'Dados GA4 indisponíveis.')
+        }
       })
     return () => {
       alive = false
@@ -142,6 +150,29 @@ export default function GoogleTab({ activePeriod }: GoogleTabProps) {
 
   const toggleProperty = (id: 'G-GF93ZH8ZXV' | 'G-3RRV0EMSRL') => {
     setSelectedProperty((prev) => (prev === id ? 'all' : id))
+  }
+
+  if (error && !data) {
+    return (
+      <div className="tab-pane animate-fade-in">
+        <section className="section-block">
+          <div className="section-header">
+            <div>
+              <h3 className="section-title">Google Analytics 4 &amp; Google Ads</h3>
+              <p className="section-desc">
+                A integração não está autorizada no servidor. Para preservar a confiabilidade, esta aba não exibe estimativas.
+              </p>
+            </div>
+          </div>
+          <aside className="status-badge-bar warning">
+            <div className="status-badge-info">
+              <span className="status-badge-pill">Fonte indisponível</span>
+              <span>{error}</span>
+            </div>
+          </aside>
+        </section>
+      </div>
+    )
   }
 
   return (

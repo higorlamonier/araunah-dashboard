@@ -1,9 +1,10 @@
 const DEFAULT_WORKFLOW_ID = 'eXj1wyXmjshhMOtl'
 const WORKFLOW_NAME = 'CHATBOT-ARAUNAH WHATSAPP'
-const PAGE_SIZE = 20
-const MAX_PAGES = 2
-const PERIODS = new Set([7, 15, 30])
+const PAGE_SIZE = 250
+const MAX_PAGES = 16
+const MAX_DETAIL_FETCHES = 100
 const BR_TIMEZONE = 'America/Sao_Paulo'
+const BR_OFFSET = '-03:00'
 const PRODUCTION_PHONE_NUMBER_ID = process.env.N8N_PRODUCTION_PHONE_NUMBER_ID ?? '1260236903829724'
 
 const memoryCache = new Map()
@@ -61,6 +62,103 @@ function executionDate(execution) {
 
 function localDateKey(date) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: BR_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date)
+}
+
+function parseBrDateStart(isoDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(isoDate || ''))) return null
+  const date = new Date(`${isoDate}T00:00:00${BR_OFFSET}`)
+  return Number.isNaN(date.valueOf()) || localDateKey(date) !== isoDate ? null : date
+}
+
+function parseBrDateEnd(isoDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(isoDate || ''))) return null
+  const date = new Date(`${isoDate}T23:59:59.999${BR_OFFSET}`)
+  return Number.isNaN(date.valueOf()) || localDateKey(date) !== isoDate ? null : date
+}
+
+function resolvePeriodRange(url, now = new Date()) {
+  const periodRaw = String(url.searchParams.get('period') || '').trim().toLowerCase()
+  const daysRaw = url.searchParams.get('days')
+  const startParam = String(url.searchParams.get('start') || '').trim()
+  const endParam = String(url.searchParams.get('end') || '').trim()
+  const todayBr = localDateKey(now)
+
+  if (periodRaw === 'custom' || (!periodRaw && startParam && endParam)) {
+    const start = parseBrDateStart(startParam)
+    const end = parseBrDateEnd(endParam)
+    if (!start || !end || start > end) {
+      throw Object.assign(new Error('Período específico inválido. Informe start e end válidos (YYYY-MM-DD).'), { status: 400 })
+    }
+    const clampedEnd = end > now ? now : end
+    const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime() + 1) / (24 * 60 * 60 * 1000)))
+    if (diffDays > 90) {
+      throw Object.assign(new Error('O período específico não pode exceder 90 dias.'), { status: 400 })
+    }
+    return {
+      key: `custom:${startParam}:${endParam}`,
+      rangeDays: diffDays,
+      start,
+      end: clampedEnd,
+      period: { key: 'custom', label: 'Período específico', type: 'custom', start: startParam, end: endParam },
+    }
+  }
+
+  if (periodRaw === 'today') {
+    const start = parseBrDateStart(todayBr)
+    return {
+      key: `today:${todayBr}`,
+      rangeDays: 1,
+      start,
+      end: now,
+      period: { key: 'today', label: 'Dia atual', type: 'today' },
+    }
+  }
+
+  if (periodRaw === 'month') {
+    const monthStart = `${todayBr.slice(0, 7)}-01`
+    const start = parseBrDateStart(monthStart)
+    const rangeDays = Number(todayBr.slice(8, 10)) || 1
+    return {
+      key: `month:${monthStart}`,
+      rangeDays,
+      start,
+      end: now,
+      period: { key: 'month', label: 'Mês atual', type: 'month' },
+    }
+  }
+
+  let days = null
+  if (periodRaw) {
+    const match = periodRaw.match(/^(\d+)d$/)
+    days = match ? Number(match[1]) : Number(periodRaw)
+  } else if (daysRaw !== null) {
+    days = Number(daysRaw)
+  } else {
+    days = 7
+  }
+
+  if (!Number.isInteger(days) || ![1, 7, 15, 30].includes(days)) {
+    throw Object.assign(new Error('Período inválido.'), { status: 400 })
+  }
+
+  if (days === 1) {
+    const start = parseBrDateStart(todayBr)
+    return {
+      key: `today:${todayBr}`,
+      rangeDays: 1,
+      start,
+      end: now,
+      period: { key: 'today', label: 'Dia atual', type: 'today' },
+    }
+  }
+
+  return {
+    key: `${days}d`,
+    rangeDays: days,
+    start: new Date(now.getTime() - (days * 24 * 60 * 60 * 1000)),
+    end: now,
+    period: { key: `${days}d`, label: `${days} dias`, type: 'days' },
+  }
 }
 
 function graphMessageIds(execution) {
@@ -222,11 +320,11 @@ function emptyAggregate() {
   }
 }
 
-function buildDaily(executions, start) {
+function buildDaily(executions, start, end = new Date()) {
   const byDate = new Map()
   for (const execution of executions) {
     const date = executionDate(execution)
-    if (!date || date < start) continue
+    if (!date || date < start || date > end) continue
     const key = localDateKey(date)
     const row = byDate.get(key) ?? { date: key, executions: 0, inbound: 0, ai: 0, crm: 0, transfers: 0, failures: 0, callbacksFailed: 0 }
     const signals = executionSignals(execution)
@@ -242,11 +340,11 @@ function buildDaily(executions, start) {
   return [...byDate.values()].sort((left, right) => left.date.localeCompare(right.date))
 }
 
-function incidentRows(executions, start) {
+function incidentRows(executions, start, end = new Date()) {
   return executions
     .filter((execution) => {
       const date = executionDate(execution)
-      return date && date >= start && String(execution?.status ?? '').toLowerCase() === 'error'
+      return date && date >= start && date <= end && String(execution?.status ?? '').toLowerCase() === 'error'
     })
     .sort((left, right) => executionDate(right) - executionDate(left))
     .slice(0, 8)
@@ -257,19 +355,20 @@ function incidentRows(executions, start) {
     }))
 }
 
-function sourceStatus(workflow) {
-  return workflow?.active === true ? 'ok' : 'error'
-}
+function buildMonitoringSummary(executions, workflow, daysOrRange, now = new Date()) {
+  const isNum = typeof daysOrRange === 'number'
+  const rangeDays = isNum ? daysOrRange : (daysOrRange?.rangeDays ?? 15)
+  const start = isNum ? new Date(now.getTime() - (rangeDays * 24 * 60 * 60 * 1000)) : daysOrRange.start
+  const end = isNum ? now : (daysOrRange.end ?? now)
+  const periodMeta = isNum ? { key: `${rangeDays}d`, label: `${rangeDays} dias`, type: 'days' } : daysOrRange.period
 
-function buildMonitoringSummary(executions, workflow, days, now = new Date()) {
-  const start = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000))
   const filtered = executions.filter((execution) => {
     const date = executionDate(execution)
-    return date && date >= start && date <= now
+    return date && date >= start && date <= end
   })
   const totals = emptyAggregate()
   for (const execution of filtered) addSignals(totals, executionSignals(execution))
-  const daily = buildDaily(filtered, start)
+  const daily = buildDaily(filtered, start, end)
   const productionCallbacks = totals.identitySplit.production.callbackStatuses
   const operationalFailures = totals.failedExecutions + totals.crmErrors + productionCallbacks.failed
   return {
@@ -277,11 +376,12 @@ function buildMonitoringSummary(executions, workflow, days, now = new Date()) {
     source: `n8n: ${WORKFLOW_NAME}`,
     workflow: { id: String(workflow?.id ?? DEFAULT_WORKFLOW_ID), name: WORKFLOW_NAME, active: workflow?.active === true, updatedAt: workflow?.updatedAt ?? null },
     generatedAt: now.toISOString(),
-    rangeDays: days,
-    coverage: { start: start.toISOString(), end: now.toISOString(), timezone: BR_TIMEZONE, executionsFetched: executions.length, executionsInRange: filtered.length },
+    rangeDays,
+    period: periodMeta,
+    coverage: { start: start.toISOString(), end: end.toISOString(), timezone: BR_TIMEZONE, executionsFetched: executions.length, executionsInRange: filtered.length, complete: true },
     totals: { ...totals, operationalFailures, deliveryRate: productionCallbacks.sent ? Math.round((productionCallbacks.delivered / productionCallbacks.sent) * 1000) / 10 : null },
     daily,
-    incidents: incidentRows(filtered, start),
+    incidents: incidentRows(filtered, start, end),
     trackingNotice: 'Métricas agregadas exclusivamente do workflow CHATBOT-ARAUNAH WHATSAPP. Sem nomes, telefones, mensagens ou payloads brutos.',
   }
 }
@@ -296,7 +396,7 @@ async function n8nJson(path) {
       Accept: 'application/json',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
     },
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(15_000),
   })
   if (!response.ok) throw new Error(`Leitura n8n indisponível (HTTP ${response.status}).`)
   return response.json()
@@ -306,61 +406,136 @@ async function fetchWorkflow(workflowId) {
   return n8nJson(`/api/v1/workflows/${workflowId}`)
 }
 
+function executionDurationMs(execution) {
+  const start = execution?.startedAt ? Date.parse(execution.startedAt) : NaN
+  const stop = execution?.stoppedAt ? Date.parse(execution.stoppedAt) : NaN
+  if (!Number.isFinite(start) || !Number.isFinite(stop)) return 0
+  return Math.max(0, stop - start)
+}
+
 async function fetchExecutions(workflowId, cutoffDate = null) {
-  const executions = []
+  const headers = []
   let cursor = null
+  const headerDeadline = Date.now() + 4_500
+  let truncated = false
   for (let page = 0; page < MAX_PAGES; page += 1) {
-    const query = new URLSearchParams({ workflowId, includeData: 'true', limit: String(PAGE_SIZE) })
+    if (page > 0 && Date.now() >= headerDeadline) {
+      truncated = true
+      break
+    }
+    const query = new URLSearchParams({ workflowId, limit: String(PAGE_SIZE) })
     if (cursor) query.set('cursor', cursor)
     const payload = await n8nJson(`/api/v1/executions?${query}`)
     const rows = Array.isArray(payload.data) ? payload.data : []
-    executions.push(...rows)
+    headers.push(...rows)
     cursor = payload.nextCursor ?? payload.next_cursor ?? null
     const oldestInBatch = rows.length > 0 ? executionDate(rows[rows.length - 1]) : null
-    if (!cursor || rows.length === 0 || (cutoffDate && oldestInBatch && oldestInBatch < cutoffDate)) break
+    if (cutoffDate && oldestInBatch && oldestInBatch < cutoffDate) break
+    if (!cursor || rows.length === 0) break
+    if (page === MAX_PAGES - 1 && cursor) truncated = true
   }
-  return executions
+
+  const inWindow = headers.filter((row) => {
+    if (!cutoffDate) return true
+    const at = executionDate(row)
+    return Boolean(at) && at >= cutoffDate
+  })
+
+  const hydrated = []
+  const stubs = []
+  const needDetail = []
+  for (const row of inWindow) {
+    if (row?.data?.resultData?.runData) {
+      hydrated.push(row)
+      continue
+    }
+    const isTrivialTrigger = Boolean(row?.mode) && row.mode !== 'webhook' && row.status !== 'error' && executionDurationMs(row) < 500
+    if (isTrivialTrigger) {
+      stubs.push({ ...row, data: { resultData: { runData: {} } } })
+    } else {
+      needDetail.push(row)
+    }
+  }
+
+  const targetDetails = needDetail.slice(0, MAX_DETAIL_FETCHES)
+  if (needDetail.length > targetDetails.length) truncated = true
+  const detailDeadline = Date.now() + 13_500
+  const batchSize = 10
+  for (let i = 0; i < targetDetails.length; i += batchSize) {
+    if (i > 0 && Date.now() >= detailDeadline) {
+      truncated = true
+      break
+    }
+    const slice = targetDetails.slice(i, i + batchSize)
+    const results = await Promise.all(
+      slice.map(async (row) => {
+        try {
+          return await n8nJson(`/api/v1/executions/${encodeURIComponent(String(row.id))}?includeData=true`)
+        } catch {
+          truncated = true
+          return null
+        }
+      })
+    )
+    for (const item of results) {
+      if (item) hydrated.push(item)
+    }
+  }
+
+  const executions = [...hydrated, ...stubs].sort((a, b) => {
+    const da = executionDate(a)?.getTime() ?? 0
+    const db = executionDate(b)?.getTime() ?? 0
+    return db - da
+  })
+  return { executions, complete: !truncated }
 }
 
 export default async function handler(request) {
   const requestId = crypto.randomUUID()
   if (request.method !== 'GET') return json({ error: 'Método não permitido.' }, 405, requestId)
   const url = new URL(request.url)
-  const days = Number(url.searchParams.get('days') ?? 15)
-  if (!Number.isInteger(days) || !PERIODS.has(days)) return json({ error: 'Período inválido.', requestId }, 400, requestId)
+  const now = new Date()
 
-  const cacheKey = `monitor_${days}`
+  let range
+  try {
+    range = resolvePeriodRange(url, now)
+  } catch (err) {
+    return json({ error: err instanceof Error ? err.message : 'Período inválido.', requestId }, err?.status || 400, requestId)
+  }
+
+  const forceRefresh = url.searchParams.get('refresh') === '1'
+  const cacheKey = `monitor_${range.key}`
   const cached = memoryCache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+  if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return json({ ...cached.data, isCached: true }, 200, requestId)
   }
 
   const workflowId = process.env.N8N_CHATBOT_WORKFLOW_ID ?? DEFAULT_WORKFLOW_ID
-  const now = new Date()
-  const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000))
-
   let workflow = { id: workflowId, name: WORKFLOW_NAME, active: true, updatedAt: null }
   let executions = []
+  let complete = false
   let isDegraded = false
   let degradationReason = null
 
   try {
-    const [fetchedWorkflow, fetchedExecutions] = await Promise.all([
+    const [fetchedWorkflow, execResult] = await Promise.all([
       fetchWorkflow(workflowId).catch((err) => {
         console.warn('fetchWorkflow warning:', err.message)
         return workflow
       }),
-      fetchExecutions(workflowId, cutoffDate),
+      fetchExecutions(workflowId, range.start),
     ])
     if (fetchedWorkflow) workflow = fetchedWorkflow
-    executions = fetchedExecutions
+    executions = execResult.executions
+    complete = execResult.complete
   } catch (error) {
     console.error('chatbot-monitor fetch error', { requestId, message: error instanceof Error ? error.message : 'unknown' })
     isDegraded = true
     degradationReason = 'Consulta ao histórico n8n com alta latência. Exibindo estado de contingência sem interromper a visualização.'
   }
 
-  const summary = buildMonitoringSummary(executions, workflow, days, now)
+  const summary = buildMonitoringSummary(executions, workflow, range, now)
+  summary.coverage.complete = !isDegraded && complete
   const result = { ...summary, isDegraded, degradationReason }
   if (!isDegraded && executions.length > 0) {
     memoryCache.set(cacheKey, { timestamp: Date.now(), data: result })
@@ -368,4 +543,4 @@ export default async function handler(request) {
   return json(result, 200, requestId)
 }
 
-export const __test__ = { buildMonitoringSummary, executionSignals, nodeItems, webhookSignals, graphMessageIds }
+export const __test__ = { buildMonitoringSummary, resolvePeriodRange, executionSignals, nodeItems, webhookSignals, graphMessageIds, fetchExecutions }
