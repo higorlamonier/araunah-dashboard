@@ -602,7 +602,6 @@ export default function LeadsPage({
   const [data, setData] = useState<Payload | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<string, boolean>>({})
-  const [syncBarDismissed, setSyncBarDismissed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -660,7 +659,6 @@ export default function LeadsPage({
       requestRef.current = controller
       if (forceRefresh && !silent) {
         setDismissedAlerts({})
-        setSyncBarDismissed(false)
       }
       if (!silent) setLoading(true)
       setIsSyncing(true)
@@ -858,7 +856,6 @@ export default function LeadsPage({
   const countAll = data?.tabs?.all ?? 0
   const countProcess = data?.tabs?.process ?? 0
   const countCrm = data?.tabs?.crm ?? 0
-  const countMesa = data?.tabs?.mesa ?? 0
   const countPending = data?.tabs?.pending ?? data?.summary.pendingConfirmation ?? 0
   const totalPages = data?.pagination?.totalPages ?? 1
   const totalItems = data?.pagination?.totalItems ?? leads.length
@@ -869,13 +866,8 @@ export default function LeadsPage({
   const uniqueLeads = data?.summary.uniqueLeads ?? countAll
   const inProcessCount = countProcess
   const crmPersistedCount = countCrm
-  const mesaCount = countMesa
   const totalInteractions =
     data?.summary.totalInteractions ?? leads.reduce((sum, item) => sum + (item.n8nEvents?.length || 1), 0)
-
-  const triagemRate = uniqueLeads > 0 ? Math.min(100, Math.round((inProcessCount / uniqueLeads) * 100)) : 100
-  const crmRate = uniqueLeads > 0 ? Math.min(100, Math.round((crmPersistedCount / uniqueLeads) * 100)) : 0
-  const mesaRate = crmPersistedCount > 0 ? Math.min(100, Math.round((mesaCount / crmPersistedCount) * 100)) : 0
 
   const sourceHealth = data?.sourceHealth
   const sourceErrors = useMemo(() => {
@@ -1022,36 +1014,6 @@ export default function LeadsPage({
         </button>
       </nav>
 
-      {data && !syncBarDismissed && !error && (
-        <aside
-          className={`status-badge-bar ${sourceErrors.length > 0 ? 'warning' : 'success'}`}
-          role="status"
-          aria-live="polite"
-        >
-          <div className="status-badge-info">
-            <span className="status-badge-pill">
-              {isSyncing ? 'SINCRONIZANDO' : sourceErrors.length > 0 ? 'ATENÇÃO' : 'SINCRONIZADO'}
-            </span>
-            <span>
-              {sourceErrors.length > 0
-                ? `Falha ao consultar fonte(s): ${sourceErrors.map((s) => s.message).join(' · ')} · ${formatDate(data.generatedAt)}`
-                : `Base sincronizada (${currentPeriodOption.shortLabel}) com Meta Lead Ads, n8n Chatbot e CRM oficial · ${formatDate(data.generatedAt)}`}
-              {data.searchMeta?.globalDatabase
-                ? ` · Busca direta no banco ativa (${data.searchMeta.matchesOutsidePeriod} fora do período)`
-                : ''}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="status-badge-dismiss"
-            onClick={() => setSyncBarDismissed(true)}
-            aria-label="Fechar aviso de sincronização"
-          >
-            ✕
-          </button>
-        </aside>
-      )}
-
       {error && !dismissedAlerts[`error:${days}:${error}`] ? (
         <div className="leads-error-card" role="alert">
           <button
@@ -1116,65 +1078,6 @@ export default function LeadsPage({
 
       {view === 'all' && (
         <>
-          <section className="leads-funnel-card">
-            <div className="funnel-header">
-              <div>
-                <span className="funnel-kicker">FLUXO DE CONVERSÃO EM TEMPO REAL</span>
-                <h3 className="funnel-title">Funil Operacional de Leads</h3>
-                <p className="funnel-lead-summary">
-                  <strong>{uniqueLeads}</strong> {uniqueLeads === 1 ? 'lead convertido' : 'leads convertidos'} no período
-                  {totalInteractions > 0 ? ` · ${totalInteractions} interações vinculadas a leads` : ''}
-                </p>
-              </div>
-              <span className="funnel-period-badge">Período: {currentPeriodOption.badgeLabel}</span>
-            </div>
-
-            <div className="leads-funnel-stages">
-              <div className="funnel-step">
-                <div className="step-badge">01</div>
-                <div className="step-content">
-                  <span className="step-label">Captação Inbound</span>
-                  <strong className="step-value text-tabular">{uniqueLeads}</strong>
-                  <span className="step-subtext">Meta, CRM e Bot confirmado</span>
-                </div>
-                <div className="step-rate-tag">100% Entradas</div>
-                <div className="step-arrow" aria-hidden="true" />
-              </div>
-
-              <div className="funnel-step">
-                <div className="step-badge">02</div>
-                <div className="step-content">
-                  <span className="step-label">Triagem IA</span>
-                  <strong className="step-value font-cyan text-tabular">{inProcessCount}</strong>
-                  <span className="step-subtext">Qualificação Agente Gemini</span>
-                </div>
-                <div className="step-rate-tag">{triagemRate}% em Triagem</div>
-                <div className="step-arrow" aria-hidden="true" />
-              </div>
-
-              <div className="funnel-step">
-                <div className="step-badge">03</div>
-                <div className="step-content">
-                  <span className="step-label">Persistência CRM</span>
-                  <strong className="step-value font-emerald text-tabular">{crmPersistedCount}</strong>
-                  <span className="step-subtext">Supabase RPC Leads</span>
-                </div>
-                <div className="step-rate-tag">{crmRate}% Persistidos</div>
-                <div className="step-arrow" aria-hidden="true" />
-              </div>
-
-              <div className="funnel-step">
-                <div className="step-badge">04</div>
-                <div className="step-content">
-                  <span className="step-label">Aguardando Triagem</span>
-                  <strong className="step-value font-lime text-tabular">{mesaCount}</strong>
-                  <span className="step-subtext">Na Mesa para triagem comercial</span>
-                </div>
-                <div className="step-rate-tag">{mesaRate}% do CRM na Mesa</div>
-              </div>
-            </div>
-          </section>
-
           <section className="leads-kpi-grid">
             <div className="leads-kpi-card highlight-emerald">
               <span className="leads-kpi-title">Leads Únicos</span>

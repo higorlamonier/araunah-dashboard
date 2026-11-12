@@ -418,22 +418,6 @@ export default function App() {
           </aside>
         )}
 
-        {/* Barra de Abas Segmentadas no Topo */}
-        <nav className="dashboard-tab-nav" aria-label="Abas do Sistema">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`dashboard-tab-btn tab-${tab.id} ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => selectTab(tab.id)}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-              <span className={`tab-badge ${tab.badgeClass}`}>{tab.badge}</span>
-            </button>
-          ))}
-        </nav>
-
         {/* Conteúdo Dinâmico por Aba */}
         {activeTab === 'meta' && (
           <MetaAdsTab data={current} activePeriod={selectedPeriod} loading={isRefreshing} />
