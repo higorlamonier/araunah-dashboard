@@ -390,16 +390,30 @@ async function n8nJson(path) {
   const baseUrl = process.env.N8N_ARAUNAH_BASE_URL?.replace(/\/$/, '')
   const apiKey = process.env.N8N_ARAUNAH_API_KEY
   if (!baseUrl || !apiKey) throw new Error('Integração n8n não configurada no servidor.')
-  const response = await fetch(`${baseUrl}${path}`, {
-    headers: {
-      'X-N8N-API-KEY': apiKey,
-      Accept: 'application/json',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
-    },
-    signal: AbortSignal.timeout(15_000),
-  })
-  if (!response.ok) throw new Error(`Leitura n8n indisponível (HTTP ${response.status}).`)
-  return response.json()
+  let lastErr = null
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (attempt > 0) {
+      await new Promise((r) => setTimeout(r, 350))
+    }
+    try {
+      const response = await fetch(`${baseUrl}${path}`, {
+        headers: {
+          'X-N8N-API-KEY': apiKey,
+          Accept: 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+        },
+        signal: AbortSignal.timeout(attempt === 0 ? 12_000 : 8_000),
+      })
+      if (!response.ok) {
+        lastErr = new Error(`Leitura n8n indisponível (HTTP ${response.status}).`)
+        continue
+      }
+      return await response.json()
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw lastErr || new Error('Leitura n8n indisponível.')
 }
 
 async function fetchWorkflow(workflowId) {

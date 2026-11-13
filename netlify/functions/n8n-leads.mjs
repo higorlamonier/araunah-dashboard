@@ -1069,10 +1069,10 @@ async function fetchWorkflowExecutions(workflowId, start, rangeKey = 'default', 
   if (!baseUrl || !apiKey) throw new Error('Integração n8n não configurada no ambiente do servidor.')
 
   const cacheKey = `${workflowId}:${String(rangeKey)}:${start ? start.toISOString().slice(0, 10) : 'all'}`
+  const existingCache = leadsMemoryCache.get(cacheKey)
   if (!options.forceRefresh) {
-    const cached = leadsMemoryCache.get(cacheKey)
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data
+    if (existingCache && existingCache.expiresAt > Date.now()) {
+      return existingCache.data
     }
   }
 
@@ -1117,45 +1117,70 @@ async function fetchWorkflowExecutions(workflowId, start, rangeKey = 'default', 
       if (page > 0 && Date.now() >= listDeadline) break
       const query = new URLSearchParams({ workflowId, limit: '250' })
       if (cursor) query.set('cursor', cursor)
-      try {
-        const listRes = await fetch(`${baseUrl}/api/v1/executions?${query}`, {
-          headers: {
-            'X-N8N-API-KEY': apiKey,
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
-          },
-          signal: AbortSignal.timeout(page === 0 ? 11500 : 7500),
-        })
-        if (!listRes.ok) {
-          if (page === 0) throw new Error('Não foi possível consultar as execuções do n8n.')
+
+      let listRes = null
+      let payload = null
+      const maxAttempts = page === 0 ? 2 : 1
+
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        if (attempt > 0) {
+          await new Promise((r) => setTimeout(r, 400))
+        }
+        try {
+          const timeoutMs = page === 0 ? (attempt === 0 ? 8000 : 7000) : 6000
+          listRes = await fetch(`${baseUrl}/api/v1/executions?${query}`, {
+            headers: {
+              'X-N8N-API-KEY': apiKey,
+              Accept: 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AraunahDashboard/1.0',
+            },
+            signal: AbortSignal.timeout(timeoutMs),
+          })
+          if (!listRes.ok) {
+            if (attempt + 1 < maxAttempts) continue
+            if (page === 0) throw new Error(`Não foi possível consultar as execuções do n8n (HTTP ${listRes.status}).`)
+            listFailure = true
+            break
+          }
+          payload = await listRes.json()
+          if (!Array.isArray(payload?.data)) {
+            if (attempt + 1 < maxAttempts) continue
+            if (page === 0) throw new Error('Resposta de execuções do n8n inválida.')
+            listFailure = true
+            break
+          }
+          break
+        } catch (err) {
+          if (attempt + 1 < maxAttempts) continue
+          if (page === 0) throw err
           listFailure = true
           break
         }
-        const payload = await listRes.json()
-        if (!Array.isArray(payload?.data)) {
-          if (page === 0) throw new Error('Resposta de execuções do n8n inválida.')
-          listFailure = true
-          break
-        }
-        const rows = payload.data
-        allRows.push(...rows)
-        cursor = payload.nextCursor ?? payload.next_cursor ?? null
-        const oldestAt = rows.length > 0 ? executionDate(rows[rows.length - 1]) : null
-        if (start && oldestAt && new Date(oldestAt) < start) {
-          reachedWindowStart = true
-          cursor = null
-          break
-        }
-        if (!cursor || rows.length === 0) break
-      } catch (err) {
-        if (page === 0) throw err
-        listFailure = true
+      }
+
+      if (listFailure || !payload) break
+
+      const rows = payload.data
+      allRows.push(...rows)
+      cursor = payload.nextCursor ?? payload.next_cursor ?? null
+      const oldestAt = rows.length > 0 ? executionDate(rows[rows.length - 1]) : null
+      if (start && oldestAt && new Date(oldestAt) < start) {
+        reachedWindowStart = true
+        cursor = null
         break
       }
+      if (!cursor || rows.length === 0) break
     }
   })()
 
-  await Promise.all([statesTask, listTask])
+  try {
+    await Promise.all([statesTask, listTask])
+  } catch (err) {
+    if (existingCache?.data) {
+      return existingCache.data
+    }
+    throw err
+  }
 
   const periodRows = allRows.filter((r) => {
     const at = executionDate(r)
@@ -1754,7 +1779,18 @@ export default async function handler(request) {
         : Promise.resolve()
 
     const [chatSnap, metaSnaps, crmTuple] = await Promise.all([chatTask, metaTasks, crmListTask, crmSearchTask])
-    if (chatSnap) chatPayload = chatSnap
+    if (chatSnap) {
+      chatPayload = chatSnap
+      chatbotError = null
+    } else if (hasN8nConfig) {
+      const chatbotId = process.env.N8N_CHATBOT_WORKFLOW_ID?.trim() || DEFAULT_CHATBOT_WORKFLOW_ID
+      const fallbackCacheKey = `${chatbotId}:${String(period.key)}:${start ? start.toISOString().slice(0, 10) : 'all'}`
+      const cachedChat = leadsMemoryCache.get(fallbackCacheKey)
+      if (cachedChat?.data) {
+        chatPayload = cachedChat.data
+        chatbotError = null
+      }
+    }
     if (Array.isArray(metaSnaps)) {
       for (const metaSnap of metaSnaps) {
         if (!metaSnap) continue
@@ -1766,10 +1802,6 @@ export default async function handler(request) {
     }
     if (Array.isArray(crmTuple)) {
       ;[initialCrmRows, consultants] = crmTuple
-    }
-    if (chatbotError) {
-      metaExecutions.length = 0
-      metaReasons.length = 0
     }
 
     const mergeCrmRowCollections = (...lists) => {
